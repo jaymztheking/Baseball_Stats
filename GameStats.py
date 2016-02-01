@@ -14,6 +14,9 @@ def GetGames(date, con):
         myGame = Game(game[0], game[1], date, con)
         myGame.GetBRLineScore(game[2])
         games.append(myGame)
+    return games
+
+
 class Game:
     parkKey = None
     homeTeam = None
