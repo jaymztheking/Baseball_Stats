@@ -1,7 +1,19 @@
 import urllib2
-from BRParser import LineScoreParser
+from BRParser import LineScoreParser, GamesParser
 from datetime import date, time
+from bbUtils import GetTeamKey, GetParkKey
 
+def GetGames(date, con):
+    url = "http://www.baseball-reference.com/games/standings.cgi?date="+date.strftime('%Y-%m-%d')
+    b = GamesParser()
+    html = urllib2.urlopen(url).read().decode('utf-8')
+    b.feed(html)
+    games = []
+    for game in b.games:
+        print(game[1]+' at '+game[0]+'  --  '+game[2])
+        myGame = Game(game[0], game[1], date, con)
+        myGame.GetBRLineScore(game[2])
+        games.append(myGame)
 class Game:
     parkKey = None
     homeTeam = None
@@ -22,16 +34,14 @@ class Game:
     homeTeamWin = False
     tie = False
     
-    def __init__(self, hTeam, aTeam, date, time):
-        self.parkKey = self.GetParkKey(hTeam, date)
-        self.homeTeam = hTeam
-        self.awayTeam = aTeam
+    def __init__(self, hTeam, aTeam, date, con):
+        self.homeTeam = GetTeamKey(hTeam, con)
+        self.awayTeam = GetTeamKey(aTeam, con)
         self.date = date
-        self.time = time
+        self.parkKey = GetParkKey(self.homeTeam, date, con)
 
-    def GetBRRawStats(self):
+    def GetBRLineScore(self, url):
         b = LineScoreParser()
-        url = 'http://www.baseball-reference.com/boxes/LAN/LAN201509150.shtml'
         html = urllib2.urlopen(url).read().decode('utf-8')
         b.feed(html)
         pos = 0
@@ -44,33 +54,34 @@ class Game:
         botTeamEnd = b.lineScore.find('\n',botTeamStart+1)
         topTeamLine = b.lineScore[topTeamStart:topTeamEnd]
         botTeamLine = b.lineScore[botTeamStart:botTeamEnd]
-        topRESpace = topTeamLine.rfind(' ')
-        topHRSpace = topTeamLine[:topRESpace-1].rfind(' ')
-        topISSpace = topTeamLine[:topHRSpace-1].rfind(' ')
-        botRESpace = botTeamLine.rfind(' ')
-        botHRSpace = botTeamLine[:botRESpace-1].rfind(' ')
-        botISSpace = botTeamLine[:botHRSpace-1].rfind(' ')
-        self.awayErrors = int(topTeamLine[topRESpace:].strip())
-        self.awayHits = int(topTeamLine[topHRSpace:topRESpace].strip())
-        self.awayRuns = int(topTeamLine[topISSpace:topHRSpace].strip())
-        self.homeErrors = int(botTeamLine[botRESpace:].strip())
-        self.homeHits = int(botTeamLine[botHRSpace:botRESpace].strip())
-        self.homeRuns = int(botTeamLine[botISSpace:botHRSpace].strip())
-        print self.awayRuns, self.awayHits, self.awayErrors
-        print self.homeRuns, self.homeHits, self.homeErrors
-
+        topTeam = topTeamLine.split(' ')
+        botTeam = botTeamLine.split(' ')
+        topTeamNums = []
+        botTeamNums = []
+        for x in topTeam:
+            if x.isdigit():
+                topTeamNums.append(x)
+        for x in botTeam:
+            if x.isdigit():
+                botTeamNums.append(x)
+        self.awayRuns = int(topTeamNums[-3])
+        self.homeRuns = int(botTeamNums[-3])
+        self.awayHits = int(topTeamNums[-2])
+        self.homeHits = int(botTeamNums[-2])
+        self.awayErrors = int(topTeamNums[-1])
+        self.homeErrors = int(botTeamNums[-1])
+        self.totalInnings = int(len(topTeamNums)-3)
+        if self.homeRuns > self.awayRuns:
+            self.homeTeamWin = True
+        elif self.homeRuns == self.awayRuns:
+            self.tie = True
+        
     def InsertStats(self):
         return True
-
-    def GenerateURL(self):
-        prefix = 'http://www.baseball-reference.com/boxes/'
-        abb = 'LAN'
-        abbWithDate = 'LAN201509150.shtml'
-        url = prefix+abb+abbWithDate+'.shtml'
-        return url
 
     def GetParkKey(self):
         return 1
 
-testGame = Game(1,2, date(2015,9,15), time(17,23,0))
-testGame.GetBRRawStats()
+
+
+
