@@ -1,5 +1,39 @@
 import HTMLParser
 
+class GameTimeParser(HTMLParser.HTMLParser):
+    startData = False
+    time = ''
+    def handle_starttag(self, tag, attrs):
+        if tag == 'div' and self.time == '':
+            for att in attrs:
+                if att[0] == 'class' and att[1] =='bold_text float_left':
+                    self.startData = True
+        
+    def handle_endtag(self, tag):
+        if tag == 'div' and self.startData:
+            self.startData = False
+    
+    def handle_data(self, data):
+        if self.startData:
+            self.time = data
+
+class GameWeatherParser(HTMLParser.HTMLParser):
+    startData = False
+    weather = ''
+    def handle_starttag(self, tag, attrs):
+        if tag == 'div':
+            for att in attrs:
+                if att[0]== 'id' and att[1]== 'weather':
+                    self.startData = True
+        
+    def handle_endtag(self, tag):
+        if tag == 'div' and self.startData:
+            self.startData = False
+        
+    def handle_data(self, data):
+        if self.startData:
+            self.weather += data
+
 class LineScoreParser(HTMLParser.HTMLParser):
     startData = False
     lineScore = ''
@@ -24,8 +58,8 @@ class GamesParser(HTMLParser.HTMLParser):
     startData = False
     games = []
     abbrevs = ['ARI','ATL','BAL','BOS','CHC','CHW','CIN','CLE','COL','DET','HOU','KCR','LAA','LAD','MIA','MIL','MIN','NYM','NYY','OAK','PHI','PIT','SDP','SEA','SFG','STL','TBR','TEX','TOR','WSN']
-    a = 0
-    h = 0
+    a = ''
+    h = ''
     lastIn = 'H'
     
     def handle_starttag(self, tag, attrs):
