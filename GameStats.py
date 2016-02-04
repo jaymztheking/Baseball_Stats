@@ -3,19 +3,20 @@ from BRParser import LineScoreParser, GamesParser, GameWeatherParser, GameTimePa
 from datetime import date, time
 from bbUtils import GetTeamKey, GetParkKey, GetParkTZ
 
-def GetGames(date, con):
+def InsertGames(date, con):
     url = "http://www.baseball-reference.com/games/standings.cgi?date="+date.strftime('%Y-%m-%d')
     b = GamesParser()
+    b.games = []
     html = urllib2.urlopen(url).read().decode('utf-8')
     b.feed(html)
-    games = []
     for game in b.games:
         myGame = Game(game[0], game[1], date, con)
         myGame.GetBRLineScore(game[2])
         myGame.GetBRWeatherInfo(game[2])
         myGame.GetBRGameTime(game[2], con)
-        games.append(myGame)
-    return games
+        if myGame.InsertStats(con):
+            print('Row inserted in GAME table')
+
 
 
 class Game:
@@ -90,7 +91,7 @@ class Game:
             if x.isdigit():
                 self.temp = int(x)
             elif x[-3:] == 'mph':
-                self.windSpeed == int(x.replace('mph',''))
+                self.windSpeed = int(x.replace('mph',''))
         weatherList = weatherString.split(',')
         windString = weatherList[1]
         self.windDir = windString[windString.find('mph')+4:]
@@ -103,13 +104,33 @@ class Game:
         html = urllib2.urlopen(url).read().decode('utf-8')
         b.feed(html)
         tempTime = b.time.split(',')[-1].strip()  
-        self.time = tempTime+' '+GetParkTZ(self.parkKey, con)
+        if tempTime != "":        
+            self.time = tempTime+' '+GetParkTZ(self.parkKey, con)
+        else:
+            self.time = '11:59 pm '+GetParkTZ(self.parkKey, con)
         
-    def InsertStats(self):
+    def InsertStats(self, con):
+        cur = con.cursor()
+        insertSQL = 'insert into "GAME" VALUES (default, %s, \'%s\', \'%s\', \'%s\', %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % \
+        (self.parkKey, self.date.strftime('%Y-%m-%d'), self.time, self.windDir, self.windSpeed, self.weather, self.totalInnings, self.homeHits, self.awayHits, self.homeRuns, self.awayRuns, self.homeErrors, self.awayErrors, self.homeTeam, self.awayTeam, self.temp, self.homeTeamWin, self.tie )
+        if not self.CheckForRow(con):
+            cur.execute(insertSQL)
+            return True
+        return False
+    
+    def CheckForRow(self, con):
+        cur = con.cursor()        
+        checkSQL = 'select "GAME_KEY" from "GAME" where "PARK_KEY" = %s and "HOME_TEAM_KEY" = %s and "AWAY_TEAM_KEY" = %s and "GAME_DATE" = \'%s\' and "GAME_TIME" = \'%s\'' % \
+        (self.parkKey, self.homeTeam, self.awayTeam, self.date.strftime('%Y-%m-%d'), self.time)
+        cur.execute(checkSQL)
+        results = cur.fetchall()
+        if len(results) == 0:
+            return False
+        else:
+            return True
+    
+    def UpdateStats(self, con):
         return True
-
-    def GetParkKey(self):
-        return 1
 
 
 

@@ -101,3 +101,26 @@ class GamesParser(HTMLParser.HTMLParser):
             self.foundh2 = False
             
             
+class LineupParser(HTMLParser.HTMLParser):
+    startData = False
+    foundh2 = False    
+    pieces = []
+    def handle_starttag(self, tag, attrs):
+        if tag == 'h2':
+            self.foundh2 = True
+        elif tag == 'div':
+            for att in attrs:
+                if att[0] == 'id' and att[1] == 'wrap_wpa_chart':
+                    self.startData = False
+                    self.foundh2 = False
+            
+    def handle_data(self, data):
+        if self.foundh2 and data == 'Starting Lineups':
+            self.startData = True
+        elif self.startData and data.strip() != '':
+            self.pieces.append(data)
+        
+    def handle_endtag(self, data):
+        pass
+            
+    
