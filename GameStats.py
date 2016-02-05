@@ -1,23 +1,8 @@
 import urllib2
-from BRParser import LineScoreParser, GamesParser, GameWeatherParser, GameTimeParser
+from BRParser import LineScoreParser, GameWeatherParser, GameTimeParser, LineupParser
 from datetime import date, time
 from bbUtils import GetTeamKey, GetParkKey, GetParkTZ
-
-def InsertGames(date, con):
-    url = "http://www.baseball-reference.com/games/standings.cgi?date="+date.strftime('%Y-%m-%d')
-    b = GamesParser()
-    b.games = []
-    html = urllib2.urlopen(url).read().decode('utf-8')
-    b.feed(html)
-    for game in b.games:
-        myGame = Game(game[0], game[1], date, con)
-        myGame.GetBRLineScore(game[2])
-        myGame.GetBRWeatherInfo(game[2])
-        myGame.GetBRGameTime(game[2], con)
-        if myGame.InsertStats(con):
-            print('Row inserted in GAME table')
-
-
+from LineupStats import Lineup
 
 class Game:
     parkKey = None #done
@@ -128,7 +113,24 @@ class Game:
             return False
         else:
             return True
-    
+            
+    def GetLineupInfo(self, url, con):
+        batnum = 0
+        userid = ''
+        pos = ''
+        name = ''
+        parms = 0
+        b = LineupParser()
+        html = urllib2.urlopen(url).read().decode('utf-8')
+        b.feed(html)
+        for i in range(2,len(b.pieces)):
+            if i.isdigit():
+                batnum = b.pieces[i]
+                parms += 1
+            elif i[:9] == '/players/'
+                userid = b.pieces[i].split('/')[-1].replace('.shtml','')
+                parms += 1
+
     def UpdateStats(self, con):
         return True
 
