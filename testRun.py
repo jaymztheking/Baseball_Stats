@@ -22,7 +22,8 @@ pw = 'h4xorz' #raw_input('Password? ')
 con = psycopg2.connect("dbname=bbstats user=bbadmin host=192.168.1.111 password=%s" % pw)
 url = 'http://www.baseball-reference.com/boxes/DET/DET201504060.shtml'
 myGame = Game('DET','MIN',date(2015,4,6), con)
-myGame.GetLineupInfo(url, con)
+myGame.GetBRGameTime(url, con)
+a = myGame.GetLineupInfo(url, con)
 
 
 '''for i in range(1,31):
@@ -31,4 +32,4 @@ myGame.GetLineupInfo(url, con)
     print(mydate.isoformat())
     InsertGames(mydate, con)
 con.cursor().execute('COMMIT;')'''
-con.close()
+#con.close()

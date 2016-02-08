@@ -1,10 +1,11 @@
 import urllib2
 from BRParser import LineScoreParser, GameWeatherParser, GameTimeParser, LineupParser
 from datetime import date, time
-from bbUtils import GetTeamKey, GetParkKey, GetParkTZ
+from bbUtils import GetTeamKey, GetParkKey, GetParkTZ, GetGameKey
 from LineupStats import Lineup
 
 class Game:
+    gameKey = None
     parkKey = None #done
     homeTeam = None #done
     awayTeam = None #done
@@ -29,6 +30,9 @@ class Game:
         self.awayTeam = GetTeamKey(aTeam, con)
         self.date = date
         self.parkKey = GetParkKey(self.homeTeam, date, con)
+    
+    def GetGameKey(self, con):
+        return GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
 
     def GetBRLineScore(self, url):
         b = LineScoreParser()
@@ -65,6 +69,7 @@ class Game:
             self.homeTeamWin = True
         elif self.homeRuns == self.awayRuns:
             self.tie = True
+        return True
             
     def GetBRWeatherInfo(self, url):
         b = GameWeatherParser()
@@ -82,6 +87,7 @@ class Game:
         self.windDir = windString[windString.find('mph')+4:]
         for x in weatherList[2:]:
             self.weather += str(x)
+        return True
             
     def GetBRGameTime(self, url, con):
         b= GameTimeParser()
@@ -93,6 +99,7 @@ class Game:
             self.time = tempTime+' '+GetParkTZ(self.parkKey, con)
         else:
             self.time = '11:59 pm '+GetParkTZ(self.parkKey, con)
+        return True
         
     def InsertStats(self, con):
         cur = con.cursor()
@@ -100,21 +107,20 @@ class Game:
         (self.parkKey, self.date.strftime('%Y-%m-%d'), self.time, self.windDir, self.windSpeed, self.weather, self.totalInnings, self.homeHits, self.awayHits, self.homeRuns, self.awayRuns, self.homeErrors, self.awayErrors, self.homeTeam, self.awayTeam, self.temp, self.homeTeamWin, self.tie )
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
+            cur.execute('COMMIT;')
             return True
         return False
     
     def CheckForRow(self, con):
-        cur = con.cursor()        
-        checkSQL = 'select "GAME_KEY" from "GAME" where "PARK_KEY" = %s and "HOME_TEAM_KEY" = %s and "AWAY_TEAM_KEY" = %s and "GAME_DATE" = \'%s\' and "GAME_TIME" = \'%s\'' % \
-        (self.parkKey, self.homeTeam, self.awayTeam, self.date.strftime('%Y-%m-%d'), self.time)
-        cur.execute(checkSQL)
-        results = cur.fetchall()
-        if len(results) == 0:
+        gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
+        if gameKey == None:
             return False
         else:
             return True
             
     def GetLineupInfo(self, url, con):
+        positions = ['C','1B','2B','SS','3B','LF','CF','RF','DH','PH']        
+        lineupRows = []
         batnum = 0
         userid = ''
         pos = ''
@@ -123,13 +129,33 @@ class Game:
         b = LineupParser()
         html = urllib2.urlopen(url).read().decode('utf-8')
         b.feed(html)
+        team = 'A'
         for i in range(2,len(b.pieces)):
-            if i.isdigit():
+            if b.pieces[i].isdigit():
                 batnum = b.pieces[i]
                 parms += 1
-            elif i[:9] == '/players/'
+            elif b.pieces[i][:9] == '/players/':
                 userid = b.pieces[i].split('/')[-1].replace('.shtml','')
                 parms += 1
+            elif b.pieces[i] in positions:
+                pos = b.pieces[i]
+                parms += 1
+            else:
+                name = b.pieces[i]
+                parms += 1
+
+            if parms == 4:
+                if pos != '':
+                    if team == 'A':
+                        lineupRows.append(Lineup(self.GetGameKey(con), self.awayTeam, name, batnum, pos, userid, con))
+                        team = 'H'
+                    else:
+                        lineupRows.append(Lineup(self.GetGameKey(con), self.homeTeam, name, batnum, pos, userid, con))
+                        team = 'A'
+                pos = ''
+                parms = 0
+                
+        return lineupRows
 
     def UpdateStats(self, con):
         return True

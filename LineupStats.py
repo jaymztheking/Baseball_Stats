@@ -1,4 +1,5 @@
-
+from bbUtils import GetHitterKey
+from PlayerStats import Hitter
 
 class Lineup:
     game = 0
@@ -19,11 +20,39 @@ class Lineup:
     SB = 0
     CS = 0
     
-    def __init__(self, game, team, player, batnum, pos):
+    def __init__(self, game, team, playerName, batnum, pos, ID, con):
         self.game = game
         self.team = team
-        self.player = player
         self.player_bat_num = batnum
         self.player_pos = pos
+        self.userID = ID
+        
+        playerKey = GetHitterKey(ID, con)
+        if playerKey == None:
+            newPlayer = Hitter(ID, playerName)
+            newPlayer.InsertPlayerRow(con)
+            playerKey = GetHitterKey(ID, con)
+            self.player = playerKey
+        else:
+            self.player = playerKey
     
+    def InsertLineupRow(self, con):
+        cur = con.cursor()
+        insertSQL = 'insert into "LINEUP" VALUES (%s, %s, %s, %s, \'%s\', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);' % \
+        (self.game, self.team, self.player, self.player_bat_num, self.player_pos)
+        if not self.CheckForRow(con):
+            cur.execute(insertSQL)
+            cur.execute('COMMIT;')
+            return True
+        return False
+    
+    def CheckForRow(self, con):
+        cur = con.cursor()
+        checkSQL = 'select 1 from "LINEUP" where "GAME_KEY" = %s and "PLAYER_KEY" = %s' % (self.game, self.player)
+        cur.execute(checkSQL)
+        results = cur.fetchall()
+        if len(results) == 0:
+            return False
+        else:
+            return True
     

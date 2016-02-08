@@ -20,3 +20,24 @@ def GetParkTZ(park, con):
     else:
         return ''
         
+def GetGameKey(hteam, ateam, date, time, con):
+    cur = con.cursor()        
+    checkSQL = 'select "GAME_KEY" from "GAME" where "HOME_TEAM_KEY" = %s and "AWAY_TEAM_KEY" = %s and "GAME_DATE" = \'%s\' and "GAME_TIME" = \'%s\'' % \
+    (hteam, ateam, date.strftime('%Y-%m-%d'), time)
+    cur.execute(checkSQL)
+    results = cur.fetchall()
+    if len(results) == 1:
+        return results[0][0]
+    else:
+        return None
+    
+def GetHitterKey(name, con):
+    cur = con.cursor()
+    getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where "USER_ID" = \'%s\'' % name
+    cur.execute(getSQL)
+    results = cur.fetchall()
+    if len(results) == 1:
+        return results[0][0]
+    else:
+        return None
+        
