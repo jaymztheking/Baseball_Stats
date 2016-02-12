@@ -1,7 +1,7 @@
-from BRParser import LineupParser
+from BRParser import BattingDataParser
 import urllib2
 
-b = LineupParser()
+b = BattingDataParser()
 url = "http://www.baseball-reference.com/boxes/COL/COL201506030.shtml"
 #need AL validation test for DH's too
 url1 = "http://www.baseball-reference.com/boxes/DET/DET201504060.shtml"

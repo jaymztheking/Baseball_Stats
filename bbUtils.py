@@ -1,8 +1,26 @@
-def GetTeamKey(abb, con):
+def GetTeam(abb, con):
    cur = con.cursor()
    sql = 'select "TEAM_KEY" from "TEAM" where "TEAM_ABBREV" = \'%s\'' % abb
    cur.execute(sql)
-   return cur.fetchall()[0][0]
+   results = cur.fetchall()
+   if len(results) == 1:
+       return results [0][0]
+   else:
+       return None
+       
+def GetTeam(gameKey, teamInd, con):
+    cur = con.cursor()
+    if teamInd == 'A':
+        team = 'AWAY_TEAM_KEY'
+    else:
+        team = 'HOME_TEAM_KEY'
+    sql = 'select "%s" from "GAME" where "GAME_KEY" = %s' % (team, gameKey)
+    cur.execute(sql)
+    results = cur.fetchall()
+    if len(results) == 1:
+        return results[0][0]
+    else:
+        return None
 
 def GetParkKey(hTeam, date, con):
     cur = con.cursor()
@@ -30,6 +48,17 @@ def GetGameKey(hteam, ateam, date, time, con):
         return results[0][0]
     else:
         return None
+        
+def GetGameKeys(hteam, ateam, date, con):
+    cur = con.cursor()        
+    output = []
+    checkSQL = 'select "GAME_KEY" from "GAME" where "HOME_TEAM_KEY" = %s and "AWAY_TEAM_KEY" = %s and "GAME_DATE" = \'%s\'' % \
+    (hteam, ateam, date.strftime('%Y-%m-%d'))
+    cur.execute(checkSQL)
+    results = cur.fetchall()
+    for row in results:
+        output.append(row[0])
+    return output
     
 def GetHitterKey(name, con):
     cur = con.cursor()
@@ -40,4 +69,16 @@ def GetHitterKey(name, con):
         return results[0][0]
     else:
         return None
+        
+def GetLineupPlayers(gamekey, con): #debug with gamekey 2
+    cur = con.cursor()
+    playerList = {}
+    getSQL = 'select h."NAME", l."PLAYER_BAT_NUM" from "HITTER_STATS" h INNER JOIN "LINEUP" l on h."PLAYER_KEY" = l."PLAYER_KEY" where l."GAME_KEY" = %s' % gamekey   
+    cur.execute(getSQL)    
+    results = cur.fetchall()
+    for row in results:
+        playerList[row[0]] = row[1]
+    return playerList
+    
+
         

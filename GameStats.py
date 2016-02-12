@@ -1,5 +1,5 @@
 import urllib2
-from BRParser import LineScoreParser, GameWeatherParser, GameTimeParser, LineupParser
+from BRParser import LineScoreParser, GameWeatherParser, GameTimeParser, LineupParser, BattingDataParser
 from datetime import date, time
 from bbUtils import GetTeamKey, GetParkKey, GetParkTZ, GetGameKey
 from LineupStats import Lineup
@@ -31,9 +31,6 @@ class Game:
         self.date = date
         self.parkKey = GetParkKey(self.homeTeam, date, con)
     
-    def GetGameKey(self, con):
-        return GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
-
     def GetBRLineScore(self, url):
         b = LineScoreParser()
         html = urllib2.urlopen(url).read().decode('utf-8')
@@ -108,6 +105,7 @@ class Game:
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
+            self.gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time)
             return True
         return False
     
@@ -118,44 +116,7 @@ class Game:
         else:
             return True
             
-    def GetLineupInfo(self, url, con):
-        positions = ['C','1B','2B','SS','3B','LF','CF','RF','DH','PH']        
-        lineupRows = []
-        batnum = 0
-        userid = ''
-        pos = ''
-        name = ''
-        parms = 0
-        b = LineupParser()
-        html = urllib2.urlopen(url).read().decode('utf-8')
-        b.feed(html)
-        team = 'A'
-        for i in range(2,len(b.pieces)):
-            if b.pieces[i].isdigit():
-                batnum = b.pieces[i]
-                parms += 1
-            elif b.pieces[i][:9] == '/players/':
-                userid = b.pieces[i].split('/')[-1].replace('.shtml','')
-                parms += 1
-            elif b.pieces[i] in positions:
-                pos = b.pieces[i]
-                parms += 1
-            else:
-                name = b.pieces[i]
-                parms += 1
 
-            if parms == 4:
-                if pos != '':
-                    if team == 'A':
-                        lineupRows.append(Lineup(self.GetGameKey(con), self.awayTeam, name, batnum, pos, userid, con))
-                        team = 'H'
-                    else:
-                        lineupRows.append(Lineup(self.GetGameKey(con), self.homeTeam, name, batnum, pos, userid, con))
-                        team = 'A'
-                pos = ''
-                parms = 0
-                
-        return lineupRows
 
     def UpdateStats(self, con):
         return True

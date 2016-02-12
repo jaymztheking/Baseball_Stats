@@ -126,5 +126,27 @@ class LineupParser(HTMLParser.HTMLParser):
         
     def handle_endtag(self, data):
         pass
-            
     
+class BattingDataParser(HTMLParser.HTMLParser):
+    startData = False
+    pieces = []
+    lastAtag = ''
+    def handle_starttag(self, tag, attrs):
+        if tag == 'table':
+            for att in attrs:
+                if att[0] == 'id' and att[1][-7:] == 'batting':
+                    self.startData = True
+        elif tag == 'a':
+            for att in attrs:
+                if att[0] == 'href' and att[1][:9] == '/players/':
+                    self.lastAtag = att[1].split('/')[-1].replace('.shtml','')
+                    
+    def handle_data(self, data):
+        if self.startData:
+            piece = data.strip()
+            if piece != '':
+                self.pieces.append(piece)
+        
+    def handle_endtag(self, tag):
+        if tag == 'table' and self.startData:
+            self.startData = False

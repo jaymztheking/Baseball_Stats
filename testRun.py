@@ -2,6 +2,7 @@ from datetime import date
 import psycopg2
 import urllib2
 from GameStats import Game
+from LineupStats import GetLineups, GetLineupData
 from BRParser import GamesParser
 
 def InsertGames(date, con):
@@ -10,6 +11,7 @@ def InsertGames(date, con):
     b.games = []
     html = urllib2.urlopen(url).read().decode('utf-8')
     b.feed(html)
+    lineupRows = []
     for game in b.games:
         myGame = Game(game[0], game[1], date, con)
         myGame.GetBRLineScore(game[2])
@@ -17,19 +19,17 @@ def InsertGames(date, con):
         myGame.GetBRGameTime(game[2], con)
         if myGame.InsertStats(con):
             print('Row inserted in GAME table')
+        lineupRows = GetLineups(myGame.gameKey)
+        lineupRows = GetLineupData(lineupRows, game[2], con)
+        for x in lineupRows:
+            x.InsertLineupRow(con)
 
 pw = 'h4xorz' #raw_input('Password? ')
 con = psycopg2.connect("dbname=bbstats user=bbadmin host=192.168.1.111 password=%s" % pw)
-url = 'http://www.baseball-reference.com/boxes/DET/DET201504060.shtml'
-myGame = Game('DET','MIN',date(2015,4,6), con)
-myGame.GetBRGameTime(url, con)
-a = myGame.GetLineupInfo(url, con)
 
-
-'''for i in range(1,31):
+for i in range(6,31):
     print('\n\n')
-    mydate = date(2015,6,i)
+    mydate = date(2015,4,i)
     print(mydate.isoformat())
     InsertGames(mydate, con)
-con.cursor().execute('COMMIT;')'''
-#con.close()
+con.close()
