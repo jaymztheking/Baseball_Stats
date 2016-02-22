@@ -1,4 +1,4 @@
-def GetTeam(abb, con):
+def GetTeamfromAbb(abb, con):
    cur = con.cursor()
    sql = 'select "TEAM_KEY" from "TEAM" where "TEAM_ABBREV" = \'%s\'' % abb
    cur.execute(sql)
@@ -24,7 +24,7 @@ def GetTeam(gameKey, teamInd, con):
 
 def GetParkKey(hTeam, date, con):
     cur = con.cursor()
-    sql = 'select "PARK_KEY" from "PARK" where "TEAM_KEY" = %s and "PARK_OPEN_DATE"<= \'%s\'' % (hTeam, date)
+    sql = 'select "PARK_KEY" from "PARK" where "TEAM_KEY" = %s and "PARK_OPEN_DATE"<= \'%s\'' % (hTeam, date.strftime('%Y-%m-%d'))
     cur.execute(sql)
     return cur.fetchall()[0][0]
     

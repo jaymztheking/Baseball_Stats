@@ -1,5 +1,17 @@
 import HTMLParser
 
+class TestParser(HTMLParser.HTMLParser):
+    def handle_starttag(self, tag, attrs):
+        pass
+    def handle_charref(self, name):
+        print(name)
+    
+    def handle_data(self, data):
+        print(data)
+    
+    def handle_endtag(self, data):
+        pass
+
 class GameTimeParser(HTMLParser.HTMLParser):
     startData = False
     time = ''
@@ -129,7 +141,9 @@ class LineupParser(HTMLParser.HTMLParser):
     
 class BattingDataParser(HTMLParser.HTMLParser):
     startData = False
-    pieces = []
+    startText = False
+    rowData = []
+    allRows = []
     lastAtag = ''
     def handle_starttag(self, tag, attrs):
         if tag == 'table':
@@ -140,13 +154,24 @@ class BattingDataParser(HTMLParser.HTMLParser):
             for att in attrs:
                 if att[0] == 'href' and att[1][:9] == '/players/':
                     self.lastAtag = att[1].split('/')[-1].replace('.shtml','')
+        elif tag == 'td' and self.startData:
+                for att in attrs:
+                    if att[0] == 'align' and att[1] not in ('left', 'right'):
+                        self.startText = True
+        
                     
     def handle_data(self, data):
         if self.startData:
             piece = data.strip()
             if piece != '':
-                self.pieces.append(piece)
+                self.rowData.append(piece)
+        
         
     def handle_endtag(self, tag):
         if tag == 'table' and self.startData:
             self.startData = False
+        elif tag == 'tr' and self.startData:
+            self.startText = False
+            self.rowData.insert(0, self.lastAtag)
+            self.allRows.append(self.rowData)
+            self.rowData = []

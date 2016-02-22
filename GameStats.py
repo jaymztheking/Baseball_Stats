@@ -1,7 +1,7 @@
 import urllib2
 from BRParser import LineScoreParser, GameWeatherParser, GameTimeParser, LineupParser, BattingDataParser
 from datetime import date, time
-from bbUtils import GetTeamKey, GetParkKey, GetParkTZ, GetGameKey
+from bbUtils import GetTeamfromAbb, GetParkKey, GetParkTZ, GetGameKey
 from LineupStats import Lineup
 
 class Game:
@@ -26,8 +26,8 @@ class Game:
     tie = False #done
     
     def __init__(self, hTeam, aTeam, date, con):
-        self.homeTeam = GetTeamKey(hTeam, con)
-        self.awayTeam = GetTeamKey(aTeam, con)
+        self.homeTeam = GetTeamfromAbb(hTeam, con)
+        self.awayTeam = GetTeamfromAbb(aTeam, con)
         self.date = date
         self.parkKey = GetParkKey(self.homeTeam, date, con)
     
@@ -105,7 +105,7 @@ class Game:
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
-            self.gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time)
+            self.gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
             return True
         return False
     

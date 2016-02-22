@@ -15,10 +15,10 @@ def GetLineups(gameKey, url, con):
     html = urllib2.urlopen(url).read().decode('utf-8')
     b.feed(html)
     team = 'A'
-    minBat = 1
+    lastBatNum = 1
     for i in range(2,len(b.pieces)):
         if b.pieces[i].isdigit():
-            batnum = b.pieces[i]
+            batnum = int(b.pieces[i])
             parms += 1
         elif b.pieces[i][:9] == '/players/':
             userid = b.pieces[i].split('/')[-1].replace('.shtml','')
@@ -32,73 +32,93 @@ def GetLineups(gameKey, url, con):
 
         if parms == 4:
             if pos != '':
-                if team == 'A' and pos != 'P':
-                    lineupRows[name] = Lineup(gameKey, GetTeam(gameKey, 'A', con), name, batnum, pos, userid, con)
-                    minBat = batnum
-                elif pos != 'P':
-                    lineupRows[name] = Lineup(gameKey, GetTeam(gameKey, 'H', con), name, batnum, pos, userid, con)
+                if pos != 'P':
+                    tm = GetTeam(gameKey, team, con)
+                    lineupRows[name] = Lineup(gameKey, tm, name, batnum, pos, userid, con)
+               
+                
             pos = ''
             parms = 0
+            if team == 'A':
+                team = 'H'
+            else:
+                team = 'A'
             
     return lineupRows
 
 def GetLineupData(lineups, url, con):
     b = BattingDataParser()
     gameKey = lineups.values()[0].game
-    players = GetLineupPlayers(gameKey, con)
-    valid = False
     team = 'A'
     html = urllib2.urlopen(url).read().decode('utf-8')
     b.feed(html)
-    columns = 0
-    for i in range(21, len(b.pieces)):
-        if b.pieces[i] in lineups.keys():
-            valid = True
-            currentLineup = lineups[b.pieces[i]]
+    lastBatNum = 1
+    for i in range(1, len(b.allRows)):
+        if len(b.allRows[i]) >1 and b.allRows[i][1] in lineups.keys():
+            currentLineup = lineups[b.allRows[i][1]]
             lastBatNum = currentLineup.player_bat_num
-            columns = 0
-        #Need to expand for long term subs (e.g. new RF comes into game for multiple innings)
-        elif i < len(b.pieces)-1 and b.pieces[i+1] == 'PH' :
-            #insert PH line in lineup  
-            lineups[b.pieces[i]] = Lineup(gameKey, GetTeam(gameKey, team, con), b.pieces[i], lastBatNum, 'PH', b.lastAtag , con)
-            valid = True
-            currentLineup = lineups[b.pieces[i]]
-            columns = 0
-        elif i < len(b.pieces)-1 and b.pieces[i+1] == 'P':
-            columns = 6
-            valid = False
+        elif len(b.allRows[i]) >1 and b.allRows[i][1] == 'Batting':
+            team = 'H'
+            lastBatNum = 1
             continue
-        elif b.pieces[i].isdigit() and columns < 5 and valid:
-            if columns == 0:
-                if int(b.pieces[i]) == 0:
-                    valid = False
-                    continue
-                currentLineup.AB = int(b.pieces[i])
-                columns += 1
-            elif columns == 1:
-                currentLineup.Runs = int(b.pieces[i])
-                columns += 1
-            elif columns == 2:
-                currentLineup.Hits = int(b.pieces[i])
-                columns += 1
-            elif columns == 3:
-                currentLineup.RBI = int(b.pieces[i])
-                columns += 1
-            elif columns == 4:
-                currentLineup.BB = int(b.pieces[i])
-                columns += 1
-        elif columns == 5:
-            valid = False
-            if str(b.pieces[i]).translate(None, ',*').isalpha():
-                print(b.pieces[i])       
+        elif len(b.allRows[i])>2 and b.allRows[i][2] != 'P' and b.allRows[i][1] != 'Team Totals' and int(b.allRows[i][3])>0:
+            lineups[b.allRows[i][1]] = Lineup(gameKey, GetTeam(gameKey, team, con), b.allRows[i][1], lastBatNum, b.allRows[i][2], b.allRows[i][0] , con)
+            currentLineup = lineups[b.allRows[i][1]]
+        else: 
+            continue
+        
+        currentLineup.AB = int(b.allRows[i][3])
+        currentLineup.Hits = int(b.allRows[i][5])
+        currentLineup.BB = int(b.allRows[i][7])
+        currentLineup.Runs = int(b.allRows[i][4])
+        currentLineup.RBI = int(b.allRows[i][6])
+        
+        text = b.allRows[i][-1].split(',')
+        for t in text:
+            if 'HBP' in t:
+                if '*' in t:
+                    currentLineup.HBP = int(t[:t.find('*')])
+                else:
+                    currentLineup.HBP = 1
+            elif '2B' in t:
+                if '*' in t:
+                    currentLineup.Double = int(t[:t.find('*')])
+                else:
+                    currentLineup.Double = 1
+            elif '3B' in t:
+                if '*' in t:
+                    currentLineup.Triple = int(t[:t.find('*')])
+                else:
+                    currentLineup.Triple = 1
+            elif 'HR' in t:
+                if '*' in t:
+                    currentLineup.HR = int(t[:t.find('*')])
+                else:
+                    currentLineup.HR = 1
+            elif 'SB' in t:
+                if '*' in t:
+                    currentLineup.SB = int(t[:t.find('*')])
+                else:
+                    currentLineup.SB = 1
+            elif 'CS' in t:
+                if '*' in t:
+                    currentLineup.CS = int(t[:t.find('*')])
+                else:
+                    currentLineup.CS = 1
+        currentLineup.Single = currentLineup.Hits - currentLineup.Double - currentLineup.Triple - currentLineup.HR
+    
     return lineups       
 
 class Lineup:
+    #Lineup    
     game = 0
     team = 0
     player = 0
     player_bat_num = 0
     player_pos = ''
+    userID = ''
+    
+    #Batting Data
     AB = 0 #1
     Hits = 0 #3
     BB = 0 #5
@@ -130,8 +150,8 @@ class Lineup:
     
     def InsertLineupRow(self, con):
         cur = con.cursor()
-        insertSQL = 'insert into "LINEUP" VALUES (%s, %s, %s, %s, \'%s\', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);' % \
-        (self.game, self.team, self.player, self.player_bat_num, self.player_pos)
+        insertSQL = 'insert into "LINEUP" VALUES (%s, %s, %s, %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % \
+        (self.game, self.team, self.player, self.player_bat_num, self.player_pos, self.AB, self.Hits, self.BB, self.HBP, self.Runs, self.RBI, self.Single, self.Double, self.Triple, self.HR, self.SB, self.CS)
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
