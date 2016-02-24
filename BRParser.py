@@ -175,3 +175,27 @@ class BattingDataParser(HTMLParser.HTMLParser):
             self.rowData.insert(0, self.lastAtag)
             self.allRows.append(self.rowData)
             self.rowData = []
+            
+class PitchRosterParser(HTMLParser.HTMLParser):
+    startData = False
+    allRows = []
+    rowData = []
+    def handle_starttag(self, tag, attrs):
+        if tag == 'table':
+            for att in attrs:
+                if att[0] == 'id' and att[1][-8:] == 'pitching':
+                    self.startData = True
+    
+    def handle_data(self,data):
+        if self.startData:
+            piece = data.strip()
+            if piece != '':
+                self.rowData.append(piece)
+    
+    def handle_endtag(self,tag):
+        if tag == 'table' and self.startData:
+            self.startData = False
+        elif tag == 'tr' and self.startData:
+            self.startText = False
+            self.allRows.append(self.rowData)
+            self.rowData = []
