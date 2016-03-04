@@ -180,22 +180,34 @@ class PitchRosterParser(HTMLParser.HTMLParser):
     startData = False
     allRows = []
     rowData = []
+    piece = None
+    lastAtag = ''
     def handle_starttag(self, tag, attrs):
         if tag == 'table':
             for att in attrs:
                 if att[0] == 'id' and att[1][-8:] == 'pitching':
                     self.startData = True
+        elif tag == 'a':
+            for att in attrs:
+                if att[0] == 'href' and att[1][:9] == '/players/':
+                    self.lastAtag = att[1].split('/')[-1].replace('.shtml','')
     
     def handle_data(self,data):
         if self.startData:
-            piece = data.strip()
-            if piece != '':
-                self.rowData.append(piece)
+            if self.piece is not None:
+                self.piece += data.strip()
+            else:
+                self.piece = data.strip()
     
     def handle_endtag(self,tag):
         if tag == 'table' and self.startData:
             self.startData = False
         elif tag == 'tr' and self.startData:
-            self.startText = False
+            self.rowData.insert(0, self.lastAtag)            
             self.allRows.append(self.rowData)
             self.rowData = []
+        elif tag == 'td' and self.startData:
+            self.rowData.append(self.piece)
+            self.piece = None
+        elif tag == 'th':
+            self.piece = None
