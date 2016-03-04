@@ -15,9 +15,10 @@ myGame.GetBRLineScore(url)
 myGame.GetBRWeatherInfo(url)
 myGame.GetBRGameTime(url, con)
 myGame.InsertStats(con)
-'''
+
 lineup = GetLineups(16, url, con)
 GetLineupData(lineup, url, con)
 for line in lineup.values():
     line.InsertLineupRow(con)
-
+'''
+r = GetPitchRoster(16, url, con)

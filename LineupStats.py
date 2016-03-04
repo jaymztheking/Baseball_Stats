@@ -15,7 +15,8 @@ def GetLineups(gameKey, url, con):
     html = urllib2.urlopen(url).read().decode('utf-8')
     b.feed(html)
     team = 'A'
-    lastBatNum = 1
+    atm = GetTeam(gameKey, team, con)
+    htm = GetTeam(gameKey, 'H', con)
     for i in range(2,len(b.pieces)):
         if b.pieces[i].isdigit():
             batnum = int(b.pieces[i])
@@ -33,7 +34,10 @@ def GetLineups(gameKey, url, con):
         if parms == 4:
             if pos != '':
                 if pos != 'P':
-                    tm = GetTeam(gameKey, team, con)
+                    if team == 'H':
+                        tm = htm
+                    else:
+                        tm = atm
                     lineupRows[name] = Lineup(gameKey, tm, name, batnum, pos, userid, con)
                
                 

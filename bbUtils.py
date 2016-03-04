@@ -60,9 +60,19 @@ def GetGameKeys(hteam, ateam, date, con):
         output.append(row[0])
     return output
     
-def GetHitterKey(name, con):
+def GetHitterKey(uid, con):
     cur = con.cursor()
-    getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where "USER_ID" = \'%s\'' % name
+    getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where "USER_ID" = \'%s\'' % uid
+    cur.execute(getSQL)
+    results = cur.fetchall()
+    if len(results) == 1:
+        return results[0][0]
+    else:
+        return None
+
+def GetPitcherKey(uid, con):
+    cur = con.cursor()
+    getSQL = 'select "PLAYER_KEY" from "PITCHER_STATS" where "USER_ID" = \'%s\'' % uid
     cur.execute(getSQL)
     results = cur.fetchall()
     if len(results) == 1:
