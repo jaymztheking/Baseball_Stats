@@ -50,7 +50,7 @@ def GetPitchRoster(gameKey, url, con):
                 elif ' S ' in x:
                     pitchers[userid].Save = True
             pitchers[userid].InsertRosterRow(con)
-        elif team == 'A' and p[1] == 'Team Totals':
+        elif team == 'A' and len(p)>1 and p[1] == 'Team Totals':
             team = 'H'
             tm = GetTeam(gameKey, team, con)
     
@@ -100,7 +100,7 @@ class PitchRoster:
     def InsertRosterRow(self, con):
         cur = con.cursor()
         insertSQL = 'insert into "PITCH_ROSTER" VALUES (%s, %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)' % \
-        (self.gameKey, self.pitcherKey, self.pitcherRole, self.pitchCount, self.K, self.BB, self.HBP, self.earnedRuns, self.IP, self.Strikes, self.Balls, self.ContactStrikes, self.CG, self.SO, self.NH, self.Win, self.Loss, self.Save, self.SwingStrikes, self.LookStrikes, self.FB, self.GB, self.LD)        
+        (self.gameKey, self.pitcherKey, self.pitcherRole, self.pitchCount, self.K, self.BB, self.HBP, self.earnedRuns, self.IP, self.Strikes, self.Balls, self.ContactStrikes, self.CG, self.SO, self.teamKey, self.NH, self.Win, self.Loss, self.Save, self.SwingStrikes, self.LookStrikes, self.FB, self.GB, self.LD)        
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
@@ -109,7 +109,7 @@ class PitchRoster:
     
     def CheckForRow(self, con):
         cur = con.cursor()
-        checkSQL = 'select 1 from "PITCH_ROSTER" where "GAME_KEY" = %s and "PITCHER_KEY" = %s' % (self.game, self.player)
+        checkSQL = 'select 1 from "PITCH_ROSTER" where "GAME_KEY" = %s and "PITCHER_KEY" = %s' % (self.gameKey, self.pitcherKey)
         cur.execute(checkSQL)
         results = cur.fetchall()
         if len(results) == 0:
