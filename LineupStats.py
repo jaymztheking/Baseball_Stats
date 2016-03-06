@@ -4,114 +4,94 @@ import urllib2
 from BRParser import LineupParser, BattingDataParser
 
 def GetLineups(gameKey, url, con):
-    positions = ['C','1B','2B','SS','3B','LF','CF','RF','DH','PH','P']        
+    positions = ['C','1B','2B','SS','3B','LF','CF','RF','DH','PH','P']          
     lineupRows = {}
     batnum = 0
     userid = ''
     pos = ''
     name = ''
-    parms = 0
     b = LineupParser()
+    b.allRows = []
     html = urllib2.urlopen(url).read().decode('utf-8')
     b.feed(html)
     team = 'A'
     atm = GetTeam(gameKey, team, con)
     htm = GetTeam(gameKey, 'H', con)
-    for i in range(2,len(b.pieces)):
-        if b.pieces[i].isdigit():
-            batnum = int(b.pieces[i])
-            parms += 1
-        elif b.pieces[i][:9] == '/players/':
-            userid = b.pieces[i].split('/')[-1].replace('.shtml','')
-            parms += 1
-        elif b.pieces[i] in positions:
-            pos = b.pieces[i]
-            parms += 1
-        else:
-            name = b.pieces[i]
-            parms += 1
 
-        if parms == 4:
-            if pos != '':
-                if pos != 'P':
-                    if team == 'H':
-                        tm = htm
-                    else:
-                        tm = atm
-                    lineupRows[name] = Lineup(gameKey, tm, name, batnum, pos, userid, con)
-               
-                
-            pos = ''
-            parms = 0
+    for row in b.allRows:
+        if len(row)>1 and row[1].isdigit():
+            userid = row[0]
+            batnum = int(row[1])
+            name = row[2]
+            pos = row[3]
             if team == 'A':
+                tm = atm
                 team = 'H'
             else:
+                tm = htm
                 team = 'A'
-            
-    return lineupRows
-
-def GetLineupData(lineups, url, con):
-    b = BattingDataParser()
-    gameKey = lineups.values()[0].game
+            lineupRows[name] = Lineup(gameKey, tm, name, batnum, pos, userid, con)
+    
+    c = BattingDataParser()
+    c.allRows = []
     team = 'A'
     html = urllib2.urlopen(url).read().decode('utf-8')
-    b.feed(html)
+    c.feed(html)
     lastBatNum = 1
-    for i in range(1, len(b.allRows)):
-        if len(b.allRows[i]) >1 and b.allRows[i][1] in lineups.keys():
-            currentLineup = lineups[b.allRows[i][1]]
-            lastBatNum = currentLineup.player_bat_num
-        elif len(b.allRows[i]) >1 and b.allRows[i][1] == 'Batting':
+    for i in range(1, len(c.allRows)):
+        if len(c.allRows[i]) >1 and c.allRows[i][1] in lineupRows.keys():
+            lastBatNum = lineupRows[c.allRows[i][1]].player_bat_num
+        elif len(c.allRows[i]) >1 and c.allRows[i][1] == 'Batting':
             team = 'H'
             lastBatNum = 1
             continue
-        elif len(b.allRows[i])>2 and b.allRows[i][2] != 'P' and b.allRows[i][1] != 'Team Totals' and int(b.allRows[i][3])>0:
-            lineups[b.allRows[i][1]] = Lineup(gameKey, GetTeam(gameKey, team, con), b.allRows[i][1], lastBatNum, b.allRows[i][2], b.allRows[i][0] , con)
-            currentLineup = lineups[b.allRows[i][1]]
+        elif len(c.allRows[i])>3 and c.allRows[i][2] != 'P' and c.allRows[i][1] != 'Team Totals' and c.allRows[i][3].isnumeric() and int(c.allRows[i][3])>0:
+            print(c.allRows[i][1])            
+            lineupRows[c.allRows[i][1]] = Lineup(gameKey, GetTeam(gameKey, team, con), c.allRows[i][1], lastBatNum, 'PH', c.allRows[i][0] , con)
         else: 
             continue
         
-        currentLineup.AB = int(b.allRows[i][3])
-        currentLineup.Hits = int(b.allRows[i][5])
-        currentLineup.BB = int(b.allRows[i][7])
-        currentLineup.Runs = int(b.allRows[i][4])
-        currentLineup.RBI = int(b.allRows[i][6])
+        lineupRows[c.allRows[i][1]].AB = int(c.allRows[i][3]) if c.allRows[i][3].isnumeric() else 0
+        lineupRows[c.allRows[i][1]].Hits = int(c.allRows[i][5]) if c.allRows[i][5].isnumeric() else 0
+        lineupRows[c.allRows[i][1]].BB = int(c.allRows[i][7]) if c.allRows[i][7].isnumeric() else 0
+        lineupRows[c.allRows[i][1]].Runs = int(c.allRows[i][4]) if c.allRows[i][4].isnumeric() else 0
+        lineupRows[c.allRows[i][1]].RBI = int(c.allRows[i][6]) if c.allRows[i][6].isnumeric() else 0
         
-        text = b.allRows[i][-1].split(',')
+        text = c.allRows[i][-1].split(',')
         for t in text:
             if 'HBP' in t:
                 if '*' in t:
-                    currentLineup.HBP = int(t[:t.find('*')])
+                    lineupRows[c.allRows[i][1]].HBP = int(t[:t.find('*')]) if t[:t.find('*')].isnumeric() else 0
                 else:
-                    currentLineup.HBP = 1
+                    lineupRows[c.allRows[i][1]].HBP = 1
             elif '2B' in t:
                 if '*' in t:
-                    currentLineup.Double = int(t[:t.find('*')])
+                    lineupRows[c.allRows[i][1]].Double = int(t[:t.find('*')]) if t[:t.find('*')].isnumeric() else 0
                 else:
-                    currentLineup.Double = 1
+                    lineupRows[c.allRows[i][1]].Double = 1
             elif '3B' in t:
                 if '*' in t:
-                    currentLineup.Triple = int(t[:t.find('*')])
+                    lineupRows[c.allRows[i][1]].Triple = int(t[:t.find('*')]) if t[:t.find('*')].isnumeric() else 0
                 else:
-                    currentLineup.Triple = 1
+                    lineupRows[c.allRows[i][1]].Triple = 1
             elif 'HR' in t:
                 if '*' in t:
-                    currentLineup.HR = int(t[:t.find('*')])
+                    lineupRows[c.allRows[i][1]].HR = int(t[:t.find('*')]) if t[:t.find('*')].isnumeric() else 0
                 else:
-                    currentLineup.HR = 1
+                    lineupRows[c.allRows[i][1]].HR = 1
             elif 'SB' in t:
                 if '*' in t:
-                    currentLineup.SB = int(t[:t.find('*')])
+                    lineupRows[c.allRows[i][1]].SB = int(t[:t.find('*')]) if t[:t.find('*')].isnumeric() else 0
                 else:
-                    currentLineup.SB = 1
+                    lineupRows[c.allRows[i][1]].SB = 1
             elif 'CS' in t:
                 if '*' in t:
-                    currentLineup.CS = int(t[:t.find('*')])
+                    lineupRows[c.allRows[i][1]].CS = int(t[:t.find('*')]) if t[:t.find('*')].isnumeric() else 0
                 else:
-                    currentLineup.CS = 1
-        currentLineup.Single = currentLineup.Hits - currentLineup.Double - currentLineup.Triple - currentLineup.HR
-    
-    return lineups       
+                    lineupRows[c.allRows[i][1]].CS = 1
+        lineupRows[c.allRows[i][1]].Single = lineupRows[c.allRows[i][1]].Hits - lineupRows[c.allRows[i][1]].Double - lineupRows[c.allRows[i][1]].Triple - lineupRows[c.allRows[i][1]].HR
+        c.close()
+    return lineupRows       
 
 class Lineup:
     #Lineup    

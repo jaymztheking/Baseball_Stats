@@ -102,13 +102,13 @@ class Game:
         cur = con.cursor()
         insertSQL = 'insert into "GAME" VALUES (default, %s, \'%s\', \'%s\', \'%s\', %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % \
         (self.parkKey, self.date.strftime('%Y-%m-%d'), self.time, self.windDir, self.windSpeed, self.weather, self.totalInnings, self.homeHits, self.awayHits, self.homeRuns, self.awayRuns, self.homeErrors, self.awayErrors, self.homeTeam, self.awayTeam, self.temp, self.homeTeamWin, self.tie )
-        if not self.CheckForRow(con):
+        self.gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
+        if self.gameKey == None:
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
             self.gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
-            return True
-        return False
-    
+        return True
+        
     def CheckForRow(self, con):
         gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
         if gameKey == None:

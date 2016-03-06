@@ -5,6 +5,7 @@ import urllib2
 
 def GetPitchRoster(gameKey, url, con):
     b = PitchRosterParser()
+    b.allRows = []
     pitchers = {}
     userid = ''
     name = ''
@@ -13,26 +14,25 @@ def GetPitchRoster(gameKey, url, con):
     team = 'A'
     tm = GetTeam(gameKey, team, con)
     for p in b.allRows:
-        if len(p)>1 and p[1] != 'Team Totals':
+        if len(p)>5 and p[1] != 'Team Totals' and p[2].isnumeric():
             userid = p[0]
             name = p[1].split(',')[0]
             pitchers[userid] = PitchRoster(gameKey, tm, name, userid, con)
-            
-            pitchers[userid].IP = float(p[2])
-            pitchers[userid].Hits = int(p[3])
-            pitchers[userid].Runs = int(p[4])
-            pitchers[userid].earnedRuns = int(p[5])
-            pitchers[userid].BB = int(p[6])
-            pitchers[userid].K = int(p[7])
-            pitchers[userid].pitchCount = int(p[11])
-            pitchers[userid].Strikes = int(p[12])
-            pitchers[userid].Balls = int(p[11]) - int(p[12])
-            pitchers[userid].ContactStrikes = int(p[13])
-            pitchers[userid].SwingStrikes = int(p[14])
-            pitchers[userid].LookStrikes = int(p[15])
-            pitchers[userid].LD = int(p[18])
-            pitchers[userid].FB = int(p[17])
-            pitchers[userid].GB = int(p[16])
+            pitchers[userid].IP = float(p[2]) 
+            pitchers[userid].Hits = int(p[3]) if p[3].isnumeric() else 0
+            pitchers[userid].Runs = int(p[4]) if p[4].isnumeric() else 0
+            pitchers[userid].earnedRuns = int(p[5]) if p[5].isnumeric() else 0
+            pitchers[userid].BB = int(p[6]) if p[6].isnumeric() else 0
+            pitchers[userid].K = int(p[7]) if p[7].isnumeric() else 0
+            pitchers[userid].pitchCount = int(p[11]) if p[11].isnumeric() else 0
+            pitchers[userid].Strikes = int(p[12]) if p[12].isnumeric() else 0
+            pitchers[userid].Balls = pitchers[userid].pitchCount - pitchers[userid].Strikes
+            pitchers[userid].ContactStrikes = int(p[13]) if p[13].isnumeric() else 0
+            pitchers[userid].SwingStrikes = int(p[14]) if p[14].isnumeric() else 0
+            pitchers[userid].LookStrikes = int(p[15]) if p[15].isnumeric() else 0
+            pitchers[userid].LD = int(p[18]) if p[18].isnumeric() else 0
+            pitchers[userid].FB = int(p[17]) if p[17].isnumeric() else 0
+            pitchers[userid].GB = int(p[16]) if p[16].isnumeric() else 0
             
             if pitchers[userid].IP == 9.0:
                 pitchers[userid].CG = True
