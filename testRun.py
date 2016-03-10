@@ -27,9 +27,9 @@ def InsertGames(date, con):
 pw = 'h4xorz' #raw_input('Password? ')
 con = psycopg2.connect("dbname=bbstats user=bbadmin host=192.168.1.111 password=%s" % pw)
 
-for i in range(6,31):
-    print('\n\n')
-    mydate = date(2015,4,i)
-    print(mydate.isoformat())
-    InsertGames(mydate, con)
+
+print('\n\n')
+mydate = date(2015,5,31)
+print(mydate.isoformat())
+InsertGames(mydate, con)
 con.close()

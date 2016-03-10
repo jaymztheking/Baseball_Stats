@@ -1,6 +1,7 @@
 from datetime import date
 import psycopg2
 from LineupStats import *
+from PitchingStats import *
 from GameStats import Game
 
 pw = 'h4xorz' #raw_input('Password? ')

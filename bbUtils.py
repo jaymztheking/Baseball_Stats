@@ -52,7 +52,7 @@ def GetGameKey(hteam, ateam, date, time, con):
 def GetGameKeys(hteam, ateam, date, con):
     cur = con.cursor()        
     output = []
-    checkSQL = 'select "GAME_KEY" from "GAME" where "HOME_TEAM_KEY" = %s and "AWAY_TEAM_KEY" = %s and "GAME_DATE" = \'%s\'' % \
+    checkSQL = 'select "GAME_KEY" from "GAME" where "HOME_TEAM_KEY" = %s and "AWAY_TEAM_KEY" = %s and "GAME_DATE" = \'%s\' order by "GAME_TIME"' % \
     (hteam, ateam, date.strftime('%Y-%m-%d'))
     cur.execute(checkSQL)
     results = cur.fetchall()
@@ -89,6 +89,17 @@ def GetLineupPlayers(gamekey, con): #debug with gamekey 2
     for row in results:
         playerList[row[0]] = row[1]
     return playerList
+
+def GetHitterKeyfromLU(gameKey, team, batNum, con):
+    cur = con.cursor()
+    getSQL = 'select "PLAYER_KEY" from "LINEUP" where "GAME_KEY" = %s and "TEAM_KEY" = %s and "PLAYER_BAT_NUM" = %s and "PLAYER_POS" <> \'PH\'' % \
+    (gameKey, team, batNum)
+    cur.execute(getSQL)
+    results = cur.fetchall()
+    if len(results) == 1:
+        return results[0][0]
+    else:
+        return None
     
 
         
