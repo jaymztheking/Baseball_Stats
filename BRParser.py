@@ -116,7 +116,10 @@ class GamesParser(HTMLParser.HTMLParser):
 class LineupParser(HTMLParser.HTMLParser):
     startData = False
     foundh2 = False    
-    pieces = []
+    piece = None
+    rowData = []
+    allRows = []
+    lastAtag = ''
     def handle_starttag(self, tag, attrs):
         if tag == 'h2':
             self.foundh2 = True
@@ -127,21 +130,38 @@ class LineupParser(HTMLParser.HTMLParser):
                     self.foundh2 = False
         elif tag == 'a' and self.startData:
             for att in attrs:
-                if att[0] == 'href':
-                    self.pieces.append(att[1])
+                if att[0] == 'href' and att[1][:9] == '/players/':
+                    self.lastAtag = att[1].split('/')[-1].replace('.shtml','')
             
     def handle_data(self, data):
         if self.foundh2 and data == 'Starting Lineups':
             self.startData = True
-        elif self.startData and data.strip() != '':
-            self.pieces.append(data)
+        elif self.startData:
+            if self.piece is not None:
+                self.piece += data.strip()
+            else:
+                self.piece = data.strip()
         
-    def handle_endtag(self, data):
-        pass
+    def handle_endtag(self, tag):
+        if tag == 'tr' and self.startData:
+            self.rowData.insert(0, self.lastAtag)
+            self.allRows.append(self.rowData)
+            self.rowData = []
+            self.piece = None
+        elif tag == 'td' and self.startData:
+            self.rowData.append(self.piece)
+            if len(self.rowData)>3:
+                self.rowData.pop()
+                self.rowData.insert(0, self.lastAtag)
+                self.allRows.append(self.rowData)
+                self.rowData = []
+                self.piece = None
+            self.piece = None
     
 class BattingDataParser(HTMLParser.HTMLParser):
     startData = False
     startText = False
+    piece = None
     rowData = []
     allRows = []
     lastAtag = ''
@@ -162,9 +182,10 @@ class BattingDataParser(HTMLParser.HTMLParser):
                     
     def handle_data(self, data):
         if self.startData:
-            piece = data.strip()
-            if piece != '':
-                self.rowData.append(piece)
+            if self.piece is not None:
+                self.piece += data.strip()
+            else:
+                self.piece = data.strip()
         
         
     def handle_endtag(self, tag):
@@ -175,6 +196,14 @@ class BattingDataParser(HTMLParser.HTMLParser):
             self.rowData.insert(0, self.lastAtag)
             self.allRows.append(self.rowData)
             self.rowData = []
+        elif tag == 'td' and self.startData:
+            self.rowData.append(self.piece)
+            self.piece = None
+        elif tag == 'a' and self.startData:
+            self.rowData.append(self.piece)
+            self.piece = None
+        elif tag == 'th' and self.startData:
+            self.piece = None
             
 class PitchRosterParser(HTMLParser.HTMLParser):
     startData = False

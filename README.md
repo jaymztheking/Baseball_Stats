@@ -9,5 +9,6 @@ This project is a collection of Python classes and corresponding PostgreSQL comp
 * psycopg2
 
 ##Notes
-
+* Pitcher hot streak flagging should be implemented
+* Use retrosheet for play-by-play
 ##To - Do
