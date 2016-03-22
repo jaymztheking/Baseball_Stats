@@ -1,21 +1,9 @@
-from bbUtils import GetGameKeys, GetHitterKeyfromLU, GetTeamfromAbb
+from bbUtils import GetGameKeys, GetHitterKeyfromLU, GetTeamfromAbb, GetRSConversion
 import psycopg2
 from datetime import date
 
 def processPlayLog(filename, con):
-    diffAbb = {}
-    diffAbb['CHN'] = 'CHC'    
-    diffAbb['CHA'] = 'CHW'
-    diffAbb['ANA'] = 'LAA'
-    diffAbb['KCA'] = 'KCR'
-    diffAbb['TBA'] = 'TBR'
-    diffAbb['NYA'] = 'NYY'
-    diffAbb['SDN'] = 'SDP'
-    diffAbb['NYN'] = 'NYM'
-    diffAbb['WAS'] = 'WSN'
-    diffAbb['SFN'] = 'SFG'
-    diffAbb['LAN'] = 'LAD'
-    diffAbb['SLN'] = 'STL'
+    diffAbb = GetRSConversion()
     text = open(filename)
     startSit = 1
     awayTeam = None

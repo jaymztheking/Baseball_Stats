@@ -101,5 +101,18 @@ def GetHitterKeyfromLU(gameKey, team, batNum, con):
     else:
         return None
     
-
-        
+def GetRSConversion():
+    diffAbb = {}
+    diffAbb['CHN'] = 'CHC'    
+    diffAbb['CHA'] = 'CHW'
+    diffAbb['ANA'] = 'LAA'
+    diffAbb['KCA'] = 'KCR'
+    diffAbb['TBA'] = 'TBR'
+    diffAbb['NYA'] = 'NYY'
+    diffAbb['SDN'] = 'SDP'
+    diffAbb['NYN'] = 'NYM'
+    diffAbb['WAS'] = 'WSN'
+    diffAbb['SFN'] = 'SFG'
+    diffAbb['LAN'] = 'LAD'
+    diffAbb['SLN'] = 'STL'
+    return diffAbb
