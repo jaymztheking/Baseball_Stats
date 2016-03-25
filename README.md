@@ -13,7 +13,7 @@ This project is a collection of Python classes and corresponding PostgreSQL comp
 * Use retrosheet for play-by-play
 
 ##To - Do
-* Create views for data framing, specifically for points and driver variables
+* Create views for data framing, specifically for points and driver variables (wOBA, BABIP, ISO, HR/FB)
 * Create view for finding missing games
 * Complete play result code
 * Write import code for pitch data
