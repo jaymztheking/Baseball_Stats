@@ -1,4 +1,3 @@
-from datetime import date
 from bbUtils import GetHitterKey, GetPitcherKey
 
 class Hitter:

@@ -116,3 +116,7 @@ def GetRSConversion():
     diffAbb['LAN'] = 'LAD'
     diffAbb['SLN'] = 'STL'
     return diffAbb
+
+def GetPos(num):
+    pos = ['P','C','1B','2B','3B','SS','LF','CF','RF','DH']
+    return pos[num-1]

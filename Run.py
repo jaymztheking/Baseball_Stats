@@ -8,6 +8,7 @@ from BRParser import GamesParser
 
 def InsertGames(date, con):
     url = "http://www.baseball-reference.com/games/standings.cgi?date="+date.strftime('%Y-%m-%d')
+    print(url)
     b = GamesParser()
     b.games = []
     i = 0
@@ -34,7 +35,7 @@ def InsertGames(date, con):
 pw = 'h4xorz' #raw_input('Password? ')
 con = psycopg2.connect("dbname=bbstats user=bbadmin host=192.168.1.111 password=%s" % pw)
 
-for z in range(1995,2010):
+for z in range(2015,2016):
     for y in range(3,11):
         for i in range(1,32):
             print('\n\n')
@@ -45,9 +46,5 @@ for z in range(1995,2010):
                 continue
             print(mydate.isoformat())
             InsertGames(mydate, con)
-            '''
-            try:
-                InsertGames(mydate, con)
-            except:
-                print('NEED TO REDO '+mydate.isoformat())'''
+                
 con.close()
