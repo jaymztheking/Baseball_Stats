@@ -117,6 +117,9 @@ def ProcessPlayLog(filename, con):
         #Clear Variables
             batEvent = ''
             runEvent = ''
+            play = ''
+            ballType = ''
+            ballLoc = ''
             contactStrikes = 0
             lookStrikes = 0
             swingStrikes = 0
@@ -158,7 +161,7 @@ def ProcessPlayLog(filename, con):
             if len(row[6].split('.')) == 2:
                 runEvent = row[6].split('.')[1]
             batParts = batEvent.split('/')
-            
+            print(batParts[0])
             #Flys/Unassisted Grounders
             if re.match('[0-9]',batParts[0]) != None:
                 lineup[hitterID].AB += 1
@@ -240,13 +243,13 @@ def ProcessPlayLog(filename, con):
                 pitchers[currentPitcher].Strikes += strikeCount
                 pitchers[currentPitcher].Balls += ballCount
                 pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
-                if batParts[0] == 'S':
+                if batParts[0][0] == 'S':
                     play = 'Single'
                     lineup[hitterID].Single += 1
-                elif batParts[0] == 'D':
+                elif batParts[0][0] == 'D':
                     play = 'Double'
                     lineup[hitterID].Double += 1
-                elif batParts[0] == 'T':
+                elif batParts[0][0] == 'T':
                     play = 'Triple'
                     lineup[hitterID].Triple += 1
                 for mod in batParts:
@@ -315,7 +318,11 @@ def ProcessPlayLog(filename, con):
             #Hit By Pitch
             #Walk
             #Intentional Walk
-            
+            #Stolen Base
+            #Caught Stealing
+            #Balk
+            #Throw Out
+            print(play)
         #Determine End Situation
             if outs >= 3:
                 endSit = 30
@@ -328,7 +335,7 @@ def ProcessPlayLog(filename, con):
                 endSit += 2
             if thirdBase != None:
                 endSit += 4
-           
+            plays[playInd].playType = play
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             #Pitcher Change
@@ -379,7 +386,7 @@ def ProcessPlayLog(filename, con):
         #Insert Game, Lineup, Pitch Roster, and Play stuff into DB
             
         #Reset variables
-    return pitchers
+    return plays
     
 
 
