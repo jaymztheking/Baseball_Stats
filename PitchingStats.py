@@ -4,7 +4,7 @@ from PlayerStats import Pitcher
 
 class PitchRoster:
     gameKey = 0 
-    teamKey = 0 
+    team = 0 
     pitcherKey = 0 
     pitcherRole = '' 
     pitchCount = 0 
@@ -32,7 +32,7 @@ class PitchRoster:
     
     def __init__(self, game, team, playerName, ID, con):
         self.gameKey = game
-        self.teamKey = team
+        self.team = team
         playerKey = GetPitcherKey(ID, con)
         if playerKey == None:
             newPlayer = Pitcher(ID, playerName)
@@ -45,7 +45,7 @@ class PitchRoster:
     def InsertRosterRow(self, con):
         cur = con.cursor()
         insertSQL = 'insert into "PITCH_ROSTER" VALUES (%s, %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)' % \
-        (self.gameKey, self.pitcherKey, self.pitcherRole, self.pitchCount, self.K, self.BB, self.HBP, self.earnedRuns, self.IP, self.Strikes, self.Balls, self.ContactStrikes, self.CG, self.SO, self.teamKey, self.NH, self.Win, self.Loss, self.Save, self.SwingStrikes, self.LookStrikes, self.FB, self.GB, self.LD, self.Hits)        
+        (self.gameKey, self.pitcherKey, self.pitcherRole, self.pitchCount, self.K, self.BB, self.HBP, self.earnedRuns, self.IP, self.Strikes, self.Balls, self.ContactStrikes, self.CG, self.SO, self.team, self.NH, self.Win, self.Loss, self.Save, self.SwingStrikes, self.LookStrikes, self.FB, self.GB, self.LD, self.Hits)        
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
