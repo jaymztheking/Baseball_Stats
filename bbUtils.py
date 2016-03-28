@@ -119,4 +119,4 @@ def GetRSConversion():
 
 def GetPos(num):
     pos = ['P','C','1B','2B','3B','SS','LF','CF','RF','DH']
-    return pos[num-1]
+    return pos[int(num)-1]

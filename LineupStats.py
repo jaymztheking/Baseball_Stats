@@ -11,6 +11,7 @@ class Lineup:
     userID = ''
     
     #Batting Data
+    PA = 0
     AB = 0 
     Hits = 0 
     BB = 0 
@@ -42,8 +43,8 @@ class Lineup:
     
     def InsertLineupRow(self, con):
         cur = con.cursor()
-        insertSQL = 'insert into "LINEUP" VALUES (%s, %s, %s, %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % \
-        (self.game, self.team, self.player, self.player_bat_num, self.player_pos, self.AB, self.Hits, self.BB, self.HBP, self.Runs, self.RBI, self.Single, self.Double, self.Triple, self.HR, self.SB, self.CS)
+        insertSQL = 'insert into "LINEUP" VALUES (%s, %s, %s, %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % \
+        (self.game, self.team, self.player, self.player_bat_num, self.player_pos, self.AB, self.Hits, self.BB, self.HBP, self.Runs, self.RBI, self.Single, self.Double, self.Triple, self.HR, self.SB, self.CS, self.PA)
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')

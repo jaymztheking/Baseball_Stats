@@ -27,9 +27,10 @@ class Game:
         self.homeTeam = GetTeamfromAbb(hTeam, con)
         self.awayTeam = GetTeamfromAbb(aTeam, con)
         self.date = date
-        self.parkKey = GetParkKey(self.homeTeam, date, con)
-            
         
+    def GetGamePark(self, date, con):
+        self.parkKey = GetParkKey(self.homeTeam, date, con)
+              
     def InsertStats(self, con):
         cur = con.cursor()
         insertSQL = 'insert into "GAME" VALUES (default, %s, \'%s\', \'%s\', \'%s\', %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, \'%s\');' % \

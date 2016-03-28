@@ -1,5 +1,6 @@
 from bbUtils import GetGameKeys, GetHitterKeyfromLU, GetTeamfromAbb, GetPos
 import psycopg2
+import re
 from datetime import date
 from GameStats import Game
 from LineupStats import Lineup
@@ -9,7 +10,9 @@ def ProcessPlayLog(filename, con):
     text = open(filename)
     lineup = {}
     pitchers = {}
-    startSit = 1
+    plays = {}
+    endSit = 1
+    startSit = 0
     awayTeam = None
     homeTeam = None
     homeTeamAbb = ''
@@ -22,15 +25,13 @@ def ProcessPlayLog(filename, con):
     gameLength = 0
     gameTemp = 0
     homeUmp = ''
-    gameKey = None
-    awayPitcherKey = None
-    homePitcherKey = None
+    awayPitcher = ''
+    homePitcher = ''
+    inning = ''
     for line in text:
         row = line.split(',')
         rowType = row[0]
-        gameIndex = 0
-        
-        
+         
         #Grab game info and create game row
         if rowType == 'info':
             att = row[1]
@@ -56,18 +57,19 @@ def ProcessPlayLog(filename, con):
             elif att == "temp":
                 gameTemp = int(row[2])
             elif att == "fieldcond":
-                weather[0] = row[2]
+                weather.append(row[2])
             elif att == "precip":
-                weather[1] = row[2]
+                weather.append(row[2])
             elif att == "sky":
-                weather[2] = row[2]
+                weather.append(row[2])
             elif att == "timeofgame":
                 gameLength = int(row[2])
             elif att == "umphome":
                 homeUmp = row[2]
                 
-        elif gameKey == None and gameDate != None and homeTeam != None and awayTeam != None:
-            currentGame = Game(homeTeam, awayTeam, gameDate, con)
+        elif rowType == 'start':
+        #First set all the GAME stuff
+            currentGame = Game(int(homeTeam), int(awayTeam), gameDate, con)
             currentGame.time = gameTime
             currentGame.temp = gameTemp
             currentGame.windDir = windDir
@@ -84,11 +86,8 @@ def ProcessPlayLog(filename, con):
             currentGame.homeTeamWin = False 
             currentGame.tie = False
             currentGame.homeUmp = homeUmp
-            currentGame.InsertStats(con)
-            gameKey = currentGame.gameKey
-           
-        #Grab hitter and starting pitcher keys from lineup
-        elif rowType == 'start':
+            
+        #Get Lineups and Pitchers
             userID = row[1]
             playerName = row[2]
             if row[3] == 0:
@@ -98,72 +97,309 @@ def ProcessPlayLog(filename, con):
             playerBatNum = row[4]
             playerPos = GetPos(row[5])
             if playerPos != 'P':
-                lineup[userID] = Lineup(gameKey, team, playerName, playerBatNum, playerPos, userID, con)
+                lineup[userID] = Lineup(123, team, playerName, playerBatNum, playerPos, userID, con)
             else:
-                pitchers[userID] = PitchRoster(gameKey, team, playerName, userID, con)
+                pitchers[userID] = PitchRoster(123, team, playerName, userID, con)
                 pitchers[userID].pitcherRole = 'Starter'
-                if row[3] == 0:
-                    awayPitcherKey = pitchers[userID].pitcherKey
+                if int(row[3]) == 0:
+                    awayPitcher = userID
                 else:
-                    homePitcherKey = pitchers[userID].pitcherKey
+                    homePitcher = userID
                 
         #Grab play-by-play stuff
         elif rowType == 'play':
-           pitchSeq = row[5]
-           innPre = 'Top' if row[2]== '0' else 'Bot'
-           inning = innPre + ' '+str(row[1])
-           hitterKey = lineup[row[1]].player
-           if innPre == 'Top':
-               pitcherKey = homePitcherKey
-           else:
-               pitcherKey = awayPitcherKey
-           ballCount = int(row[4][0])
-           strikeCount= int(row[4][1])
+        #Create PitchResult
+            lineup[row[3]].PA += 1
+            playInd = lineup[row[3]].userID + str(lineup[row[3]].PA)
+            pitcher = homePitcher if row[2] == '1' else awayPitcher
+            plays[playInd] = PitchResult(123, lineup[row[3]].userID, pitcher, startSit)           
+            
+        #Clear Variables
+            batEvent = ''
+            runEvent = ''
+            contactStrikes = 0
+            lookStrikes = 0
+            swingStrikes = 0
+            outs = 0
+            firstBase = None
+            secondBase = None
+            thirdBase = None
+            innPre = 'Top' if row[2]== '0' else 'Bot'
+            prevInn = inning
+            inning = innPre + ' '+str(row[1])
+            plays[playInd].inning = inning
+            #Inning Changed
+            if inning != prevInn:
+                startSit = 0
+                plays[playInd].startSit = startSit
+            else:
+                startSit = endSit
+            plays[playInd].startSit = startSit
+            
+        #Pitches
+            pitchSeq = row[5]
+            hitterID = row[3]
+            if innPre == 'Top':
+                currentPitcher = homePitcher
+            else:
+                currentPitcher = awayPitcher
+            ballCount = int(row[4][0])
+            strikeCount= int(row[4][1])
+            for pitch in pitchSeq:
+                if pitch in ('F','X','L','O','R','T','Y'):
+                    contactStrikes += 1
+                elif pitch == 'C':
+                    lookStrikes += 1
+                elif pitch in ('S','M','Q'):
+                    swingStrikes += 1
+          
+        #Events
+            batEvent = row[6].split('.')[0]
+            if len(row[6].split('.')) == 2:
+                runEvent = row[6].split('.')[1]
+            batParts = batEvent.split('/')
+            
+            #Flys/Unassisted Grounders
+            if re.match('[0-9]',batParts[0]) != None:
+                lineup[hitterID].AB += 1
+                pitchers[currentPitcher].ContactStrikes += contactStrikes
+                pitchers[currentPitcher].SwingStrikes += swingStrikes
+                pitchers[currentPitcher].LookStrikes += lookStrikes
+                pitchers[currentPitcher].Strikes += strikeCount
+                pitchers[currentPitcher].Balls += ballCount
+                pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
+                outs += 1
+                if 'SF' in batParts:
+                    play = 'Sac Fly'
+                    if 'F' in batParts:
+                        ballType = 'Flyball'
+                        pitchers[currentPitcher].FB += 1
+                    elif 'L' in batParts:
+                        ballType = 'Line Drive'
+                        pitchers[currentPitcher].LD += 1
+                    else:
+                        ballType = 'Unknown'
+                else:
+                    for mod in batParts:
+                        if 'F' in mod:
+                            play = 'Flyout'
+                            ballType = 'Flyball'
+                            ballLoc = batParts[0]
+                            pitchers[currentPitcher].FB += 1
+                            break
+                        elif 'L' in mod:
+                            play = 'Lineout'
+                            ballType = 'Line Drive'
+                            ballLoc = batParts[0]
+                            pitchers[currentPitcher].LD += 1
+                            break
+                        elif 'G' in mod:
+                            play = 'Groundout'
+                            ballType = 'Ground Ball'
+                            ballLoc = batParts[0]
+                            pitchers[currentPitcher].GB += 1
+                            break
+                        play = 'Out'
+                        ballLoc = batParts[0]
+                        ballType = 'Unknown'
+                        
+            #Groundball outs
+            if re.match('[0-9]{2,}',batParts[0]) != None:
+                lineup[hitterID].AB += 1
+                pitchers[currentPitcher].ContactStrikes += contactStrikes
+                pitchers[currentPitcher].SwingStrikes += swingStrikes
+                pitchers[currentPitcher].LookStrikes += lookStrikes
+                pitchers[currentPitcher].Strikes += strikeCount
+                pitchers[currentPitcher].Balls += ballCount
+                pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
+                outs += 1
+                for mod in batParts:
+                    if 'SH' in mod:
+                        play = 'Sacrifice'
+                        ballType = 'Unknown'
+                        ballLoc = batParts[0][0]
+                    elif 'BG' in mod:
+                        play = 'Groundout'
+                        ballType = 'Bunt'
+                        ballLoc = batParts[0][0]
+                        pitchers[currentPitcher].GB += 1
+                    elif 'G' in mod:
+                        play = 'Groundout'
+                        ballType = 'Ground Ball'
+                        ballLoc = batParts[0][0]
+                        pitchers[currentPitcher].GB += 1
+                        
+            #Hits         
+            if re.match('[SDT][0-9]',batParts[0]) != None:
+                lineup[hitterID].AB += 1
+                lineup[hitterID].Hits += 1
+                pitchers[currentPitcher].Hits += 1
+                pitchers[currentPitcher].ContactStrikes += contactStrikes
+                pitchers[currentPitcher].SwingStrikes += swingStrikes
+                pitchers[currentPitcher].LookStrikes += lookStrikes
+                pitchers[currentPitcher].Strikes += strikeCount
+                pitchers[currentPitcher].Balls += ballCount
+                pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
+                if batParts[0] == 'S':
+                    play = 'Single'
+                    lineup[hitterID].Single += 1
+                elif batParts[0] == 'D':
+                    play = 'Double'
+                    lineup[hitterID].Double += 1
+                elif batParts[0] == 'T':
+                    play = 'Triple'
+                    lineup[hitterID].Triple += 1
+                for mod in batParts:
+                    if 'BG' in mod:
+                        ballType = 'Bunt'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].GB += 1
+                    elif 'G' in mod:
+                        ballType = 'Ground Ball'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].GB += 1
+                    elif 'L' in mod:
+                        ballType = 'Line Drive'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].LD += 1
+                    elif 'F' in mod:
+                        ballType = 'Flyball'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].FB += 1
+                    elif 'BP' in mod:
+                        ballType = 'Bunt Pop'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].FB += 1
+            
+            #Home Runs
+            if re.match('HR',batParts[0]) != None:
+                lineup[hitterID].AB += 1
+                lineup[hitterID].Hits += 1
+                lineup[hitterID].HR += 1
+                pitchers[currentPitcher].Hits += 1
+                pitchers[currentPitcher].ContactStrikes += contactStrikes
+                pitchers[currentPitcher].SwingStrikes += swingStrikes
+                pitchers[currentPitcher].LookStrikes += lookStrikes
+                pitchers[currentPitcher].Strikes += strikeCount
+                pitchers[currentPitcher].Balls += ballCount
+                pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
+                play = 'Home Run'
+                for mod in batParts:
+                    if 'BG' in mod:
+                        ballType = 'Bunt'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].GB += 1
+                    elif 'G' in mod:
+                        ballType = 'Ground Ball'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].GB += 1
+                    elif 'L' in mod:
+                        ballType = 'Line Drive'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].LD += 1
+                    elif 'F' in mod:
+                        ballType = 'Flyball'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].FB += 1
+                    elif 'BP' in mod:
+                        ballType = 'Bunt Pop'
+                        ballLoc = batParts[0][1]
+                        pitchers[currentPitcher].FB += 1   
+            
+            #StrikeOuts
+            #Ground Double Plays
+            #Line Double Plays
+            #Fielder's Choice and Force Outs
+            #Triple Plays
+            #Ground Rule Doubles
+            #Hit By Pitch
+            #Walk
+            #Intentional Walk
+            
+        #Determine End Situation
+            if outs >= 3:
+                endSit = 30
+            elif outs != startSit/10:
+                endSit = outs * 10
+                
+            if firstBase != None:
+                endSit += 1
+            if secondBase != None:
+                endSit += 2
+            if thirdBase != None:
+                endSit += 4
            
-           
+        #Handle Pinch Hits, Pitcher Changes, and other subs
+        elif rowType == 'sub':
+            #Pitcher Change
+            if int(row[5]) == 1:
+                #Home Team
+                if row[3] == 1:
+                    pitchers[homePitcher].IP = int(inning[-1])-1
+                    pitchers[homePitcher].IP += int(outs)/3.0
+                    homePitcher = row[1]
+                    pitchers[homePitcher] = PitchRoster(123, homeTeam, row[2], row[1], con)
+                    pitchers[homePitcher].pitcherRole = 'Reliever'
+                #Away Team  
+                else:
+                    pitchers[awayPitcher].IP = int(inning[-1])-1
+                    pitchers[awayPitcher].IP += int(outs)/3.0
+                    awayPitcher = row[1]
+                    pitchers[awayPitcher] = PitchRoster(123, awayTeam, row[2], row[1], con)
+                    pitchers[awayPitcher].pitcherRole = 'Reliever'
+            #Pinch Hitter
+            elif int(row[5]) == 11:                   
+                team = homeTeam if int(row[3])==1 else awayTeam
+                lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PH', row[1], con)
+            #Pinch Runner
+            elif int(row[5]) == 12:
+                batnum = int(row[4])
+                team = homeTeam if int(row[3])==1 else awayTeam
+                lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PR', row[1], con)
+                for guy in lineup.keys():
+                    if lineup[guy].team == team and lineup[guy].player_bat_num == batnum and guy != row[1]:
+                        replacee = lineup[guy]
+                        if firstBase == replacee:
+                            firstBase = lineup[row[1]]
+                        elif secondBase == replacee:
+                            secondBase = lineup[row[1]]
+                        elif thirdBase == replacee:
+                            thirdBase = lineup[row[1]]
+                
+                pass #find batter with same batnum
+            #Defensive Sub
+            else:
+                team = homeTeam if int(row[3])==1 else awayTeam
+                playerPos = GetPos(row[5])
+                lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), playerPos, row[1], con)
+                    
         #New game found, reset everything   
         elif rowType == 'id':
-            startSit = 1
-            awayTeam = None
-            homeTeam = None
-            homeTeamAbb = ''
-            awayTeamAbb = ''
-            windDir = ''
-            windSpeed = 0
-            weather = []
-            gameDate = None
-            gameTime = None
-            gameLength = 0
-            gameTemp = 0
-            homeUmp = ''
-            gameKey = None
-            awayPitcherKey = None
-            homePitcherKey = None
-            userID = ''
-            playerName = ''
-            team = None
-            playerBatNum = 0
-            playerPos = ''
-            lineup = {}
-            pitchers = {}
+            pass
+        #Insert Game, Lineup, Pitch Roster, and Play stuff into DB
+            
+        #Reset variables
+    return pitchers
+    
 
 
 class PitchResult:
     gameKey = 0 #done
-    hitterKey = 0 #done
-    pitcherKey = 0 #done
-    startSituationKey = 0
+    hitterID = ''#done
+    pitcherID = '' #done
+    startSit = 0
     inning = '' #done
+    hitterPANum = 0
     strikeCount = 0 #done
     ballCount = 0 #done
     pitchSeq = '' #done
-    contactStrikes = 0
-    swingStrikes = 0
-    lookStrikes = 0
-    playType = ''
-    hit = False
-    resultOuts = 0
-    endSituationKey = 0
+    contactStrikes = 0 #done
+    swingStrikes = 0 #done
+    lookStrikes = 0 #done
+    playType = '' #Event
+    hit = False #Event
+    resultOuts = 0 #Event
+    endSit = 0 #Event
     ballLoc = ''
     ballType = ''
     runScored = False
@@ -171,19 +407,12 @@ class PitchResult:
     
     def __init__(self, gk, hk, pk, sk):
         self.gameKey = gk
-        self.hitterKey = hk
-        self.pitcherKey = pk
+        self.hitterID = hk
+        self.pitcherID = pk
         self.startSituationKey = sk
         
-    def ProcessPitchSeq(self):
-        if self.pitchSeq != '':
-            pass
     
-    def ProcessEventString(self):
         
     
         
     
-pw = 'h4xorz' #raw_input('Password? ')
-con = psycopg2.connect("dbname=bbstats user=bbadmin host=192.168.1.111 password=%s" % pw)
-processPlayLog('.\\Play by Play Logs\\2015DET.EVA', con)
