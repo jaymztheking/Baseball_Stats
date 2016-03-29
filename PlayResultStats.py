@@ -1,5 +1,4 @@
-from bbUtils import GetGameKeys, GetHitterKeyfromLU, GetTeamfromAbb, GetPos
-import psycopg2
+from bbUtils import GetPitcherKey, GetHitterKey, GetTeamfromAbb, GetPos
 import re
 from datetime import date
 from GameStats import Game
@@ -137,12 +136,14 @@ def ProcessPlayLog(filename, con):
             #Inning Changed
             if inning != prevInn:
                 startSit = 0
+                endSit = 0
                 outs = 0
                 firstBase = None
                 secondBase = None
                 thirdBase = None
             else:
                 startSit = endSit
+                endSit = 0
             plays[playInd] = PitchResult(123, row[3], pitcher, startSit)
             plays[playInd].inning = inning
             plays[playInd].hitterPANum = lineup[row[3]].PA
@@ -616,15 +617,15 @@ def ProcessPlayLog(filename, con):
             #Determine End Situation
             if outs >= 3:
                 endSit = 30
-            elif outs != startSit/10:
+            else:
                 endSit = outs * 10
-                
-            if firstBase != None:
+            if firstBase != None and outs <3:
                 endSit += 1
-            if secondBase != None:
+            if secondBase != None and outs <3:
                 endSit += 2
-            if thirdBase != None:
+            if thirdBase != None and outs <3:
                 endSit += 4
+            print(playInd, startSit, endSit, firstBase, secondBase, thirdBase, play)
             plays[playInd].playType = play
             plays[playInd].ballLoc = ballLoc
             plays[playInd].ballType = ballType
@@ -692,7 +693,6 @@ def ProcessPlayLog(filename, con):
                 pitchers[homePitcher].IP += currentGame.totalInnings
                 pitchers[awayPitcher].IP += currentGame.totalInnings
                 for x in pitchers.keys():
-                    print(wp, lp, sp, x, x==lp, x==wp, x==sp)
                     if x == wp:
                         pitchers[x].Win = True
                     elif x == lp:
@@ -716,8 +716,8 @@ def ProcessPlayLog(filename, con):
                     homeTeamWin = True
                 elif currentGame.homeRuns == currentGame.awayRuns:
                     tie = True
-                #currentGame.GetGamePark(gameDate, con)
-                #currentGame.InsertStats(con)
+                currentGame.GetGamePark(gameDate, con)
+                currentGame.InsertStats(con)
                 gameKey = currentGame.gameKey
                 for x in pitchers.keys():
                     if pitchers[x] == 9.0:
@@ -729,8 +729,9 @@ def ProcessPlayLog(filename, con):
                     pitchers[x].gameKey = gameKey
                     pitchers[x].InsertRosterRow(con)
                 for x in lineup.keys():
-                    lineup[x].game = gameKey
-                    lineup[x].InsertLineupRow(con)
+                    if lineup[x].player_pos != 'P':
+                        lineup[x].game = gameKey
+                        lineup[x].InsertLineupRow(con)
                 for x in plays.keys():
                     plays[x].gameKey = gameKey
                     plays[x].InsertPlay(con)
@@ -794,12 +795,12 @@ class PitchResult:
         self.gameKey = gk
         self.hitterID = hk
         self.pitcherID = pk
-        self.startSituationKey = sk
+        self.startSit = sk
         
     def InsertPlay(self, con):
         cur = con.cursor()
-        insertSQL = 'insert into "LINEUP" VALUES (%s, %s, %s, %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);' % \
-        (self.game, self.team, self.player, self.player_bat_num, self.player_pos, self.AB, self.Hits, self.BB, self.HBP, self.Runs, self.RBI, self.Single, self.Double, self.Triple, self.HR, self.SB, self.CS, self.PA)
+        insertSQL = 'insert into "PITCH_RESULT" VALUES (%s, %s, %s, %s, \'%s\', %s, %s, \'%s\', %s, %s, %s, \'%s\', %s, %s, \'%s\', \'%s\', %s, %s, %s, %s);' % \
+        (self.gameKey, GetHitterKey(self.hitterID, con), GetPitcherKey(self.pitcherID, con), self.startSit, self.inning, self.strikeCount, self.ballCount, self.pitchSeq, self.contactStrikes, self.swingStrikes, self.lookStrikes, self.playType, self.hit, self.resultOuts, self.ballLoc, self.ballType, self.endSit, self.runScored, self.RBI, self.hitterPANum)
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
@@ -808,7 +809,7 @@ class PitchResult:
     
     def CheckForRow(self, con):
         cur = con.cursor()
-        checkSQL = 'select 1 from "LINEUP" where "GAME_KEY" = %s and "PLAYER_KEY" = %s' % (self.game, self.player)
+        checkSQL = 'select 1 from "PITCH_RESULT" where "GAME_KEY" = %s and "HITTER_KEY" = %s and "PITCHER_KEY" = %s and "HITTER_PA" = %s' % (self.gameKey, GetHitterKey(self.hitterID, con), GetPitcherKey(self.pitcherID, con), self.hitterPANum)
         cur.execute(checkSQL)
         results = cur.fetchall()
         if len(results) == 0:
