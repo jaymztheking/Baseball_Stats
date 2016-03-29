@@ -99,9 +99,8 @@ def ProcessPlayLog(filename, con):
                 team = homeTeam
             playerBatNum = row[4]
             playerPos = GetPos(row[5])
-            if playerPos != 'P':
-                lineup[userID] = Lineup(123, team, playerName, int(playerBatNum), playerPos, userID, con)
-            else:
+            lineup[userID] = Lineup(123, team, playerName, int(playerBatNum), playerPos, userID, con)
+            if playerPos == 'P':
                 pitchers[userID] = PitchRoster(123, team, playerName, userID, con)
                 pitchers[userID].pitcherRole = 'Starter'
                 if int(row[3]) == 0:
@@ -646,6 +645,7 @@ def ProcessPlayLog(filename, con):
                     pitchers[homePitcher].IP += int(outs)/3.0
                     homePitcher = row[1]
                     pitchers[homePitcher] = PitchRoster(123, homeTeam, row[2], row[1], con)
+                    lineup[homePitcher] = Lineup(123, homeTeam, row[2], int(row[4]), 'P', row[1], con)
                     pitchers[homePitcher].pitcherRole = 'Reliever'
                 #Away Team  
                 else:
@@ -656,6 +656,7 @@ def ProcessPlayLog(filename, con):
                     pitchers[awayPitcher].IP += float(outs)/3.0
                     awayPitcher = row[1]
                     pitchers[awayPitcher] = PitchRoster(123, awayTeam, row[2], row[1], con)
+                    lineup[awayPitcher] = Lineup(123, homeTeam, row[2], int(row[4]), 'P', row[1], con)
                     pitchers[awayPitcher].pitcherRole = 'Reliever'
             #Pinch Hitter
             elif int(row[5]) == 11:                   
