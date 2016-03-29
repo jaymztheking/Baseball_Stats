@@ -29,6 +29,9 @@ def ProcessPlayLog(filename, con):
     wp = ''
     lp = ''
     sp = ''
+    firstBase = None
+    secondBase = None
+    thirdBase = None
     for line in text:
         row = line.split(',')
         rowType = row[0]
@@ -110,7 +113,6 @@ def ProcessPlayLog(filename, con):
                 
         #Grab play-by-play stuff
         elif rowType == 'play':
-           
         #Create PitchResult
             lineup[row[3]].PA += 1
             
@@ -169,7 +171,55 @@ def ProcessPlayLog(filename, con):
             if len(row[6].split('.')) == 2:
                 runEvent = row[6].split('.')[1]
             batParts = batEvent.split('/')
-
+            
+            #Stolen Base
+            if re.match('.*SB[23H]$',batParts[0]) != None:
+                lineup[hitterID].PA -= 1
+                if 'SB2' in batParts[0]:
+                    lineup[firstBase[0]].SB += 1
+                    if '1-' not in runEvent:
+                        secondBase = firstBase
+                        firstBase = None
+                elif 'SB3' in batParts[0]:
+                    lineup[secondBase[0]].SB += 1
+                    if '2-' not in runEvent:
+                        thirdBase = secondBase
+                        secondBase = None
+                elif 'SBH' in batParts[0]:
+                    plays[thirdBase[0]+str(thirdBase[1])].runScored = True
+                    lineup[thirdBase[0]].SB += 1
+                    lineup[thirdBase[0]].Runs += 1
+                    runsScored += 1
+                    thirdBase = None
+            #Caught Stealing
+            if re.match('CS[23H]',batParts[0]) != None:
+                if batParts[0][:2] == 'CS':
+                    play = 'Caught Stealing'
+                    lineup[hitterID].PA -= 1
+                    ballType = ''
+                    ballLoc = ''
+                if 'CS2' in batParts[0]:
+                    lineup[firstBase[0]].CS += 1
+                    firstBase = None
+                elif 'CS3' in batParts[0]:
+                    lineup[secondBase[0]].CS += 1
+                    secondBase = None
+                elif 'CSH' in batParts[0]:
+                    lineup[thirdBase[0]].CS += 1
+                    thirdBase = None  
+            #Balk
+            if batParts[0].strip() == 'BK':
+                lineup[hitterID].PA -= 1
+                play = 'Balk'
+                ballLoc = ''
+                ballType = ''
+                
+            #Wild Pitch
+            if re.match('WP', batParts[0]) != None:
+                lineup[hitterID].PA -= 1
+                play = 'Wild Pitch'
+                ballLoc = ''
+                ballType = ''            
             
             #Figure out runners first
             if runEvent != '':
@@ -182,7 +232,7 @@ def ProcessPlayLog(filename, con):
                         thirdBase = firstBase
                         firstBase = None
                     elif run[:3] == '1-H':
-                        plays[firstBase[0]+firstBase[1]].runScored = True
+                        plays[firstBase[0]+str(firstBase[1])].runScored = True
                         lineup[firstBase[0]].Runs += 1
                         runsScored += 1
                         firstBase = None
@@ -190,12 +240,12 @@ def ProcessPlayLog(filename, con):
                         thirdBase = secondBase
                         secondBase = None
                     elif run[:3] == '2-H':
-                        plays[secondBase[0]+secondBase[1]].runScored = True
+                        plays[secondBase[0]+str(secondBase[1])].runScored = True
                         lineup[secondBase[0]].Runs += 1
                         runsScored += 1
                         secondBase = None
                     elif run[:3] == '3-H':                        
-                        plays[thirdBase[0]+thirdBase[1]].runScored = True
+                        plays[thirdBase[0]+str(thirdBase[1])].runScored = True
                         lineup[thirdBase[0]].Runs += 1
                         runsScored += 1
                         thirdBase = None
@@ -224,7 +274,7 @@ def ProcessPlayLog(filename, con):
                             thirdBase = firstBase
                             firstBase = None
                         elif run[:3] == '1XH':
-                            plays[firstBase[0]+firstBase[1]].runScored = True
+                            plays[firstBase[0]+str(firstBase[1])].runScored = True
                             lineup[firstBase[0]].Runs += 1
                             runsScored += 1
                             firstBase = None
@@ -236,7 +286,7 @@ def ProcessPlayLog(filename, con):
                             thirdBase = secondBase
                             secondBase = None
                         elif run[:3] == '2XH':
-                            plays[secondBase[0]+secondBase[1]].runScored = True
+                            plays[secondBase[0]+str(secondBase[1])].runScored = True
                             lineup[secondBase[0]].Runs += 1
                             runsScored += 1
                             secondBase = None
@@ -245,7 +295,7 @@ def ProcessPlayLog(filename, con):
                             outs += 1                        
                             thirdBase = None
                         elif run[:3] == '3XH':
-                            plays[thirdBase[0]+thirdBase[1]].runScored = True
+                            plays[thirdBase[0]+str(thirdBase[1])].runScored = True
                             lineup[thirdBase[0]].Runs += 1
                             runsScored += 1
                             thirdBase = None 
@@ -454,7 +504,7 @@ def ProcessPlayLog(filename, con):
             
             #Home Runs
             if re.match('HR',batParts[0]) != None:
-                plays[playInd].Hit = True
+                plays[playInd].hit = True
                 plays[playInd].runScored = True
                 lineup[hitterID].AB += 1
                 lineup[hitterID].Hits += 1
@@ -534,6 +584,25 @@ def ProcessPlayLog(filename, con):
                 
             #Triple Plays
             #Ground Rule Doubles
+            if re.match('DGR', batParts[0]) != None:
+                plays[playInd].hit = True
+                lineup[hitterID].AB += 1
+                lineup[hitterID].Hits += 1
+                lineup[hitterID].Double += 1
+                pitchers[currentPitcher].Hits += 1
+                plays[playInd].contactStrikes += contactStrikes
+                plays[playInd].swingStrikes += swingStrikes
+                plays[playInd].lookStrikes += lookStrikes
+                pitchers[currentPitcher].ContactStrikes += contactStrikes
+                pitchers[currentPitcher].SwingStrikes += swingStrikes
+                pitchers[currentPitcher].LookStrikes += lookStrikes
+                pitchers[currentPitcher].Strikes += lookStrikes + swingStrikes + contactStrikes
+                pitchers[currentPitcher].Balls += ballCount
+                pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
+                plays[playInd].strikeCount = strikeCount
+                plays[playInd].ballCount = ballCount
+                secondBase = [hitterID, str(lineup[hitterID].PA)]                
+                
             #Hit By Pitch
             if batParts[0].strip() == 'HP':
                 plays[playInd].contactStrikes += contactStrikes
@@ -585,54 +654,9 @@ def ProcessPlayLog(filename, con):
                 pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
                 play = 'Reach on Error'
                 ballType = ''
-                ballLco = ''
-                
-            #Stolen Base
-            if re.match('SB[23H]',batParts[0]) != None:
-                lineup[hitterID].PA -= 1
-                if batParts[0].strip() == 'SB2':
-                    lineup[firstBase[0]].SB += 1
-                    secondBase = firstBase
-                    firstBase = None
-                elif batParts[0].strip() == 'SB3':
-                    lineup[secondBase[0]].SB += 1
-                    thirdBase = secondBase
-                    secondBase = None
-                elif batParts[0].strip() == 'SBH':
-                    plays[thirdBase[0]+thirdBase[1]].runScored = True
-                    lineup[thirdBase[0]].SB += 1
-                    lineup[thirdBase[0]].Runs += 1
-                    runsScored += 1
-                    thirdBase = None
-            #Caught Stealing
-            if re.match('CS[23H]',batParts[0]) != None:
-                if batParts[0][:2] == 'CS':
-                    play = 'Caught Stealing'
-                    lineup[hitterID].PA -= 1
-                    ballType = ''
-                    ballLoc = ''
-                if 'CS2' in batParts[0]:
-                    lineup[firstBase[0]].CS += 1
-                    firstBase = None
-                elif 'CS3' in batParts[0]:
-                    lineup[secondBase[0]].CS += 1
-                    secondBase = None
-                elif 'CSH' in batParts[0]:
-                    lineup[thirdBase[0]].CS += 1
-                    thirdBase = None  
-            #Balk
-            if batParts[0].strip() == 'BK':
-                lineup[hitterID].PA -= 1
-                play = 'Balk'
                 ballLoc = ''
-                ballType = ''
                 
-            #Wild Pitch
-            if re.match('WP', batParts[0]) != None:
-                lineup[hitterID].PA -= 1
-                play = 'Wild Pitch'
-                ballLoc = ''
-                ballType = ''                
+                            
                 
             #Throw Out
             #Determine End Situation
@@ -688,17 +712,16 @@ def ProcessPlayLog(filename, con):
                 batnum = int(row[4])
                 team = homeTeam if int(row[3])==1 else awayTeam
                 lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PR', row[1], con)
+                plays[row[1]+str(lineup[row[1]].PA)] = PitchResult(123, row[1], currentPitcher, startSit)
                 for guy in lineup.keys():
                     if lineup[guy].team == team and lineup[guy].player_bat_num == batnum and guy != row[1]:
-                        replacee = lineup[guy]
+                        replacee = guy
                         if firstBase != None and firstBase[0] == replacee:
-                            firstBase = lineup[row[1]]
+                            firstBase = [row[1],lineup[row[1]].PA]
                         elif secondBase != None and secondBase[0] == replacee:
-                            secondBase = lineup[row[1]]
+                            secondBase = [row[1],lineup[row[1]].PA]
                         elif thirdBase != None and thirdBase[0] == replacee:
-                            thirdBase = lineup[row[1]]
-                
-                pass #find batter with same batnum
+                            thirdBase = [row[1],lineup[row[1]].PA]
             #Defensive Sub
             else:
                 team = homeTeam if int(row[3])==1 else awayTeam
@@ -710,6 +733,7 @@ def ProcessPlayLog(filename, con):
         #New game found, reset everything   
         elif rowType == 'id':
             #Wrap up Game
+            print(awayTeamAbb,' at ',homeTeamAbb,gameDate)
             if gameDate != None:
                 currentGame.totalInnings = int(inning.split(' ')[-1])
                 pitchers[homePitcher].IP += currentGame.totalInnings
@@ -738,9 +762,9 @@ def ProcessPlayLog(filename, con):
                         currentGame.awayHits += lineup[x].Hits
                         currentGame.awayRuns += lineup[x].Runs
                 if currentGame.homeRuns > currentGame.awayRuns:
-                    homeTeamWin = True
+                    currentGame.homeTeamWin = True
                 elif currentGame.homeRuns == currentGame.awayRuns:
-                    tie = True
+                    currentGame.tie = True
                 currentGame.GetGamePark(gameDate, con)
                 currentGame.InsertStats(con)
                 gameKey = currentGame.gameKey
@@ -791,7 +815,62 @@ def ProcessPlayLog(filename, con):
             wp = ''
             lp = ''
             sp = ''
-            
+    
+    currentGame.totalInnings = int(inning.split(' ')[-1])
+    pitchers[homePitcher].IP += currentGame.totalInnings
+    pitchers[awayPitcher].IP += currentGame.totalInnings
+
+    if inning[:3] == 'Top':
+        pitchers[awayPitcher].IP -= 1
+    elif inning[:3] == 'Bot' and outs < 3:
+        pitchers[awayPitcher].IP -= float(3-int(outs))/3.0
+    for x in pitchers.keys():
+        if x == wp:
+            pitchers[x].Win = True
+        elif x == lp:
+            pitchers[x].Loss = True
+        elif x == sp:
+            pitchers[x].Save = True
+        elif pitchers[x].team == pitchers[homePitcher].team and x != homePitcher:
+            pitchers[homePitcher].IP-=float(pitchers[x].IP)
+        elif pitchers[x].team == pitchers[awayPitcher].team and x != awayPitcher:
+            pitchers[awayPitcher].IP-=float(pitchers[x].IP)
+    for x in lineup.keys():
+        if lineup[x].team == homeTeam:
+            currentGame.homeHits += lineup[x].Hits
+            currentGame.homeRuns += lineup[x].Runs
+        else:
+            currentGame.awayHits += lineup[x].Hits
+            currentGame.awayRuns += lineup[x].Runs
+    if currentGame.homeRuns > currentGame.awayRuns:
+        currentGame.homeTeamWin = True
+    elif currentGame.homeRuns == currentGame.awayRuns:
+        currentGame.tie = True
+    currentGame.GetGamePark(gameDate, con)
+    currentGame.InsertStats(con)
+    gameKey = currentGame.gameKey
+    for x in plays.keys():
+        plays[x].gameKey = gameKey
+        plays[x].InsertPlay(con)
+        if plays[x].runScored:
+            pitchers[plays[x].pitcherID].Runs += 1
+    for x in pitchers.keys():
+        if pitchers[x] == 9.0:
+            pitchers[x].CG = True
+            if pitchers[x].Runs == 0:
+                pitchers[x].SO = True
+                if pitchers[x].Hits == 0:
+                    pitchers[x].NH = True
+        pitchers[x].gameKey = gameKey
+        pitchers[x].InsertRosterRow(con)
+    for x in lineup.keys():
+        if lineup[x].player_pos != 'P':
+            lineup[x].game = gameKey
+            lineup[x].InsertLineupRow(con)
+    rcurrentGame = currentGame
+    rplays = plays
+    rlineup = lineup
+    rpitchers = pitchers
     return rplays, rpitchers, rlineup, rcurrentGame
     
 
