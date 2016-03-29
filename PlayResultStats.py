@@ -115,9 +115,7 @@ def ProcessPlayLog(filename, con):
             lineup[row[3]].PA += 1
             
             playInd = lineup[row[3]].userID + str(lineup[row[3]].PA)
-            pitcher = homePitcher if row[2] == '1' else awayPitcher
-           
-            
+        
         #Clear Variables
             batEvent = ''
             runEvent = ''
@@ -143,9 +141,7 @@ def ProcessPlayLog(filename, con):
             else:
                 startSit = endSit
                 endSit = 0
-            plays[playInd] = PitchResult(123, row[3], pitcher, startSit)
-            plays[playInd].inning = inning
-            plays[playInd].hitterPANum = lineup[row[3]].PA
+            
 
         #Pitches
             pitchSeq = row[5]
@@ -163,6 +159,9 @@ def ProcessPlayLog(filename, con):
                     lookStrikes += 1
                 elif pitch in ('S','M','Q'):
                     swingStrikes += 1
+            plays[playInd] = PitchResult(123, row[3], currentPitcher, startSit)
+            plays[playInd].inning = inning
+            plays[playInd].hitterPANum = lineup[row[3]].PA
             plays[playInd].pitchSeq = pitchSeq
           
         #Events
@@ -185,7 +184,6 @@ def ProcessPlayLog(filename, con):
                     elif run[:3] == '1-H':
                         plays[firstBase[0]+firstBase[1]].runScored = True
                         lineup[firstBase[0]].Runs += 1
-                        pitchers[currentPitcher].Runs += 1
                         runsScored += 1
                         firstBase = None
                     elif run[:3] == '2-3':
@@ -194,13 +192,11 @@ def ProcessPlayLog(filename, con):
                     elif run[:3] == '2-H':
                         plays[secondBase[0]+secondBase[1]].runScored = True
                         lineup[secondBase[0]].Runs += 1
-                        pitchers[currentPitcher].Runs += 1
                         runsScored += 1
                         secondBase = None
                     elif run[:3] == '3-H':                        
                         plays[thirdBase[0]+thirdBase[1]].runScored = True
                         lineup[thirdBase[0]].Runs += 1
-                        pitchers[currentPitcher].Runs += 1
                         runsScored += 1
                         thirdBase = None
                     elif run[:3] == 'B-1':
@@ -215,7 +211,6 @@ def ProcessPlayLog(filename, con):
                     elif run[:3] == 'B-H':
                         plays[hitterID+str(lineup[hitterID].PA)].runScored = True
                         lineup[hitterID].Runs += 1
-                        pitchers[currentPitcher].Runs += 1
                         runsScored += 1
                         batRunner = True
                     elif run[:2] == '1X':
@@ -231,7 +226,6 @@ def ProcessPlayLog(filename, con):
                         elif run[:3] == '1XH':
                             plays[firstBase[0]+firstBase[1]].runScored = True
                             lineup[firstBase[0]].Runs += 1
-                            pitchers[currentPitcher].Runs += 1
                             runsScored += 1
                             firstBase = None
                     elif run[:2] == '2X':
@@ -244,7 +238,6 @@ def ProcessPlayLog(filename, con):
                         elif run[:3] == '2XH':
                             plays[secondBase[0]+secondBase[1]].runScored = True
                             lineup[secondBase[0]].Runs += 1
-                            pitchers[currentPitcher].Runs += 1
                             runsScored += 1
                             secondBase = None
                     elif run[:2] == '3X':
@@ -254,7 +247,6 @@ def ProcessPlayLog(filename, con):
                         elif run[:3] == '3XH':
                             plays[thirdBase[0]+thirdBase[1]].runScored = True
                             lineup[thirdBase[0]].Runs += 1
-                            pitchers[currentPitcher].Runs += 1
                             runsScored += 1
                             thirdBase = None 
                     elif run[:2] == 'BX':
@@ -463,6 +455,7 @@ def ProcessPlayLog(filename, con):
             #Home Runs
             if re.match('HR',batParts[0]) != None:
                 plays[playInd].Hit = True
+                plays[playInd].runScored = True
                 lineup[hitterID].AB += 1
                 lineup[hitterID].Hits += 1
                 lineup[hitterID].Runs += 1
@@ -479,7 +472,6 @@ def ProcessPlayLog(filename, con):
                 pitchers[currentPitcher].Strikes += lookStrikes + swingStrikes + contactStrikes
                 pitchers[currentPitcher].Balls += ballCount
                 pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
-                pitchers[currentPitcher].Runs += 1
                 plays[playInd].strikeCount = strikeCount
                 plays[playInd].ballCount = ballCount
                 play = 'Home Run'
@@ -554,7 +546,6 @@ def ProcessPlayLog(filename, con):
                 pitchers[currentPitcher].Balls += ballCount
                 pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount+1
                 lineup[hitterID].HBP += 1
-                lineup[hitterID].AB -= 1
                 pitchers[currentPitcher].HBP += 1
                 play = 'Hit By Pitch'
                 ballType = ''
@@ -578,6 +569,24 @@ def ProcessPlayLog(filename, con):
                 ballType = ''
                 ballLoc = ''
                 firstBase = [hitterID, str(lineup[hitterID].PA)]
+                
+            #Reach on Error
+            if re.match('E[0-9]', batParts[0]) != None:
+                lineup[hitterID].AB += 1
+                firstBase = [hitterID, str(lineup[hitterID].PA)]
+                plays[playInd].contactStrikes += contactStrikes
+                plays[playInd].swingStrikes += swingStrikes
+                plays[playInd].lookStrikes += lookStrikes
+                pitchers[currentPitcher].ContactStrikes += contactStrikes
+                pitchers[currentPitcher].SwingStrikes += swingStrikes
+                pitchers[currentPitcher].LookStrikes += lookStrikes
+                pitchers[currentPitcher].Strikes += lookStrikes + swingStrikes + contactStrikes
+                pitchers[currentPitcher].Balls += ballCount
+                pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
+                play = 'Reach on Error'
+                ballType = ''
+                ballLco = ''
+                
             #Stolen Base
             if re.match('SB[23H]',batParts[0]) != None:
                 lineup[hitterID].PA -= 1
@@ -612,6 +621,19 @@ def ProcessPlayLog(filename, con):
                     lineup[thirdBase[0]].CS += 1
                     thirdBase = None  
             #Balk
+            if batParts[0].strip() == 'BK':
+                lineup[hitterID].PA -= 1
+                play = 'Balk'
+                ballLoc = ''
+                ballType = ''
+                
+            #Wild Pitch
+            if re.match('WP', batParts[0]) != None:
+                lineup[hitterID].PA -= 1
+                play = 'Wild Pitch'
+                ballLoc = ''
+                ballType = ''                
+                
             #Throw Out
             #Determine End Situation
             if outs >= 3:
@@ -624,7 +646,6 @@ def ProcessPlayLog(filename, con):
                 endSit += 2
             if thirdBase != None and outs <3:
                 endSit += 4
-            print(playInd, startSit, endSit, firstBase, secondBase, thirdBase, play)
             plays[playInd].playType = play
             plays[playInd].ballLoc = ballLoc
             plays[playInd].ballType = ballType
@@ -638,10 +659,10 @@ def ProcessPlayLog(filename, con):
             if int(row[5]) == 1:
                 #Home Team
                 if int(row[3]) == 1:
-                    pitchers[homePitcher].IP += int(inning[-1])-1
+                    pitchers[homePitcher].IP += int(inning.split(' ')[-1])-1
                     for x in pitchers.keys():
                         if pitchers[x].team == pitchers[homePitcher].team and x != homePitcher:
-                            pitchers[homePitcher].IP-=int(pitchers[x].IP)
+                            pitchers[homePitcher].IP-=float(pitchers[x].IP)
                     pitchers[homePitcher].IP += int(outs)/3.0
                     homePitcher = row[1]
                     pitchers[homePitcher] = PitchRoster(123, homeTeam, row[2], row[1], con)
@@ -649,14 +670,14 @@ def ProcessPlayLog(filename, con):
                     pitchers[homePitcher].pitcherRole = 'Reliever'
                 #Away Team  
                 else:
-                    pitchers[awayPitcher].IP = int(inning[-1])-1
+                    pitchers[awayPitcher].IP = int(inning.split(' ')[-1])-1
                     for x in pitchers.keys():
                         if pitchers[x].team == pitchers[awayPitcher].team and x != awayPitcher:
                             pitchers[awayPitcher].IP-=float(pitchers[x].IP)
                     pitchers[awayPitcher].IP += float(outs)/3.0
                     awayPitcher = row[1]
                     pitchers[awayPitcher] = PitchRoster(123, awayTeam, row[2], row[1], con)
-                    lineup[awayPitcher] = Lineup(123, homeTeam, row[2], int(row[4]), 'P', row[1], con)
+                    lineup[awayPitcher] = Lineup(123, awayTeam, row[2], int(row[4]), 'P', row[1], con)
                     pitchers[awayPitcher].pitcherRole = 'Reliever'
             #Pinch Hitter
             elif int(row[5]) == 11:                   
@@ -693,6 +714,11 @@ def ProcessPlayLog(filename, con):
                 currentGame.totalInnings = int(inning.split(' ')[-1])
                 pitchers[homePitcher].IP += currentGame.totalInnings
                 pitchers[awayPitcher].IP += currentGame.totalInnings
+
+                if inning[:3] == 'Top':
+                    pitchers[awayPitcher].IP -= 1
+                elif inning[:3] == 'Bot' and outs < 3:
+                    pitchers[awayPitcher].IP -= float(3-int(outs))/3.0
                 for x in pitchers.keys():
                     if x == wp:
                         pitchers[x].Win = True
@@ -704,8 +730,6 @@ def ProcessPlayLog(filename, con):
                         pitchers[homePitcher].IP-=float(pitchers[x].IP)
                     elif pitchers[x].team == pitchers[awayPitcher].team and x != awayPitcher:
                         pitchers[awayPitcher].IP-=float(pitchers[x].IP)
-                if inning[:3] == 'Top':
-                    pitchers[awayPitcher].IP -= 1
                 for x in lineup.keys():
                     if lineup[x].team == homeTeam:
                         currentGame.homeHits += lineup[x].Hits
@@ -720,6 +744,11 @@ def ProcessPlayLog(filename, con):
                 currentGame.GetGamePark(gameDate, con)
                 currentGame.InsertStats(con)
                 gameKey = currentGame.gameKey
+                for x in plays.keys():
+                    plays[x].gameKey = gameKey
+                    plays[x].InsertPlay(con)
+                    if plays[x].runScored:
+                        pitchers[plays[x].pitcherID].Runs += 1
                 for x in pitchers.keys():
                     if pitchers[x] == 9.0:
                         pitchers[x].CG = True
@@ -733,9 +762,6 @@ def ProcessPlayLog(filename, con):
                     if lineup[x].player_pos != 'P':
                         lineup[x].game = gameKey
                         lineup[x].InsertLineupRow(con)
-                for x in plays.keys():
-                    plays[x].gameKey = gameKey
-                    plays[x].InsertPlay(con)
             #Insert Game, Lineup, Pitch Roster, and Play stuff into DB
             
             #Reset variables
