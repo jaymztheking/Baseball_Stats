@@ -1,337 +1,164 @@
-id,DET201504060
+id,ANA201505280
 version,2
-info,visteam,MIN
-info,hometeam,DET
-info,site,DET05
-info,date,2015/04/06
+info,visteam,DET
+info,hometeam,ANA
+info,site,ANA01
+info,date,2015/05/28
 info,number,0
-info,starttime,1:08PM
-info,daynight,day
+info,starttime,7:07PM
+info,daynight,night
 info,usedh,true
-info,umphome,westj901
-info,ump1b,danlk901
-info,ump2b,barkl901
-info,ump3b,reybd901
+info,umphome,hamaa901
+info,ump1b,littw901
+info,ump2b,cuzzp901
+info,ump3b,davig901
 info,howscored,park
 info,pitches,pitches
-info,temp,52
-info,winddir,rtol
+info,temp,69
+info,winddir,torf
 info,windspeed,5
 info,fieldcond,unknown
 info,precip,unknown
 info,sky,cloudy
-info,timeofgame,150
-info,attendance,45030
-info,wp,pricd001
-info,lp,hughp001
-info,save,nathj001
-start,santd001,"Danny Santana",0,1,6
-start,dozib001,"Brian Dozier",0,2,4
-start,mauej001,"Joe Mauer",0,3,3
-start,huntt001,"Torii Hunter",0,4,9
-start,vargk001,"Kennys Vargas",0,5,10
-start,plout001,"Trevor Plouffe",0,6,5
-start,arcio001,"Oswaldo Arcia",0,7,7
-start,suzuk001,"Kurt Suzuki",0,8,2
-start,schaj002,"Jordan Schafer",0,9,8
-start,hughp001,"Phil Hughes",0,0,1
-start,davir003,"Rajai Davis",1,1,8
-start,kinsi001,"Ian Kinsler",1,2,4
-start,cabrm001,"Miguel Cabrera",1,3,3
-start,martv001,"Victor Martinez",1,4,10
-start,martj006,"J.D. Martinez",1,5,9
-start,cespy001,"Yoenis Cespedes",1,6,7
-start,castn001,"Nick Castellanos",1,7,5
-start,avila001,"Alex Avila",1,8,2
-start,iglej001,"Jose Iglesias",1,9,6
-start,pricd001,"David Price",1,0,1
-play,1,0,santd001,12,BCFFX,5/L
-play,1,0,dozib001,00,X,3/P3F
-play,1,0,mauej001,10,BX,43/G
-play,1,1,davir003,12,BCFFX,43/G
-play,1,1,kinsi001,00,X,S7/L
-play,1,1,cabrm001,02,CFX,9/F
-play,1,1,martv001,01,CX,6/L-
-play,2,0,huntt001,12,BFSC,K
-play,2,0,vargk001,12,CCBFX,43/G
-play,2,0,plout001,21,FBBX,7/L
-play,2,1,martj006,01,FX,HR/89/F
-play,2,1,cespy001,01,CX,D7/G
-play,2,1,castn001,22,BSCFFBS,K
-play,2,1,avila001,22,FFBBFX,HR/78/F.2-H
-play,2,1,iglej001,00,X,S8/G
-play,2,1,davir003,11,BF>C,SB2
-play,2,1,davir003,22,BF>C.BX,FC6/G.2X3(65)
-play,2,1,kinsi001,01,1F1>B,SB2
-play,2,1,kinsi001,12,1F1>B.CC,K
-play,3,0,arcio001,10,BX,43/G
-play,3,0,suzuk001,12,CCBX,7/F
-play,3,0,schaj002,22,CCFBFBX,8/F
-play,3,1,cabrm001,22,BBCTX,4/P
-play,3,1,martv001,10,BX,9/L
-play,3,1,martj006,02,CSS,K
-play,4,0,santd001,01,CX,4/L
-play,4,0,dozib001,21,CBBX,2/P2F
-play,4,0,mauej001,02,CFC,K
-play,4,1,cespy001,01,FX,8/F
-play,4,1,castn001,32,FBFBBB,W
-play,4,1,avila001,00,X,S7/L.1-2
-play,4,1,iglej001,02,CFFX,64(1)/FO/G.2-3
-play,4,1,davir003,22,TB11SB1C,K
-play,5,0,huntt001,11,SBX,9/F
-play,5,0,vargk001,01,FX,S7/L
-play,5,0,plout001,10,BX,8/F
-play,5,0,arcio001,12,BFFS,K
-play,5,1,kinsi001,02,CFFX,S8/L
-play,5,1,cabrm001,00,X,54(1)3/GDP
-play,5,1,martv001,22,BCFBC,K
-play,6,0,suzuk001,20,BBX,S9/L
-play,6,0,schaj002,22,BCSBFX,S8/G.1-2
-play,6,0,santd001,02,SSC,K
-play,6,0,dozib001,10,BX,64(1)3/GDP
-play,6,1,martj006,22,FFBBX,9/F
-play,6,1,cespy001,11,CBX,T7/F
-play,6,1,castn001,12,CFBX,8/L/SF.3-H
-play,6,1,avila001,22,FCBBS,K
-play,7,0,mauej001,00,X,43/G
-play,7,0,huntt001,32,CCBFBFBX,63/G
-play,7,0,vargk001,01,CX,63/G
-play,7,1,iglej001,00,,NP
-sub,grahj002,"J.R. Graham",0,0,1
-play,7,1,iglej001,32,.BFBBCX,S4/G
-play,7,1,davir003,01,F>B,SB2
-play,7,1,davir003,32,F>B.F*BFBB,W
-play,7,1,kinsi001,12,C*BFX,6(1)3/GDP.2-3
-play,7,1,cabrm001,10,BX,3/P3F
-play,8,0,plout001,00,X,9/F
-play,8,0,arcio001,02,CFS,K
-play,8,0,suzuk001,01,CX,8/F
-play,8,1,martv001,21,BBSX,S8/G
-play,8,1,martj006,01,SX,8/F
-play,8,1,cespy001,02,CCX,9/F
-play,8,1,castn001,02,CFX,6/L
-play,9,0,schaj002,00,,NP
-sub,romia001,"Andrew Romine",1,7,5
-play,9,0,schaj002,00,,NP
-sub,escoe001,"Eduardo Escobar",0,9,11
-play,9,0,escoe001,22,..BCFBFX,63/G
-play,9,0,santd001,02,CSFFX,8/F
-play,9,0,dozib001,11,BCX,S8/L
-play,9,0,mauej001,01,CX,S4/G.1-2
-play,9,0,huntt001,00,,NP
-sub,nathj001,"Joe Nathan",1,0,1
-play,9,0,huntt001,12,.SFBS,K
-data,er,hughp001,4
-data,er,grahj002,0
-data,er,pricd001,0
-data,er,nathj001,0
-id,CIN201504080
-version,2
-info,visteam,PIT
-info,hometeam,CIN
-info,site,CIN09
-info,date,2015/04/08
-info,number,0
-info,starttime,9:44PM
-info,daynight,night
-info,usedh,false
-info,umphome,holbs901
-info,ump1b,welkb901
-info,ump2b,hoyej901
-info,ump3b,hirsj901
-info,howscored,park
-info,pitches,pitches
-info,temp,64
-info,winddir,ltor
-info,windspeed,2
-info,fieldcond,unknown
-info,precip,unknown
-info,sky,unknown
-info,timeofgame,241
-info,attendance,30859
-info,wp,hoovj002
-info,lp,liz-r001
+info,timeofgame,187
+info,attendance,32261
+info,wp,wilsc004
+info,lp,farmb001
 info,save,
-start,harrj002,"Josh Harrison",0,1,5
-start,polag001,"Gregory Polanco",0,2,9
-start,mccua001,"Andrew McCutchen",0,3,8
-start,walkn001,"Neil Walker",0,4,4
-start,marts002,"Starling Marte",0,5,7
-start,alvap001,"Pedro Alvarez",0,6,3
-start,cervf001,"Francisco Cervelli",0,7,2
-start,mercj002,"Jordy Mercer",0,8,6
-start,coleg001,"Gerrit Cole",0,9,1
-start,hamib001,"Billy Hamilton",1,1,8
-start,vottj001,"Joey Votto",1,2,3
-start,frazt001,"Todd Frazier",1,3,5
-start,mesod001,"Devin Mesoraco",1,4,2
-start,brucj001,"Jay Bruce",1,5,9
-start,byrdm001,"Marlon Byrd",1,6,7
-start,philb001,"Brandon Phillips",1,7,4
-start,cozaz001,"Zack Cozart",1,8,6
-start,leakm001,"Mike Leake",1,9,1
-play,1,0,harrj002,01,CX,7/L
-play,1,0,polag001,11,CBX,31/G
-play,1,0,mccua001,00,X,53/G
-play,1,1,hamib001,11,BFX,3/G
-play,1,1,vottj001,22,BFSBC,K
-play,1,1,frazt001,32,BBFBFFX,HR/7/L
-play,1,1,mesod001,11,CBX,53/G
-play,2,0,walkn001,32,BFBFBB,W
-play,2,0,marts002,02,FFX,8/L
-play,2,0,alvap001,21,BFBX,D8/L.1-H
-play,2,0,cervf001,00,B,WP.2-3
-play,2,0,cervf001,22,B.CFBS,K
-play,2,0,mercj002,30,IIII,IW
-play,2,0,coleg001,32,CBBBS>S,K
-play,2,1,brucj001,00,X,E3/G
-play,2,1,byrdm001,22,1CB>FBX,64(1)3/GDP
-play,2,1,philb001,00,X,8/F
-play,3,0,harrj002,21,BFBX,63/G
-play,3,0,polag001,10,BX,31/G
-play,3,0,mccua001,31,CBBBX,8/L
-play,3,1,cozaz001,20,BBX,D8/L
-play,3,1,leakm001,20,BBX,14/BG/SH.2-3
-play,3,1,hamib001,12,BCSS,K
-play,3,1,vottj001,00,B,WP.3-H(NR)
-play,3,1,vottj001,32,B.BFFFBX,53/G+
-play,4,0,walkn001,02,CFFS,K
-play,4,0,marts002,21,BBCX,D7/L
-play,4,0,alvap001,00,X,5/P
-play,4,0,cervf001,31,BBCBX,D8/F.2-H
-play,4,0,mercj002,30,IIII,IW
-play,4,0,coleg001,02,FSS,K
-play,4,1,frazt001,32,BBCBCX,S7/L
-play,4,1,mesod001,00,X,13/G.1-2
-play,4,1,brucj001,32,*BSB*BSB,W
-play,4,1,byrdm001,02,FCS,K
-play,4,1,philb001,01,CX,S8/G.2-H;1-3
-play,4,1,cozaz001,32,BBBCF>F>B,W.1-2
-play,4,1,leakm001,11,LBX,6/P
-play,5,0,harrj002,31,BBBCB,W
-play,5,0,polag001,31,C11BBBB,W.1-2
-play,5,0,mccua001,11,F*BX,53/G.2-3;1-2
-play,5,0,walkn001,11,BFX,9/F/SF.3-H;2-3
-play,5,0,marts002,32,SBFF*B*BC,K
-play,5,1,hamib001,32,BBCBCX,S7/L
-play,5,1,vottj001,02,>S1F>B,SB2
-play,5,1,vottj001,22,>S1F>B.BS,K
-com,"$Runner attempted to steal on first pitch, but the batter"
-com,"hit the catcher with his backswing and the runner was"
-com,"returned to first base according to the comment on Rule"
-com,"6.06(c) concerning 'unintentional interference'"
-play,5,1,frazt001,02,C>FC,K
-play,5,1,mesod001,00,>B,SB3
-play,5,1,mesod001,32,>B.FSBBFFFC,K
-play,6,0,alvap001,12,CBFC,K
-play,6,0,cervf001,01,CX,8/L
-play,6,0,mercj002,22,CBCBFX,S8/G
-play,6,0,coleg001,00,,NP
-sub,lamba001,"Andrew Lambo",0,9,11
-play,6,0,lamba001,31,.BBBCB,W.1-2
-play,6,0,harrj002,00,X,S5/G.2-3;1-2
-play,6,0,polag001,00,,NP
-sub,cingt001,"Tony Cingrani",1,9,1
-play,6,0,polag001,12,.BCFFS,K
-play,6,1,brucj001,00,,NP
-sub,hughj001,"Jared Hughes",0,9,1
-play,6,1,brucj001,22,.BBSFS,K
-play,6,1,byrdm001,10,BX,63/G
-play,6,1,philb001,00,X,53/G
-play,7,0,mccua001,31,BCBBB,W
-play,7,0,walkn001,10,1BX,8/L
-play,7,0,marts002,10,1BN,BK.1-2
-play,7,0,marts002,32,1BN.BFTBFX,9/L
-play,7,0,alvap001,00,,NP
-sub,hartc001,"Corey Hart",0,6,11
-play,7,0,hartc001,00,,NP
-sub,badeb001,"Burke Badenhop",1,9,1
-play,7,0,hartc001,00,..X,S8/G.2-H
-play,7,0,cervf001,00,,NP
-sub,rodrs002,"Sean Rodriguez",0,6,12
-play,7,0,cervf001,01,.CX,46(1)/FO/G
-play,7,1,cozaz001,00,,NP
-sub,rodrs002,"Sean Rodriguez",0,6,3
-play,7,1,cozaz001,32,.CBBBCFFFX,63/G
-play,7,1,badeb001,00,,NP
-sub,boesb001,"Brennan Boesch",1,9,11
-play,7,1,boesb001,22,.FBBSFFFFFS,K
-play,7,1,hamib001,01,FX,S8/L
-play,7,1,vottj001,00,,NP
-sub,basta001,"Antonio Bastardo",0,9,1
-play,7,1,vottj001,02,.F1CB,WP.1-2
-play,7,1,vottj001,22,.F1CB.*BX,S9/G.2-H
-play,7,1,frazt001,00,,NP
-sub,camia001,"Arquimedes Caminero",0,9,1
-play,7,1,frazt001,12,.BSF>B,SB2
-play,7,1,frazt001,32,.BSF>B.BS,K
-play,8,0,mercj002,00,,NP
-sub,diazj005,"Jumbo Diaz",1,9,1
-play,8,0,mercj002,32,.BBBCCX,63/G
-play,8,0,camia001,00,,NP
-sub,kangj001,"Jung Ho Kang",0,9,11
-play,8,0,kangj001,10,.BX,53/G
-play,8,0,harrj002,32,BBBCFX,8/F
-play,8,1,mesod001,00,,NP
-sub,watst001,"Tony Watson",0,9,1
-play,8,1,mesod001,22,.CBFBS,K
-play,8,1,brucj001,12,CSBFX,43/G
-play,8,1,byrdm001,12,FBCFX,S6/P
-play,8,1,philb001,11,BCX,46(1)/FO/G+
-play,9,0,polag001,00,,NP
-sub,chapa001,"Aroldis Chapman",1,9,1
-play,9,0,polag001,22,.BBFFX,S8/G
-play,9,0,mccua001,21,BBF1X,53/G.1-2
-play,9,0,walkn001,11,BCX,53/G
-play,9,0,marts002,01,S>S,SB3
-play,9,0,marts002,02,S>S.S,K
-play,9,1,cozaz001,00,,NP
-sub,scahr001,"Rob Scahill",0,9,1
-play,9,1,cozaz001,22,.BCFBFFC,K
-play,9,1,chapa001,00,,NP
-sub,schus001,"Skip Schumaker",1,9,11
-play,9,1,schus001,02,.FFFC,K
-play,9,1,hamib001,02,CCX,S6/G
-play,9,1,vottj001,01,11C1>B,SB2
-play,9,1,vottj001,31,11C1>B.BBX,43/G
-play,10,0,rodrs002,00,,NP
-sub,hoovj002,"J.J. Hoover",1,9,1
-play,10,0,rodrs002,12,.BSSX,S1/G+
-play,10,0,cervf001,00,X,13/BG/SH.1-2
-play,10,0,mercj002,22,BSBCS,K
-play,10,0,scahr001,00,,NP
-sub,sanct001,"Tony Sanchez",0,9,11
-play,10,0,sanct001,22,.CCFBBX,8/F
-play,10,1,frazt001,00,,NP
-sub,melam001,"Mark Melancon",0,9,1
-play,10,1,frazt001,21,.CBBX,63/G
-play,10,1,mesod001,11,BFX,13/G-
-play,10,1,brucj001,11,CBX,S9/L
-play,10,1,byrdm001,22,1BSBF1>S,K
-play,11,0,harrj002,32,CSFBBFFFFBX,43/G
-play,11,0,polag001,01,CX,43/G
-play,11,0,mccua001,10,BX,53/G
-play,11,1,philb001,00,,NP
-sub,liz-r001,"Radhames Liz",0,9,1
-play,11,1,philb001,00,.X,4/P
-play,11,1,cozaz001,01,FH,HP
-play,11,1,hoovj002,00,,NP
-sub,domic001,"Chris Dominguez",1,9,11
-play,11,1,domic001,02,.SSC,K
-play,11,1,hamib001,31,BBCBB,W.1-2
-play,11,1,vottj001,11,FBX,S9/L.2-H;1-2
-data,er,coleg001,3
-data,er,hughj001,1
-data,er,basta001,0
-data,er,camia001,0
-data,er,watst001,0
-data,er,scahr001,0
-data,er,melam001,0
-data,er,liz-r001,1
-data,er,leakm001,3
-data,er,cingt001,1
-data,er,badeb001,0
-data,er,diazj005,0
-data,er,chapa001,0
-data,er,hoovj002,0
-id
+start,davir003,"Rajai Davis",0,1,10
+start,kinsi001,"Ian Kinsler",0,2,4
+start,cabrm001,"Miguel Cabrera",0,3,3
+start,cespy001,"Yoenis Cespedes",0,4,7
+start,martj006,"J.D. Martinez",0,5,9
+start,castn001,"Nick Castellanos",0,6,5
+start,mccaj001,"James McCann",0,7,2
+start,iglej001,"Jose Iglesias",0,8,6
+start,gosea001,"Anthony Gose",0,9,8
+start,farmb001,"Buck Farmer",0,0,1
+start,aybae001,"Erick Aybar",1,1,6
+start,troum001,"Mike Trout",1,2,8
+start,pujoa001,"Albert Pujols",1,3,10
+start,calhk001,"Kole Calhoun",1,4,9
+start,freed001,"David Freese",1,5,5
+start,joycm001,"Matthew Joyce",1,6,7
+start,iannc001,"Chris Iannetta",1,7,2
+start,greeg002,"Grant Green",1,8,3
+start,giavj001,"Johnny Giavotella",1,9,4
+start,wilsc004,"C.J. Wilson",1,0,1
+play,1,0,davir003,00,X,13/G+
+play,1,0,kinsi001,32,CBFBBFFFFFB,W
+play,1,0,cabrm001,10,B1X,64(1)3/GDP
+play,1,1,aybae001,22,SFBFBX,S9/L
+play,1,1,troum001,22,*BB1CCX,43/G-.1-2
+play,1,1,pujoa001,22,FSBBFX,HR/7/L.2-H
+play,1,1,calhk001,22,BCFBX,13/G-
+play,1,1,freed001,01,CX,9/F
+play,2,0,cespy001,31,BBCBX,53/G+
+play,2,0,martj006,32,CFBBBFS,K
+play,2,0,castn001,01,CX,8/F
+play,2,1,joycm001,00,X,HR/9/F
+play,2,1,iannc001,01,CX,D8/F
+play,2,1,greeg002,01,CX,S51/BP.2-3
+play,2,1,giavj001,12,*BC11FFT,K
+play,2,1,aybae001,02,CS1X,46(1)3/GDP
+play,3,0,mccaj001,02,CCX,S7/L+
+play,3,0,iglej001,22,CBB1FX,14(1)/FO/G+
+play,3,0,gosea001,12,C11SBS,K
+play,3,0,davir003,32,BC*BFB>F>B,W.1-2
+play,3,0,kinsi001,32,BBCBF>F>F>F>B,W.2-3;1-2
+play,3,0,cabrm001,12,CBFH,HP.3-H;2-3;1-2
+play,3,0,cespy001,22,CBFBC,K
+play,3,1,troum001,22,BCCBX,63/G
+play,3,1,pujoa001,12,FBSX,9/F
+play,3,1,calhk001,31,BBCBX,3/L+
+play,4,0,martj006,10,BX,9/F
+play,4,0,castn001,00,X,53/G
+play,4,0,mccaj001,02,CFS,K
+play,4,1,freed001,22,BBCSFX,7/F
+play,4,1,joycm001,01,CX,43/G
+play,4,1,iannc001,00,X,8/F
+play,5,0,iglej001,30,BBBB,W
+play,5,0,gosea001,02,FLS,K
+play,5,0,davir003,11,L1BX,S8/L+.1-3
+play,5,0,kinsi001,00,X,9/F
+play,5,0,cabrm001,11,BCX,8/L
+play,5,1,greeg002,01,CX,43/G
+play,5,1,giavj001,00,X,T7/G+
+play,5,1,aybae001,10,BX,53/BG/SH.3-H
+play,5,1,troum001,01,FX,43/G
+play,6,0,cespy001,00,,NP
+sub,featt001,"Taylor Featherston",1,1,6
+com,"Angels shortstop Erick Aybar left the game due to an injured leg"
+play,6,0,cespy001,22,.SBFFFBC,K
+play,6,0,martj006,32,CFBBFBB,W
+play,6,0,castn001,12,SBCC,K
+play,6,0,mccaj001,21,B1F.BX,13/G-
+play,6,1,pujoa001,32,BCBBFFB,W
+play,6,1,calhk001,21,B1BTX,S8/G+.1-2
+play,6,1,freed001,02,FSX,S7/G+.2-3;1-2
+play,6,1,joycm001,11,BSX,S3/G.3-H;2-3;1-2
+play,6,1,iannc001,00,,NP
+sub,nesba001,"Angel Nesbitt",0,0,1
+play,6,1,iannc001,00,,NP
+sub,nieuk001,"Kirk Nieuwenhuis",1,6,12
+play,6,1,iannc001,00,..X,52(3)/FO/G+.2-3;1-2
+play,6,1,greeg002,12,BCFX,43/G-.3-H;2-3;1-2
+play,6,1,giavj001,00,B,WP.3-H(NR);2-3
+play,6,1,giavj001,12,B.CCFFFX,53/G
+play,7,0,iglej001,00,,NP
+sub,nieuk001,"Kirk Nieuwenhuis",1,6,7
+play,7,0,iglej001,00,,NP
+sub,salaf001,"Fernando Salas",1,0,1
+play,7,0,iglej001,02,..CFFFFX,7/F-
+play,7,0,gosea001,22,SBBSX,13/G-
+play,7,0,davir003,12,CBFFFC,K
+play,7,1,featt001,01,SX,8/L
+play,7,1,troum001,12,CBSX,D9/L
+play,7,1,pujoa001,30,IIII,IW
+play,7,1,calhk001,00,,NP
+sub,gorzt001,"Tom Gorzelanny",0,0,1
+play,7,1,calhk001,31,.SBBBB,W.2-3;1-2
+play,7,1,freed001,11,SBX,S7/G.3-H;2XH(72435);1-2
+play,7,1,nieuk001,32,BBSBF>F>B,W.2-3;1-2
+play,7,1,iannc001,31,BBBCX,HR/78/F.3-H;2-H;1-H
+play,7,1,greeg002,32,BFBBSX,8/F
+play,8,0,kinsi001,00,,NP
+sub,marta005,"Alfredo Marte",1,2,7
+play,8,0,kinsi001,00,,NP
+sub,nieuk001,"Kirk Nieuwenhuis",1,6,8
+play,8,0,kinsi001,00,,NP
+sub,alvaj003,"Jose Alvarez",1,0,1
+play,8,0,kinsi001,00,,NP
+sub,romia001,"Andrew Romine",0,2,11
+play,8,0,romia001,12,....CBFS,K
+play,8,0,cabrm001,00,,NP
+sub,pereh001,"Hernan Perez",0,3,11
+play,8,0,pereh001,12,.FBFX,6/P
+play,8,0,cespy001,22,CFBBX,9/F
+play,8,1,giavj001,00,,NP
+sub,romia001,"Andrew Romine",0,2,4
+play,8,1,giavj001,00,,NP
+sub,pereh001,"Hernan Perez",0,3,3
+play,8,1,giavj001,00,,NP
+sub,collt002,"Tyler Collins",0,4,7
+play,8,1,giavj001,00,,NP
+sub,albua001,"Al Alburquerque",0,0,1
+play,8,1,giavj001,20,....BBX,D7/L+
+play,8,1,featt001,02,CSFC,K
+play,8,1,marta005,02,CCX,143/G.2-3
+play,8,1,pujoa001,00,,NP
+sub,perec003,"Carlos Perez",1,3,11
+play,8,1,perec003,22,.BBFSX,5/P
+play,9,0,martj006,00,.X,S8/G+
+play,9,0,castn001,12,SCBS,K
+play,9,0,mccaj001,22,BBCFFX,S8/L.1-2
+play,9,0,iglej001,00,X,D9/L+.2-H;1-3
+play,9,0,gosea001,11,CBX,7/L
+play,9,0,davir003,22,BBFFC,K
+data,er,farmb001,7
+data,er,nesba001,1
+data,er,gorzt001,4
+data,er,albua001,0
+data,er,wilsc004,1
+data,er,salaf001,0
+data,er,alvaj003,1
