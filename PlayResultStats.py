@@ -149,10 +149,6 @@ def ProcessPlayLog(filename, con):
                 startSit = endSit
                 endSit = 0
             
-            start1 = firstBase
-            start2 = secondBase
-            start3 = thirdBase
-            print('START',firstBase, secondBase, thirdBase, row)
         #Pitches
             pitchSeq = row[5]
             hitterID = row[3]
@@ -187,11 +183,11 @@ def ProcessPlayLog(filename, con):
                     lineup[firstBase[0]].SB += 1
                     if '1-' not in runEvent:
                         runEvent += ';1-2'
-                elif 'SB3' in batParts[0]:
+                if 'SB3' in batParts[0]:
                     lineup[secondBase[0]].SB += 1
                     if '2-' not in runEvent:
                         runEvent += ';2-3'
-                elif 'SBH' in batParts[0]:
+                if 'SBH' in batParts[0]:
                     lineup[thirdBase[0]].SB += 1
                     if '3-' not in runEvent:
                         runEvent += ';3-H'
@@ -582,13 +578,11 @@ def ProcessPlayLog(filename, con):
                             
                 
             #Throw Out
-                
             #Figure out Runners
             if runEvent != '':
                 runners = filter(None, runEvent.split(';'))
                 runners = sorted(runners, key=lambda base: sorter[base[0]])
                 for run in runners:
-                    print(run)
                     if run[:3] == '1-2':
                         secondBase = firstBase
                         firstBase = None
@@ -669,7 +663,6 @@ def ProcessPlayLog(filename, con):
                     if 'E' not in runEvent:
                         lineup[hitterID].RBI += runsScored
                         plays[playInd].RBI = runsScored
-            print(firstBase, secondBase, thirdBase)
             
             #Determine End Situation
             if outs >= 3:
