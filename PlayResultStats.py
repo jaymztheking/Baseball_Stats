@@ -175,7 +175,7 @@ def ProcessPlayLog(filename, con):
             if len(row[6].split('.')) == 2:
                 runEvent = row[6].split('.')[1]
             batParts = batEvent.split('/')
-            
+                        
             #Stolen Base
             if re.match('.*SB[23H]$',batParts[0]) != None:
                 lineup[hitterID].PA -= 1
@@ -200,13 +200,16 @@ def ProcessPlayLog(filename, con):
                     ballLoc = ''
                 if 'CS2' in batParts[0]:
                     lineup[firstBase[0]].CS += 1
-                    firstBase = None
+                    if 'E' not in batParts[0]:
+                        runEvent += ';1X2'
                 elif 'CS3' in batParts[0]:
                     lineup[secondBase[0]].CS += 1
-                    secondBase = None
+                    if 'E' not in batParts[0]:
+                        runEvent += ';2X3'
                 elif 'CSH' in batParts[0]:
                     lineup[thirdBase[0]].CS += 1
-                    thirdBase = None  
+                    if 'E' not in batParts[0]:
+                        runEvent += ';3XH'  
             #Balk
             if batParts[0].strip() == 'BK':
                 lineup[hitterID].PA -= 1
@@ -220,6 +223,14 @@ def ProcessPlayLog(filename, con):
                 play = 'Wild Pitch'
                 ballLoc = ''
                 ballType = ''  
+
+            #Catcher Interference
+            if re.match('^C$', batParts[0]) != None:               
+                play = 'Interference'
+                ballLoc = ''
+                ballType = ''
+                if 'B-' not in runEvent:
+                    runEvent += ';B-1'
             
             #Groundball outs for Batter
             if re.match('[0-9]{2,}$',batParts[0]) != None:
@@ -563,7 +574,7 @@ def ProcessPlayLog(filename, con):
                     runEvent += ';B-1'
                 
             #Reach on Error
-            if re.match('E[0-9]', batParts[0]) != None:
+            if re.match('[0-9]?E[0-9]', batParts[0]) != None:
                 lineup[hitterID].AB += 1
                 plays[playInd].contactStrikes += contactStrikes
                 plays[playInd].swingStrikes += swingStrikes
@@ -582,10 +593,9 @@ def ProcessPlayLog(filename, con):
                             
                 
             #Throw Out
+
             #Figure out Runners
             if runEvent != '':
-                print(runEvent)
-                print('BEFORE', firstBase, secondBase, thirdBase)
                 runners = filter(None, runEvent.split(';'))
                 runners = sorted(runners, key=lambda base: sorter[base[0]])
                 for run in runners:
@@ -669,7 +679,6 @@ def ProcessPlayLog(filename, con):
                     if 'E' not in runEvent:
                         lineup[hitterID].RBI += runsScored
                         plays[playInd].RBI = runsScored
-            print('AFTER', firstBase, secondBase, thirdBase)
             #Determine End Situation
             if outs >= 3:
                 endSit = 30
@@ -686,11 +695,10 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-          
-            print(row, play, firstBase, secondBase, thirdBase, runsScored)
-            
+            #print(batParts[0], firstBase, secondBase, thirdBase, row)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
+            
             #Pitcher Change
             if int(row[5]) == 1:
                 #Home Team
@@ -715,10 +723,12 @@ def ProcessPlayLog(filename, con):
                     pitchers[awayPitcher] = PitchRoster(123, awayTeam, row[2], row[1], con)
                     lineup[awayPitcher] = Lineup(123, awayTeam, row[2], int(row[4]), 'P', row[1], con)
                     pitchers[awayPitcher].pitcherRole = 'Reliever'
+                    
             #Pinch Hitter
             elif int(row[5]) == 11:                   
                 team = homeTeam if int(row[3])==1 else awayTeam
                 lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PH', row[1], con)
+                
             #Pinch Runner
             elif int(row[5]) == 12:
                 batnum = int(row[4])
@@ -743,6 +753,7 @@ def ProcessPlayLog(filename, con):
         elif rowType == 'data':
             if row[1] == 'er':
                 pitchers[row[2]].earnedRuns += int(row[3])
+                
         #New game found, reset everything   
         elif rowType == 'id':
             #Wrap up Game
