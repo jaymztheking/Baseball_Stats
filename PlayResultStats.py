@@ -423,13 +423,13 @@ def ProcessPlayLog(filename, con):
             
             #Home Runs
             if re.match('HR',batParts[0]) != None:
+                if 'B-' not in runEvent:
+                    runEvent += ';B-H'
                 plays[playInd].hit = True
                 plays[playInd].runScored = True
                 lineup[hitterID].AB += 1
                 lineup[hitterID].Hits += 1
-                lineup[hitterID].Runs += 1
                 lineup[hitterID].RBI += 1
-                runsScored += 1
                 lineup[hitterID].HR += 1
                 pitchers[currentPitcher].Hits += 1
                 plays[playInd].contactStrikes += contactStrikes
@@ -520,7 +520,8 @@ def ProcessPlayLog(filename, con):
                 pitchers[currentPitcher].pitchCount += contactStrikes + swingStrikes + lookStrikes + ballCount
                 plays[playInd].strikeCount = strikeCount
                 plays[playInd].ballCount = ballCount
-                runEvent += ';B-2'               
+                if 'B-' not in runEvent:
+                    runEvent += ';B-2'                               
                 
             #Hit By Pitch
             if batParts[0].strip() == 'HP':
@@ -538,7 +539,9 @@ def ProcessPlayLog(filename, con):
                 play = 'Hit By Pitch'
                 ballType = ''
                 ballLoc = ''
-                runEvent += ';B-1'
+                
+                if 'B-' not in runEvent:
+                    runEvent += ';B-1'
                 
             #Walk
             if batParts[0].strip() == 'W' or batParts[0].strip() == 'IW':
@@ -556,12 +559,12 @@ def ProcessPlayLog(filename, con):
                 play = 'Walk'
                 ballType = ''
                 ballLoc = ''
-                runEvent += ';B-1'
+                if 'B-' not in runEvent:
+                    runEvent += ';B-1'
                 
             #Reach on Error
             if re.match('E[0-9]', batParts[0]) != None:
                 lineup[hitterID].AB += 1
-                firstBase = [hitterID, str(lineup[hitterID].PA)]
                 plays[playInd].contactStrikes += contactStrikes
                 plays[playInd].swingStrikes += swingStrikes
                 plays[playInd].lookStrikes += lookStrikes
@@ -574,12 +577,15 @@ def ProcessPlayLog(filename, con):
                 play = 'Reach on Error'
                 ballType = ''
                 ballLoc = ''
-                runEvent += ';B-1'
+                if 'B-' not in runEvent:
+                    runEvent += ';B-1'
                             
                 
             #Throw Out
             #Figure out Runners
             if runEvent != '':
+                print(runEvent)
+                print('BEFORE', firstBase, secondBase, thirdBase)
                 runners = filter(None, runEvent.split(';'))
                 runners = sorted(runners, key=lambda base: sorter[base[0]])
                 for run in runners:
@@ -663,7 +669,7 @@ def ProcessPlayLog(filename, con):
                     if 'E' not in runEvent:
                         lineup[hitterID].RBI += runsScored
                         plays[playInd].RBI = runsScored
-            
+            print('AFTER', firstBase, secondBase, thirdBase)
             #Determine End Situation
             if outs >= 3:
                 endSit = 30
@@ -681,7 +687,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
           
-            
+            print(row, play, firstBase, secondBase, thirdBase, runsScored)
             
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
