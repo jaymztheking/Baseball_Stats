@@ -120,9 +120,8 @@ def ProcessPlayLog(filename, con):
         elif rowType == 'play':
         #Create PitchResult
             lineup[row[3]].PA += 1
-            
             playInd = lineup[row[3]].userID + str(lineup[row[3]].PA)
-        
+            
         #Clear Variables
             batEvent = ''
             runEvent = ''
@@ -555,7 +554,7 @@ def ProcessPlayLog(filename, con):
                     runEvent += ';B-1'
                 
             #Walk
-            if batParts[0].strip() == 'W' or batParts[0].strip() == 'IW':
+            if re.match('[I]?W($|\+)', batParts[0]):
                 plays[playInd].contactStrikes += contactStrikes
                 plays[playInd].swingStrikes += swingStrikes
                 plays[playInd].lookStrikes += lookStrikes

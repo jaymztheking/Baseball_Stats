@@ -1,159 +1,168 @@
-id,ARI201506190
+id,ATL201509180
 version,2
-info,visteam,SDN
-info,hometeam,ARI
-info,site,PHO01
-info,date,2015/06/19
+info,visteam,PHI
+info,hometeam,ATL
+info,site,ATL02
+info,date,2015/09/18
 info,number,0
-info,starttime,6:40PM
+info,starttime,7:36PM
 info,daynight,night
 info,usedh,false
-info,umphome,hoyej901
-info,ump1b,hirsj901
-info,ump2b,welkb901
-info,ump3b,holbs901
+info,umphome,fairc901
+info,ump1b,hobep901
+info,ump2b,joycj901
+info,ump3b,gibsg901
 info,howscored,park
 info,pitches,pitches
-info,temp,81
-info,winddir,unknown
-info,windspeed,0
-info,fieldcond,dry
-info,precip,none
-info,sky,dome
-info,timeofgame,188
-info,attendance,27394
-info,wp,delar003
-info,lp,shiej002
-info,save,ziegb001
-start,solay001,"Yangervis Solarte",0,1,5
-start,alony001,"Yonder Alonso",0,2,3
-start,uptoj001,"Justin Upton",0,3,7
-start,kempm001,"Matt Kemp",0,4,9
-start,norrd001,"Derek Norris",0,5,2
-start,venaw001,"Will Venable",0,6,8
-start,spanc001,"Cory Spangenberg",0,7,4
-start,amara001,"Alexi Amarista",0,8,6
-start,shiej002,"James Shields",0,9,1
-start,polla001,"A.J. Pollock",1,1,8
-start,lambj001,"Jake Lamb",1,2,5
-start,goldp001,"Paul Goldschmidt",1,3,3
-start,perad001,"David Peralta",1,4,7
-start,tomay001,"Yasmany Tomas",1,5,9
-start,hilla001,"Aaron Hill",1,6,4
-start,castw002,"Welington Castillo",1,7,2
-start,ahmen001,"Nick Ahmed",1,8,6
-start,delar003,"Rubby de la Rosa",1,9,1
-play,1,0,solay001,00,X,9/F
-play,1,0,alony001,01,CX,S8/L
-play,1,0,uptoj001,12,SCBFX,64(1)/FO/G
-play,1,0,kempm001,12,1FF1B>C,K
-play,1,1,polla001,00,X,DGR/78/L+
-play,1,1,lambj001,12,BCSB,WP.2-3
-play,1,1,lambj001,22,BCSB.S,K
-play,1,1,goldp001,22,F3B*BSX,43/G.3-H
-play,1,1,perad001,32,SBSBB*B,W
-play,1,1,tomay001,01,FH,HP.1-2
-play,1,1,hilla001,32,SSBBB>B,W.2-3;1-2
-play,1,1,castw002,12,BCCS,K
-play,2,0,norrd001,12,BCFS,K
-play,2,0,venaw001,01,CX,S9/G
-play,2,0,spanc001,01,111FX,S9/G.1-3
-play,2,0,amara001,01,1FX,FC3/BG.3XH(3253);1-3;B-2
-play,2,0,shiej002,12,SSBX,63/G
-play,2,1,ahmen001,02,FFX,63/G
-play,2,1,delar003,02,CCFFC,K
-play,2,1,polla001,21,SBBX,S8/G
-play,2,1,lambj001,01,C1B,WP.1-2
-play,2,1,lambj001,22,C1B.SBX,23/G-
-play,3,0,solay001,12,CBFX,9/L
-play,3,0,alony001,00,X,53/G
-play,3,0,uptoj001,00,X,53/G
-play,3,1,goldp001,32,CBBSBB,W
-play,3,1,perad001,00,11X,D9/G+.1-3
-play,3,1,tomay001,11,BSB,OA/MREV.3XH(2);2-3
-com,"replay,3,tomay001,ARI,hirsj901,PHO01,,Y,M,SDN,A"
-com,"$when Paul Goldschmidt was called safe at HP, Padres"
-com,"acting manager Pat Murphy challenged the ruling; the"
-com,"call was overturned by replay"
-play,3,1,tomay001,32,BSB.FFBS,K
-play,3,1,hilla001,11,BCX,D9/L.3-H
-play,3,1,castw002,01,SX,D7/L+.2-H
-play,3,1,ahmen001,22,FFF*BFFBFX,S8/L.2-H;B-2(TH)
-play,3,1,delar003,01,SX,13/G-
-play,4,0,kempm001,00,,NP
-sub,dornd001,"Danny Dorn",1,5,9
-com,"Diamondbacks Yasmany Tomas left the game due to an injured elbow"
-play,4,0,kempm001,02,.FCS,K
-play,4,0,norrd001,00,X,7/L
-play,4,0,venaw001,12,BCFS,K23
-play,4,1,polla001,32,BCSBBB,W
-play,4,1,lambj001,21,BB11CX,7/F.1-2
-play,4,1,goldp001,00,X,S6/G.2-2
-play,4,1,perad001,00,X,16(1)3/GDP
-play,5,0,spanc001,10,BX,23/G-
-play,5,0,amara001,10,BX,43/G
-play,5,0,shiej002,02,CSX,S8/G
-play,5,0,solay001,10,BX,S9/L.1-2
-play,5,0,alony001,31,BSBBB,W.2-3;1-2
-play,5,0,uptoj001,32,CBBCB>F>B,W.3-H;2-3;1-2
-play,5,0,kempm001,12,FS*BS,K
-play,5,1,dornd001,01,CX,3/G
-play,5,1,hilla001,12,CFBFC,K
-play,5,1,castw002,11,BCX,9/L
-play,6,0,norrd001,11,FBX,53/G
-play,6,0,venaw001,02,SFFX,5/P
-play,6,0,spanc001,32,BCBFBFB,W
-play,6,0,amara001,12,1CFBX,8/L
-play,6,1,ahmen001,12,SSBX,13/G
-play,6,1,delar003,01,SX,S7/L
-play,6,1,polla001,00,X,64(1)/FO/G
-play,6,1,lambj001,00,>B,CS2(26)/MREV
-com,"replay,6,lambj001,ARI,hirsj901,PHO01,,Y,M,SDN,A"
-com,"$when A.J. Pollock was called safe at 2B, Padres"
-com,"acting manager Pat Murphy challenged the ruling; the"
-com,"call was overturned by replay"
-play,7,0,shiej002,00,,NP
-sub,uptob001,"Melvin Upton",0,9,11
-play,7,0,uptob001,01,.CX,53/G
-play,7,0,solay001,11,CBX,53/G
-play,7,0,alony001,12,BFFFFS,K
-play,7,1,lambj001,00,,NP
-sub,garcf003,"Frank Garces",0,9,1
-play,7,1,lambj001,12,.CBSC,K
-play,7,1,goldp001,22,CBFFFBFX,C/E2
-play,7,1,perad001,00,>S,SB2
-play,7,1,perad001,12,>S.*BST,K
-play,7,1,dornd001,21,BS*BX,8/L
-play,8,0,uptoj001,22,.SCBBX,E6/TH/G
-play,8,0,kempm001,02,CFF>X,E5/TH/G.1-3
-play,8,0,norrd001,00,,NP
-sub,hudsd001,"Daniel Hudson",1,9,1
-play,8,0,norrd001,01,.S1X,54(1)/FO/G
-play,8,0,venaw001,31,BBBCB,W.1-2
-play,8,0,spanc001,22,FBBFX,7/F/SF.3-H(UR)
-play,8,0,amara001,00,,NP
-sub,wallb001,"Brett Wallace",0,8,11
-play,8,0,wallb001,22,.BBSSFX,43/G
-play,8,1,hilla001,00,,NP
-sub,vincn001,"Nick Vincent",0,8,1
-play,8,1,hilla001,00,,NP
-sub,middw001,"Will Middlebrooks",0,9,6
-play,8,1,hilla001,22,..BCFBX,8/F
-play,8,1,castw002,10,BX,8/L+
-play,8,1,ahmen001,01,CX,S9/L
-play,8,1,hudsd001,00,,NP
-sub,owinc001,"Chris Owings",1,9,11
-play,8,1,owinc001,12,.FFB>S,K
-play,9,0,middw001,00,,NP
-sub,ziegb001,"Brad Ziegler",1,9,1
-play,9,0,middw001,12,.BSFX,6/P
-play,9,0,solay001,12,FBFS,K
-play,9,0,alony001,32,CBBCFBB,W
-play,9,0,uptoj001,20,BBX,D9/L.1-3
-play,9,0,kempm001,01,CX,13/G
-data,er,shiej002,4
-data,er,garcf003,0
-data,er,vincn001,0
-data,er,delar003,1
-data,er,hudsd001,0
-data,er,ziegb001,0
+info,temp,80
+info,winddir,rtol
+info,windspeed,6
+info,fieldcond,unknown
+info,precip,unknown
+info,sky,sunny
+info,timeofgame,178
+info,attendance,22525
+info,wp,perew001
+info,lp,morga001
+info,save,vizca001
+start,galvf001,"Freddy Galvis",0,1,6
+start,altha001,"Aaron Altherr",0,2,7
+start,herro001,"Odubel Herrera",0,3,8
+start,ruf-d001,"Darin Ruf",0,4,3
+start,blana001,"Andres Blanco",0,5,4
+start,aschc001,"Cody Asche",0,6,5
+start,ruppc001,"Cameron Rupp",0,7,2
+start,bogub001,"Brian Bogusevic",0,8,9
+start,morga001,"Adam Morgan",0,9,1
+start,markn001,"Nick Markakis",1,1,9
+start,castd001,"Daniel Castro",1,2,4
+start,freef001,"Freddie Freeman",1,3,3
+start,garca004,"Adonis Garcia",1,4,7
+start,maybc001,"Cameron Maybin",1,5,8
+start,simma001,"Andrelton Simmons",1,6,6
+start,olivh001,"Hector Olivera",1,7,5
+start,bethc001,"Christian Bethancourt",1,8,2
+start,perew001,"Williams Perez",1,9,1
+play,1,0,galvf001,02,CSX,6/L
+play,1,0,altha001,02,CCX,3/G
+play,1,0,herro001,10,BX,S8/G
+play,1,0,ruf-d001,32,B1CB1BF>F>F>F>F>F>F>F>T,K
+play,1,1,markn001,12,BFCX,S6/P-
+play,1,1,castd001,11,BFX,7/F
+play,1,1,freef001,00,X,9/F
+play,1,1,garca004,00,X,D9/L+/MREV.1-H;BX2(943)
+com,"replay,1,garca004,ATL,joycj901,ATL02,,Y,M,PHI,A"
+com,"$when Adonis Garcia was called safe at 2B after rounding"
+com,"the bag, Phillies intermin manager Pete Mackanin"
+com,"challenged the ruling; the call was overturned"
+com,"by replay"
+play,2,0,blana001,00,,NP
+sub,bourm001,"Michael Bourn",1,4,7
+play,2,0,blana001,32,.BFBFBX,43/G
+play,2,0,aschc001,02,SFFS,K
+play,2,0,ruppc001,12,FCBX,HR/9/L
+play,2,0,bogub001,20,BBX,43/G
+play,2,1,maybc001,20,BBX,6/P
+play,2,1,simma001,22,BBFFS,K
+play,2,1,olivh001,11,BSX,31/G
+play,3,0,morga001,01,CX,7/L
+play,3,0,galvf001,00,X,8/F
+play,3,0,altha001,22,CBSBS,K
+play,3,1,bethc001,12,FFBFX,D7/L+
+play,3,1,perew001,01,M+2,POCS3(265)
+play,3,1,perew001,02,M+2.FFS,K
+play,3,1,markn001,11,CBX,7/F
+play,4,0,herro001,32,LFBFFFBFBX,S4/G-
+play,4,0,ruf-d001,12,F1BC+1T,K
+play,4,0,blana001,00,X,S7/L.1-2
+play,4,0,aschc001,22,CFFB*BFFX,8/L
+play,4,0,ruppc001,32,SF*B*BFB>S,K
+play,4,1,castd001,11,CBX,63/G
+play,4,1,freef001,12,FFFFBX,D9/L
+play,4,1,bourm001,00,X,8/L.2-3
+play,4,1,maybc001,00,X,S8/L.3-H
+play,4,1,simma001,00,1,SB2
+play,4,1,simma001,00,1.X,8/L
+play,5,0,bogub001,22,CBFBX,S8/G
+play,5,0,morga001,11,BM>X,23/BG/SH.1-2
+play,5,0,galvf001,22,CBSF*B2X,43/G.2-3
+play,5,0,altha001,11,BCX,43/G
+play,5,1,olivh001,12,CBFX,8/F+
+play,5,1,bethc001,22,SSFFBFBS,K
+play,5,1,perew001,12,CCBX,63/G
+play,6,0,herro001,02,CFS,K
+play,6,0,ruf-d001,11,BCX,S7/L
+play,6,0,blana001,00,X,53/G.1-2
+play,6,0,aschc001,30,BB+2BB,W
+play,6,0,ruppc001,00,,NP
+sub,cunnb001,"Brandon Cunniff",1,9,1
+play,6,0,ruppc001,32,.BSB2BC>B,W.2-3;1-2
+play,6,0,bogub001,00,,NP
+sub,mckia001,"Andrew McKirahan",1,9,1
+play,6,0,bogub001,00,,NP
+sub,franj004,"Jeff Francoeur",0,8,11
+play,6,0,franj004,02,..FSFFFS,K
+play,6,1,markn001,00,,NP
+sub,franj004,"Jeff Francoeur",0,8,9
+play,6,1,markn001,00,.X,43/G
+play,6,1,castd001,12,CFBX,53/G
+play,6,1,freef001,12,FBFX,S8/L
+play,6,1,bourm001,00,X,7/L
+play,7,0,morga001,00,,NP
+sub,darnc001,"Chase d'Arnaud",0,9,11
+play,7,0,darnc001,01,.CX,S6/G-/MREV
+com,"replay,7,darnc001,PHI,joycj901,ATL02,,Y,M,PHI,C"
+com,"$when Chase d'Arnaud was called out at 1B, Phillies"
+com,"interim manager Pete Mackanin challenged the ruling;"
+com,"the call was overturned by replay"
+play,7,0,galvf001,21,B1BCX,53/G-.1-2
+play,7,0,altha001,32,CFBF*BBB,W+PB.2-3
+play,7,0,herro001,00,X,FC1/BG/MREV.3XH(12);1-3
+com,"replay,7,herro001,PHI,joycj901,ATL02,,N,M,PHI,P"
+com,"$when Chase d'Arnaud was called out at HP, Phillies"
+com,"interim manager Pete Mackanin challenged the ruling;"
+com,"the call was upheld by replay saying the catcher"
+com,"did not block HP without the ball"
+play,7,0,ruf-d001,00,,NP
+sub,moylp001,"Peter Moylan",1,9,1
+play,7,0,ruf-d001,01,.F1X,13/G
+play,7,1,maybc001,00,,NP
+sub,hinod001,"Dalier Hinojosa",0,9,1
+play,7,1,maybc001,01,.CX,53/G
+play,7,1,simma001,11,CBX,63/G
+play,7,1,olivh001,11,CBX,S4/G
+play,7,1,bethc001,10,BX,64(1)/FO/G
+play,8,0,blana001,00,,NP
+sub,markm001,"Matt Marksberry",1,9,1
+play,8,0,blana001,32,.BBBCSFFS,K
+play,8,0,aschc001,00,,NP
+sub,sweed001,"Darnell Sweeney",0,6,11
+play,8,0,sweed001,32,.BCBCBB,W
+play,8,0,ruppc001,00,X,64(1)3/GDP
+play,8,1,markm001,00,,NP
+sub,blana001,"Andres Blanco",0,5,5
+play,8,1,markm001,00,,NP
+sub,sweed001,"Darnell Sweeney",0,6,4
+play,8,1,markm001,00,,NP
+sub,piera001,"A.J. Pierzynski",1,9,11
+play,8,1,piera001,12,...CBSS,K
+play,8,1,markn001,02,FFC,K
+play,8,1,castd001,11,FBX,63/G
+play,9,0,franj004,00,,NP
+sub,vizca001,"Arodys Vizcaino",1,9,1
+play,9,0,franj004,32,.BBFCBFFB,W
+play,9,0,hinod001,00,,NP
+sub,ruizc001,"Carlos Ruiz",0,9,11
+play,9,0,ruizc001,22,.BCFBX,E5/FO/G.1-2
+play,9,0,galvf001,12,BCLFS,K
+play,9,0,altha001,12,BCCS,K
+play,9,0,herro001,02,CSS,K+WP.2-3;1-2;B-1
+play,9,0,ruf-d001,21,SBBX,4/L
+data,er,morga001,2
+data,er,hinod001,0
+data,er,perew001,1
+data,er,cunnb001,0
+data,er,mckia001,0
+data,er,moylp001,0
+data,er,markm001,0
+data,er,vizca001,0
