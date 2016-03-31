@@ -378,7 +378,7 @@ def ProcessPlayLog(filename, con):
             
             
             #Hits         
-            if re.match('[SDT][0-9]',batParts[0]) != None:
+            if re.match('[SDT][0-9]?',batParts[0]) != None:
                 plays[playInd].hit = True
                 lineup[hitterID].AB += 1
                 lineup[hitterID].Hits += 1
@@ -412,23 +412,38 @@ def ProcessPlayLog(filename, con):
                 for mod in batParts:
                     if 'BG' in mod:
                         ballType = 'Bunt'
-                        ballLoc = batParts[0][1]
+                        if len(batParts[0])>1:
+                            ballLoc = batParts[0][1]
+                        else:
+                            ballLoc = ''
                         pitchers[currentPitcher].GB += 1
                     elif 'G' in mod:
                         ballType = 'Ground Ball'
-                        ballLoc = batParts[0][1]
+                        if len(batParts[0])>1:
+                            ballLoc = batParts[0][1]
+                        else:
+                            ballLoc = ''
                         pitchers[currentPitcher].GB += 1
                     elif 'L' in mod:
                         ballType = 'Line Drive'
-                        ballLoc = batParts[0][1]
+                        if len(batParts[0])>1:
+                            ballLoc = batParts[0][1]
+                        else:
+                            ballLoc = ''
                         pitchers[currentPitcher].LD += 1
                     elif 'F' in mod:
                         ballType = 'Flyball'
-                        ballLoc = batParts[0][1]
+                        if len(batParts[0])>1:
+                            ballLoc = batParts[0][1]
+                        else:
+                            ballLoc = ''
                         pitchers[currentPitcher].FB += 1
                     elif 'BP' in mod:
                         ballType = 'Bunt Pop'
-                        ballLoc = batParts[0][1]
+                        if len(batParts[0])>1:
+                            ballLoc = batParts[0][1]
+                        else:
+                            ballLoc = ''
                         pitchers[currentPitcher].FB += 1
             
             #Home Runs
