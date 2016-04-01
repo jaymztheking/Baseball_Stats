@@ -1,25 +1,23 @@
 import psycopg2
-import os
-from PlayResultStats import ProcessPlayLog
+from PlayerStats import Hitter
 
 pw = 'h4xorz' #raw_input('Password? ')
 con = psycopg2.connect("dbname=bbstats user=bbadmin host=192.168.1.111 password=%s" % pw)
 
-#Real Deal
-
-for file in enumerate(os.listdir('.\\Play by Play Logs\\')):
-    if '.EV' in file[1]:
-        filename = '.\\Play by Play Logs\\'+file[1]
-        a, b, c, d = ProcessPlayLog(filename, con)
 
 
-#Debug
+sql = 'select "USER_ID" from "HITTER_STATS" where "HEIGHT_INCH" = 0'
+cur = con.cursor()
+cur.execute(sql)
+for x in cur:
+    print(x[0])
+    player = Hitter(x[0], con)
+    player.UpdatePlayerInfo(con)
+
 '''
-filename = '.\\Play by Play Logs\\SAMPLE.EVN'
-a, b, c, d = ProcessPlayLog(filename, con)
+player = Pitcher('jackj001', con)
+player.UpdatePlayerInfo(con)
 '''
-
-con.close()
 
 
 

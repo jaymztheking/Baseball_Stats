@@ -454,7 +454,6 @@ def ProcessPlayLog(filename, con):
                 plays[playInd].runScored = True
                 lineup[hitterID].AB += 1
                 lineup[hitterID].Hits += 1
-                lineup[hitterID].RBI += 1
                 lineup[hitterID].HR += 1
                 pitchers[currentPitcher].Hits += 1
                 plays[playInd].contactStrikes += contactStrikes
