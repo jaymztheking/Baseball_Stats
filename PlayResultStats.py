@@ -121,7 +121,7 @@ def ProcessPlayLog(filename, con):
         #Create PitchResult
             lineup[row[3]].PA += 1
             playInd = lineup[row[3]].userID + str(lineup[row[3]].PA)
-            
+            print('BEGIN', firstBase, secondBase, thirdBase)
         #Clear Variables
             batEvent = ''
             runEvent = ''
@@ -378,7 +378,7 @@ def ProcessPlayLog(filename, con):
             
             
             #Hits         
-            if re.match('[SDT][0-9]?',batParts[0]) != None:
+            if re.match('[SDT]([0-9]|$)',batParts[0]) != None:
                 plays[playInd].hit = True
                 lineup[hitterID].AB += 1
                 lineup[hitterID].Hits += 1
@@ -722,6 +722,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
             print(batParts[0], firstBase, secondBase, thirdBase, row)
+            print(play, 'Nolan', lineup['arenn001'].AB, lineup['arenn001'].Hits, lineup['arenn001'].Runs, lineup['arenn001'].RBI, lineup['arenn001'].BB )
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
@@ -833,9 +834,8 @@ def ProcessPlayLog(filename, con):
                     pitchers[x].gameKey = gameKey
                     pitchers[x].InsertRosterRow(con)
                 for x in lineup.keys():
-                    if lineup[x].player_pos != 'P':
-                        lineup[x].game = gameKey
-                        lineup[x].InsertLineupRow(con)
+                    lineup[x].game = gameKey
+                    lineup[x].InsertLineupRow(con)
             #Insert Game, Lineup, Pitch Roster, and Play stuff into DB
             
             #Reset variables
