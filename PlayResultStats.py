@@ -693,7 +693,22 @@ def ProcessPlayLog(filename, con):
                             runsScored += 1
                             thirdBase = None 
                     elif run[:2] == 'BX':
-                        outs += 1
+                        if 'E' not in run:
+                            outs += 1
+                        elif run[:3] == 'BX1':
+                            firstBase = [hitterID, str(lineup[hitterID].PA)]
+                            batRunner = True
+                        elif run[:3] == 'BX2':
+                            secondBase = [hitterID, str(lineup[hitterID].PA)]
+                            batRunner = True
+                        elif run[:3] == 'BX3':
+                            thirdBase = [hitterID, str(lineup[hitterID].PA)]
+                            batRunner = True
+                        elif run[:3] == 'BXH':
+                            plays[hitterID+str(lineup[hitterID].PA)].runScored = True
+                            lineup[hitterID].Runs += 1
+                            runsScored += 1
+                            batRunner = True
                 if batParts[0] not in ('WP','PB','BK'):
                     if 'E' not in runEvent:
                         lineup[hitterID].RBI += runsScored
@@ -714,7 +729,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            #print(batParts[0], firstBase, secondBase, thirdBase, row, play)
+            print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
