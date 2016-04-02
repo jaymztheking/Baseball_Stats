@@ -191,8 +191,8 @@ def ProcessPlayLog(filename, con):
                     if '3-' not in runEvent:
                         runEvent += ';3-H'
             #Caught Stealing
-            if re.match('CS[23H]',batParts[0]) != None:
-                if batParts[0][:2] == 'CS':
+            if re.match('.*CS[23H]',batParts[0]) != None:
+                if 'CS' in batParts[0]:
                     play = 'Caught Stealing'
                     lineup[hitterID].PA -= 1
                     ballType = ''
@@ -201,14 +201,20 @@ def ProcessPlayLog(filename, con):
                     lineup[firstBase[0]].CS += 1
                     if 'E' not in batParts[0]:
                         runEvent += ';1X2'
+                    elif '1-' not in runEvent:
+                        runEvent += ';1-2'
                 elif 'CS3' in batParts[0]:
                     lineup[secondBase[0]].CS += 1
                     if 'E' not in batParts[0]:
                         runEvent += ';2X3'
+                    elif '2-' not in runEvent:
+                        runEvent += ';2-3'
                 elif 'CSH' in batParts[0]:
                     lineup[thirdBase[0]].CS += 1
                     if 'E' not in batParts[0]:
-                        runEvent += ';3XH'  
+                        runEvent += ';3XH'
+                    elif '3-' not in runEvent:
+                        runEvent += ';3-H'
             #Balk
             if batParts[0].strip() == 'BK':
                 lineup[hitterID].PA -= 1
@@ -708,7 +714,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            #print(batParts[0], firstBase, secondBase, thirdBase, row)
+            #print(batParts[0], firstBase, secondBase, thirdBase, row, play)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
