@@ -384,7 +384,7 @@ def ProcessPlayLog(filename, con):
             
             
             #Hits         
-            if re.match('[SDT][0-9]?',batParts[0]) != None:
+            if re.match('[SDT]($|[^B])',batParts[0]) != None:
                 plays[playInd].hit = True
                 lineup[hitterID].AB += 1
                 lineup[hitterID].Hits += 1
@@ -729,7 +729,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
+            #print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
