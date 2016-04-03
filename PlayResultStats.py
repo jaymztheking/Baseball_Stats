@@ -559,23 +559,38 @@ def ProcessPlayLog(filename, con):
                 for mod in batParts:
                     if 'BG' in mod:
                         ballType = 'Bunt'
-                        ballLoc = batParts[1]
+                        if len(batParts) > 1:
+                            ballLoc = batParts[1]
+                        else:
+                            ballLoc = batParts[0].replace('DGR','')
                         pitchers[currentPitcher].GB += 1
                     elif 'G' in mod:
                         ballType = 'Ground Ball'
-                        ballLoc = batParts[1]
+                        if len(batParts) > 1:
+                            ballLoc = batParts[1]
+                        else:
+                            ballLoc = batParts[0].replace('DGR','')
                         pitchers[currentPitcher].GB += 1
                     elif 'L' in mod:
                         ballType = 'Line Drive'
-                        ballLoc = batParts[1]
+                        if len(batParts) > 1:
+                            ballLoc = batParts[1]
+                        else:
+                            ballLoc = batParts[0].replace('DGR','')
                         pitchers[currentPitcher].LD += 1
                     elif 'F' in mod:
                         ballType = 'Flyball'
-                        ballLoc = batParts[1]
+                        if len(batParts) > 1:
+                            ballLoc = batParts[1]
+                        else:
+                            ballLoc = batParts[0].replace('DGR','')
                         pitchers[currentPitcher].FB += 1
                     elif 'BP' in mod:
                         ballType = 'Bunt Pop'
-                        ballLoc = batParts[1]
+                        if len(batParts) > 1:
+                            ballLoc = batParts[1]
+                        else:
+                            ballLoc = batParts[0].replace('DGR','')
                         pitchers[currentPitcher].FB += 1                               
                 
             #Hit By Pitch
@@ -751,7 +766,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
+            #print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
