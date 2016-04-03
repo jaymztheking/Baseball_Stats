@@ -745,9 +745,11 @@ def ProcessPlayLog(filename, con):
                             plays[hitterID+str(lineup[hitterID].PA)].runScored = True
                             lineup[hitterID].Runs += 1
                             runsScored += 1
+                            
+                #Figure out RBI
                 if batParts[0] not in ('WP','PB','BK') and 'E' not in batParts[0]:
                     for run in runners:
-                        if 'E' not in run and 'H' in run:
+                        if 'E' not in run and 'H' in run and 'TH' not in run:
                             lineup[hitterID].RBI += 1
                             plays[playInd].RBI += 1
             #Determine End Situation
