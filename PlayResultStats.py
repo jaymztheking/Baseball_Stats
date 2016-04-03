@@ -747,6 +747,15 @@ def ProcessPlayLog(filename, con):
                             plays[hitterID+str(lineup[hitterID].PA)].runScored = True
                             lineup[hitterID].Runs += 1
                             runsScored += 1
+                      
+                #Apparently Necessary Backwards Running
+                if runEvent != '':
+                    runners = filter(None, runEvent.split(';'))
+                    runners = sorted(runners, key=lambda base: sorter[base[0]])
+                    for run in runners:
+                        if run[:3] == '2-1':
+                            firstBase = secondBase
+                            secondBase = None
                             
                 #Figure out RBI
                 if batParts[0] not in ('WP','PB','BK') and 'E' not in batParts[0]:
@@ -770,7 +779,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            #print(batParts[0], firstBase, secondBase, thirdBase, row, playInd, runEvent)
+            print(batParts[0], firstBase, secondBase, thirdBase, row, playInd, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
