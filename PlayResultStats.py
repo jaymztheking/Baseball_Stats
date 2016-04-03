@@ -177,7 +177,8 @@ def ProcessPlayLog(filename, con):
                         
             #Stolen Base
             if re.match('.*SB[23H]$',batParts[0]) != None:
-                lineup[hitterID].PA -= 1
+                if '+' not in batParts[0]:
+                    lineup[hitterID].PA -= 1
                 if 'SB2' in batParts[0]:
                     lineup[firstBase[0]].SB += 1
                     if '1-' not in runEvent:
@@ -194,7 +195,8 @@ def ProcessPlayLog(filename, con):
             if re.match('.*CS[23H]',batParts[0]) != None:
                 if 'CS' in batParts[0]:
                     play = 'Caught Stealing'
-                    lineup[hitterID].PA -= 1
+                    if '+' not in batParts[0]:
+                        lineup[hitterID].PA -= 1
                     ballType = ''
                     ballLoc = ''
                 if 'CS2' in batParts[0]:
@@ -749,7 +751,7 @@ def ProcessPlayLog(filename, con):
                 #Figure out RBI
                 if batParts[0] not in ('WP','PB','BK') and 'E' not in batParts[0]:
                     for run in runners:
-                        if 'E' not in run and 'H' in run and 'TH' not in run:
+                        if 'E' not in run and '-H' in run:
                             lineup[hitterID].RBI += 1
                             plays[playInd].RBI += 1
             #Determine End Situation
@@ -768,7 +770,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            #print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
+            #print(batParts[0], firstBase, secondBase, thirdBase, row, playInd, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
