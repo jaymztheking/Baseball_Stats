@@ -229,6 +229,14 @@ def ProcessPlayLog(filename, con):
                 ballLoc = ''
                 ballType = ''  
 
+                            
+            #Defensive Indifference
+            if re.match('DI', batParts[0]) != None:
+                lineup[hitterID].PA -= 1
+                play = 'Defensive Indifference'
+                ballLoc = ''
+                ballType = ''                
+                
             #Catcher Interference
             if re.match('^C$', batParts[0]) != None:               
                 play = 'Interference'
@@ -268,9 +276,7 @@ def ProcessPlayLog(filename, con):
                         ballType = 'Ground Ball'
                         ballLoc = batParts[0][0]
                         pitchers[currentPitcher].GB += 1
-                        
-            
-            
+                                   
             #Groudball outs for Runners
             if re.match('[0-9]\([1-3]\)',batParts[0]) != None or re.match('[0-9][0-9]\([1-3]\)',batParts[0]) != None:
                 lineup[hitterID].AB += 1
@@ -380,11 +386,9 @@ def ProcessPlayLog(filename, con):
                         play = 'Out'
                         ballLoc = batParts[0]
                         ballType = 'Unknown'
-                        
-            
-            
+                            
             #Hits         
-            if re.match('[SDT]($|[^B])',batParts[0]) != None:
+            if re.match('[SDT]($|[^BGI])',batParts[0]) != None:
                 plays[playInd].hit = True
                 lineup[hitterID].AB += 1
                 lineup[hitterID].Hits += 1
@@ -531,9 +535,9 @@ def ProcessPlayLog(filename, con):
                 play = 'FC'
                 ballLoc = batParts[0][-1]
                 
-            #Triple Plays
             #Ground Rule Doubles
             if re.match('DGR', batParts[0]) != None:
+                play = 'Ground Rule Double'
                 plays[playInd].hit = True
                 lineup[hitterID].AB += 1
                 lineup[hitterID].Hits += 1
@@ -551,7 +555,28 @@ def ProcessPlayLog(filename, con):
                 plays[playInd].strikeCount = strikeCount
                 plays[playInd].ballCount = ballCount
                 if 'B-' not in runEvent:
-                    runEvent += ';B-2'                               
+                    runEvent += ';B-2'
+                for mod in batParts:
+                    if 'BG' in mod:
+                        ballType = 'Bunt'
+                        ballLoc = batParts[1]
+                        pitchers[currentPitcher].GB += 1
+                    elif 'G' in mod:
+                        ballType = 'Ground Ball'
+                        ballLoc = batParts[1]
+                        pitchers[currentPitcher].GB += 1
+                    elif 'L' in mod:
+                        ballType = 'Line Drive'
+                        ballLoc = batParts[1]
+                        pitchers[currentPitcher].LD += 1
+                    elif 'F' in mod:
+                        ballType = 'Flyball'
+                        ballLoc = batParts[1]
+                        pitchers[currentPitcher].FB += 1
+                    elif 'BP' in mod:
+                        ballType = 'Bunt Pop'
+                        ballLoc = batParts[1]
+                        pitchers[currentPitcher].FB += 1                               
                 
             #Hit By Pitch
             if batParts[0].strip() == 'HP':
@@ -697,22 +722,19 @@ def ProcessPlayLog(filename, con):
                             outs += 1
                         elif run[:3] == 'BX1':
                             firstBase = [hitterID, str(lineup[hitterID].PA)]
-                            batRunner = True
                         elif run[:3] == 'BX2':
                             secondBase = [hitterID, str(lineup[hitterID].PA)]
-                            batRunner = True
                         elif run[:3] == 'BX3':
                             thirdBase = [hitterID, str(lineup[hitterID].PA)]
-                            batRunner = True
                         elif run[:3] == 'BXH':
                             plays[hitterID+str(lineup[hitterID].PA)].runScored = True
                             lineup[hitterID].Runs += 1
                             runsScored += 1
-                            batRunner = True
-                if batParts[0] not in ('WP','PB','BK'):
-                    if 'E' not in runEvent:
-                        lineup[hitterID].RBI += runsScored
-                        plays[playInd].RBI = runsScored
+                if batParts[0] not in ('WP','PB','BK') and 'E' not in batParts[0]:
+                    for run in runners:
+                        if 'E' not in run and 'H' in run:
+                            lineup[hitterID].RBI += 1
+                            plays[playInd].RBI += 1
             #Determine End Situation
             if outs >= 3:
                 endSit = 30
@@ -729,7 +751,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            #print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
+            print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
