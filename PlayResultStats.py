@@ -763,6 +763,10 @@ def ProcessPlayLog(filename, con):
                         if 'E' not in run and '-H' in run:
                             lineup[hitterID].RBI += 1
                             plays[playInd].RBI += 1
+                            for x in batParts:
+                                if 'DP' in x:
+                                    lineup[hitterID].RBI -= 1
+                                    plays[playInd].RBI -= 1
             #Determine End Situation
             if outs >= 3:
                 endSit = 30
@@ -779,7 +783,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            print(batParts[0], firstBase, secondBase, thirdBase, row, playInd, runEvent)
+            #print(batParts[0], firstBase, secondBase, thirdBase, row, playInd, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
