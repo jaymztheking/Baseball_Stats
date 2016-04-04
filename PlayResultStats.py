@@ -224,6 +224,13 @@ def ProcessPlayLog(filename, con):
                 ballLoc = ''
                 ballType = ''
                 
+            #Pass Ball
+            if re.match('PB', batParts[0]) != None:
+                lineup[hitterID].PA -= 1
+                play = 'Passed Ball'
+                ballLoc = ''
+                ballType = ''
+            
             #Wild Pitch
             if re.match('WP', batParts[0]) != None:
                 lineup[hitterID].PA -= 1
@@ -231,6 +238,20 @@ def ProcessPlayLog(filename, con):
                 ballLoc = ''
                 ballType = ''  
 
+            #Put Out
+            if re.match('PO', batParts[0]) != None: 
+                lineup[hitterID].PA -= 1
+                play = 'Pick Off'
+                ballLoc = ''
+                ballType = ''
+                if 'E' not in batParts[0]:
+                    outs += 1
+                    if 'PO1' in batParts[0]:
+                        firstBase = None
+                    elif 'PO2' in batParts[0]:
+                        secondBase = None
+                    elif 'PO3' in batParts[0]:
+                        thirdBase = None
                             
             #Defensive Indifference
             if re.match('DI', batParts[0]) != None:
@@ -338,6 +359,11 @@ def ProcessPlayLog(filename, con):
             if batParts[0].strip() == 'NP':
                 lineup[hitterID].PA -=1
                 play = 'No Play'
+                
+            #Error on Foul Fly
+            if 'FLE' in batParts:
+                lineup[hitterID].PA -=1
+                play = 'Error on Foul'
                 
             #Flys/Unassisted Grounders
             if re.match('[0-9]$',batParts[0]) != None:
@@ -521,7 +547,7 @@ def ProcessPlayLog(filename, con):
                 pitchers[currentPitcher].K += 1
 
             #Fielder's Choice
-            if re.match('FC[0-9]$', batParts[0]) != None:
+            if re.match('FC[0-9]!?$', batParts[0]) != None:
                 lineup[hitterID].AB += 1
                 plays[playInd].contactStrikes += contactStrikes
                 plays[playInd].swingStrikes += swingStrikes
@@ -636,7 +662,11 @@ def ProcessPlayLog(filename, con):
                 
             #Reach on Error
             if re.match('[0-9]?E[0-9]', batParts[0]) != None:
-                lineup[hitterID].AB += 1
+                if 'SF' in batParts
+                    play = 'Sac Fly'
+                else:
+                    play = 'Reach on Error'
+                    lineup[hitterID].AB += 1
                 plays[playInd].contactStrikes += contactStrikes
                 plays[playInd].swingStrikes += swingStrikes
                 plays[playInd].lookStrikes += lookStrikes
@@ -651,9 +681,6 @@ def ProcessPlayLog(filename, con):
                 ballLoc = ''
                 if 'B-' not in runEvent:
                     runEvent += ';B-1'
-                            
-                
-            #Throw Out
 
             #Figure out Runners
             if runEvent != '':
