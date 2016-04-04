@@ -662,7 +662,7 @@ def ProcessPlayLog(filename, con):
                 
             #Reach on Error
             if re.match('[0-9]?E[0-9]', batParts[0]) != None:
-                if 'SF' in batParts
+                if 'SF' in batParts:
                     play = 'Sac Fly'
                 else:
                     play = 'Reach on Error'
