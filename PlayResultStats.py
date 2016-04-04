@@ -38,6 +38,7 @@ def ProcessPlayLog(filename, con):
     secondBase = None
     thirdBase = None
     for line in text:
+        line.replace('!','')
         row = line.split(',')
         rowType = row[0]
          
@@ -810,7 +811,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            #print(batParts[0], firstBase, secondBase, thirdBase, row, playInd, runEvent)
+            #print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             

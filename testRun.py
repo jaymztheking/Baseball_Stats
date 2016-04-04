@@ -4,7 +4,7 @@ from PlayResultStats import ProcessPlayLog
 
 pw = 'h4xorz' #raw_input('Password? ')
 con = psycopg2.connect("dbname=bbstats user=bbadmin host=192.168.1.111 password=%s" % pw)
-year = 2015
+year = 2011
 #Real Deal
 
 while year > 1992:
