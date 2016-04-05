@@ -22,7 +22,6 @@ while year > 1992:
 filename = '.\\Play by Play Logs\\SAMPLE.EVA'
 a, b, c, d = ProcessPlayLog(filename, con)
 '''
-
 con.close()
 
 

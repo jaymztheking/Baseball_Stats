@@ -38,7 +38,7 @@ def ProcessPlayLog(filename, con):
     secondBase = None
     thirdBase = None
     for line in text:
-        line.replace('!','')
+        line = line.replace('!','')
         row = line.split(',')
         rowType = row[0]
          
