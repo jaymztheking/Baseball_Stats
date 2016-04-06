@@ -69,7 +69,7 @@ class GamesParser(HTMLParser.HTMLParser):
     foundh2 = False
     startData = False
     games = []
-    abbrevs = ['ARI','ATL','BAL','BOS','CHC','CHW','CIN','CLE','COL','DET','HOU','KCR','LAA','LAD','MIA','MIL','MIN','NYM','NYY','OAK','PHI','PIT','SDP','SEA','SFG','STL','TBR','TEX','TOR','WSN']
+    BRabbrevs = ['ARI','ATL','BAL','BOS','CHC','CHW','CIN','CLE','COL','DET','HOU','KCR','LAA','LAD','MIA','MIL','MIN','NYM','NYY','OAK','PHI','PIT','SDP','SEA','SFG','STL','TBR','TEX','TOR','WSN']
     a = ''
     h = ''
     lastIn = 'H'
@@ -92,14 +92,14 @@ class GamesParser(HTMLParser.HTMLParser):
             self.startData = False
         elif self.startData:
             data = data.replace(' ','').strip('@').strip('\n')
-            if data in self.abbrevs:
+            if data in self.BRabbrevs:
                 if self.lastIn == 'H':
                     self.a = data
                     self.lastIn = 'A'
                 elif self.lastIn == 'A':
                     self.h = data
                     self.lastIn = 'H'
-            elif data.strip('@') in self.abbrevs:
+            elif data.strip('@') in self.BRabbrevs:
                 if self.lastIn == 'H':
                     self.a = data.strip(' ').strip('@')
                     self.lastIn = 'A'
