@@ -24,7 +24,7 @@ def GetTeam(gameKey, teamInd, con):
 
 def GetParkKey(hTeam, date, con):
     cur = con.cursor()
-    sql = 'select "PARK_KEY" from "PARK" where "TEAM_KEY" = %s and "PARK_OPEN_DATE"<= \'%s\'' % (hTeam, date.strftime('%Y-%m-%d'))
+    sql = 'select "PARK_KEY" from "PARK" where "TEAM_KEY" = %s and "PARK_OPEN_DATE"<= \'%s\' and ("PARK_CLOSE_DATE" is null or "PARK_CLOSE_DATE" >= \'%s\')' % (hTeam, date.strftime('%Y-%m-%d'), date.strftime('%Y-%m-%d'))
     cur.execute(sql)
     return cur.fetchall()[0][0]
     
