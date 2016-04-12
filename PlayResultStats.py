@@ -177,7 +177,7 @@ def ProcessPlayLog(filename, con):
             batParts = batEvent.split('/')
                         
             #Stolen Base
-            if re.match('.*SB[23H]$',batParts[0]) != None:
+            if re.match('.*SB[23H]',batParts[0]) != None:
                 if '+' not in batParts[0]:
                     lineup[hitterID].PA -= 1
                 if 'SB2' in batParts[0]:
@@ -811,7 +811,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            #print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
+            print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
