@@ -1,5 +1,7 @@
 from PlayByPlay import Play, PlayByPlay
 from Game import Game
+from LineupStats import Lineup
+from PitchingStats import PitchRoster
 from bbUtils import GetTeamfromAbb, GetPos
 from datetime import date
 
@@ -11,6 +13,7 @@ def ProcessRSLog(filename, con):
     wp = ''
     lp = ''
     savep = ''
+    playInd = 0
     for line in text:
         line = line.replace('!','')
         row = line.split(',')
@@ -69,9 +72,38 @@ def ProcessRSLog(filename, con):
             playerPos = GetPos(row[5])
             pbp.lineup[userID] = Lineup(123, team, playerName, int(playerBatNum), playerPos, userID, con)
             if playerPos == 'P':
-                pitchers[userID] = PitchRoster(123, team, playerName, userID, con)
-                pitchers[userID].pitcherRole = 'Starter'
+                pbp.pitchers[userID] = PitchRoster(123, team, playerName, userID, con)
+                pbp.pitchers[userID].pitcherRole = 'Starter'
                 if int(row[3]) == 0:
-                    awayPitcher = userID
+                    pbp.aPitcher = userID
                 else:
-                    homePitcher = userID
+                    pbp.hPitcher = userID
+        
+        #Plays            
+        elif rowType == 'play':
+            userID = row[3].strip()
+            pbp.lineup[userID].PA += 1
+            playInd += 1
+            pbp.plays[playInd] = Play()
+            pbp.plays[playInd].hitterID = userID
+            
+            #Set Inning specific variables
+            innPre = 'Top' if row[2]=='0' else 'Bot'
+            pbp.plays[playInd].pitcherID = pbp.hPitcher if innPre == 'Top' else pbp.aPitcher
+            prevInn = pbp.innning
+            pbp.inning = pbp.plays[playInd].inning = innPre +' '+str(row[1])
+            if pbp.inning != prevInn:
+                pbp.outs = 0
+                pbp.firstBase = None
+                pbp.secondBase = None
+                pbp.thirdBase = None
+            pbp.plays[playInd].startSit = pbp.ReturnSit()
+            
+            #Deal with Pitches
+            pbp.plays[playInd].pitchSeq = row[5]
+            pbp.plays[playInd].strikes = int(row[4][1])
+            pbp.plays[playInd].balls = int(row[4][0])
+            
+        #Subtract PAs from non-PA plays and clear pitches
+            
+            
