@@ -662,7 +662,7 @@ def ProcessPlayLog(filename, con):
                     runEvent += ';B-1'
                 
             #Reach on Error
-            if re.match('[0-9]?E[0-9]', batParts[0]) != None:
+            if re.match('[0-9]*E[0-9]', batParts[0]) != None:
                 if 'SF' in batParts:
                     play = 'Sac Fly'
                 else:
@@ -811,7 +811,7 @@ def ProcessPlayLog(filename, con):
             plays[playInd].ballType = ballType
             plays[playInd].resultOuts = outs - (startSit/10)
             plays[playInd].endSit = endSit
-            print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
+            #print(batParts[0], firstBase, secondBase, thirdBase, row, play, runEvent)
         #Handle Pinch Hits, Pitcher Changes, and other subs
         elif rowType == 'sub':
             
