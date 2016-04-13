@@ -1,4 +1,4 @@
-from bbUtils import GetHitterKey, GetTeam
+from bbUtils import GetHitterKey
 from PlayerStats import Hitter
 
 class Lineup:
