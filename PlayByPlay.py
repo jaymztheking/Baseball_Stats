@@ -192,10 +192,32 @@ class PlayByPlay:
             self.plays[playInd].resultOuts = 1
             self.outs += 1
 
-        #Field Outs/Double Play/Triple Play
+        #Force and Tag Outs/Double Play/Triple Play
         if re.search('^[0-9]{1,2}\([B123]\)', batParts[0]) != None:
-                        
-            
+            outStr = re.findall('\([B123]\)', batParts[0])
+            self.plays[playInd].ballLoc = batParts[0][0]
+            for a in batParts:
+                if 'DP' in a and 'NDP' not in a:
+                    self.outs +=2
+                    self.plays[playInd].resultOuts = 2
+                    self.plays[playInd].playType = 'Double Play'
+                if 'TP' in a:
+                    self.outs +=3
+                    self.plays[playInd].resultOuts = 3
+                    self.plays[playInd].playType = 'Triple Play'
+            if self.plays[playInd].playType not in('Triple Play', 'Double Play'):
+                self.plays[playInd].playType = 'Out'
+                self.outs += 1
+                self.plays[playInd].resultOuts = 1
+                if 'B-' not in runEvent and '(B)' not in outStr:
+                    runEvent += ';B-1'
+            for o in outStr:
+                if o == '(1)':
+                    self.firstBase = None
+                elif o == '(2)':
+                    self.secondBase = None
+                elif o == '(3)':
+                    self.thirdBase = None
         #Fielder's Choice
         
         #Single
