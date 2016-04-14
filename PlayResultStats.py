@@ -177,7 +177,7 @@ def ProcessPlayLog(filename, con):
             batParts = batEvent.split('/')
                         
             #Stolen Base
-            if re.match('.*SB[23H]$',batParts[0]) != None:
+            if re.match('.*SB[23H]',batParts[0]) != None:
                 if '+' not in batParts[0]:
                     lineup[hitterID].PA -= 1
                 if 'SB2' in batParts[0]:
@@ -662,7 +662,7 @@ def ProcessPlayLog(filename, con):
                     runEvent += ';B-1'
                 
             #Reach on Error
-            if re.match('[0-9]?E[0-9]', batParts[0]) != None:
+            if re.match('[0-9]*E[0-9]', batParts[0]) != None:
                 if 'SF' in batParts:
                     play = 'Sac Fly'
                 else:
