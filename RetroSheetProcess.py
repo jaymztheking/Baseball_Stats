@@ -6,7 +6,11 @@ from bbUtils import GetTeamfromAbb, GetPos
 from datetime import date
 
 def ProcessRSLog(filename, con):
-    text = open(filename)
+    text = open(filename,'a')
+    text.write('\n')
+    text.write('id,dunzo')
+    text.close()
+    text = open(filename,'r')
     pbp = PlayByPlay()
     currentGame = None
     gameDate = date(1500,1,1)
@@ -179,7 +183,7 @@ def ProcessRSLog(filename, con):
                     
                 #Go through Plays
                 for x in pbp.plays.values():
-                    if x.playType not in ('No Play','Stolen Base','Caught Stealing','Pick Off','Balk','Passed Ball','Wild Pitch','Defensive Indifference','Error on Foul'):
+                    if x.playType not in ('No Play','Stolen Base','Caught Stealing','Pick Off','Balk','Passed Ball','Wild Pitch','Defensive Indifference','Error on Foul', 'Unknown Runner Activity'):
                         x.CalcPitches()
                         pbp.lineup[x.hitterID].PA += 1
                         pbp.pitchers[x.pitcherID].ContactStrikes += x.contactX
@@ -187,7 +191,7 @@ def ProcessRSLog(filename, con):
                         pbp.pitchers[x.pitcherID].LookStrikes += x.lookX
                         pbp.pitchers[x.pitcherID].Strikes += x.lookX + x.swingX + x.contactX
                         pbp.pitchers[x.pitcherID].Balls += x.balls
-                        pbp.pitchers[x.pitcherID].pitchCount += pbp.pitchers[x.pitcherID].Strikes + x.balls
+                        pbp.pitchers[x.pitcherID].pitchCount += x.lookX + x.swingX + x.contactX + x.balls
                         if x.ballType in ('Ground Ball', 'Bunt Bround Ball'):
                             pbp.pitchers[x.pitcherID].GB += 1
                         elif x.ballType in ('Line Drive', 'Bunt Line Drive'):
@@ -213,6 +217,7 @@ def ProcessRSLog(filename, con):
                             if x.playType in ('Walk', 'Intentional Walk'):
                                 pbp.pitchers[x.pitcherID].BB += 1
                                 pbp.lineup[x.hitterID].BB += 1
+                                pbp.pitchers[x.pitcherID].pitchCount += 1
                             elif x.playType == 'Hit By Pitch':
                                 pbp.pitchers[x.pitcherID].HBP += 1
                                 pbp.lineup[x.hitterID].HBP += 1

@@ -190,6 +190,7 @@ class PlayByPlay:
                 
     def ProcessRSPlay(self, playStr, playInd):
         play = playStr.split('.')
+        #print(self.inning, playStr)
         batEvent = play[0]
         runEvent = play[1] if len(play) == 2 else ''
         batParts = batEvent.split('/')
@@ -280,6 +281,11 @@ class PlayByPlay:
         if re.search('FLE', batParts[0]) != None:
             self.plays[playInd].playType = 'Error on Foul'
             rbiEligible = False
+            
+        #Misc. Advance
+        if re.search('OA', batParts[0]) != None:
+            self.plays[playInd].playType = 'Unknown Runner Activity'
+            rbiEligible = False
 
 ###############################################################################
 #  Plate Appearance, No At-Bat                                                #
@@ -338,7 +344,7 @@ class PlayByPlay:
             self.outs += 1
 
         #Force and Tag Outs/Double Play/Triple Play
-        if re.search('^[0-9]{1,2}\([B123]\)', batParts[0]) != None:
+        if re.search('^[0-9]{1,3}\([B123]\)', batParts[0]) != None:
             outStr = re.findall('\([B123]\)', batParts[0])
             self.plays[playInd].ballLoc = batParts[0][0]
             for a in batParts:
@@ -387,20 +393,22 @@ class PlayByPlay:
                 runEvent += ';B-1'
             
         #Single
-        if re.search('S[0-9]', batParts[0]) != None:
+        if re.search('^S[0-9]?', batParts[0]) != None:
             self.plays[playInd].hit = True
             self.plays[playInd].playType = 'Single'
             rbiEligible = True
-            self.plays[playInd].ballLoc = re.search('S([0-9])', batParts[0]).group(1)
+            if re.search('^S[0-9]', batParts[0]) != None:
+                self.plays[playInd].ballLoc = re.search('S([0-9])', batParts[0]).group(1)
             if 'B' not in runEvent:
                 runEvent += ';B-1'
          
         #Double
-        if re.search('D[0-9]', batParts[0]) != None:
+        if re.search('^D[0-9]?', batParts[0]) != None:
             self.plays[playInd].hit = True
             self.plays[playInd].playType = 'Double'
             rbiEligible = True
-            self.plays[playInd].ballLoc = re.search('D([0-9])', batParts[0]).group(1)
+            if re.search('^D[0-9]', batParts[0]) != None:
+                self.plays[playInd].ballLoc = re.search('D([0-9])', batParts[0]).group(1)
             if 'B' not in runEvent:
                 runEvent += ';B-2'
          
@@ -413,11 +421,12 @@ class PlayByPlay:
                 runEvent += ';B-2'
          
         #Triple
-        if re.search('T[0-9]', batParts[0]) != None:
+        if re.search('^T[0-9]?', batParts[0]) != None:
             self.plays[playInd].hit = True
             self.plays[playInd].playType = 'Triple'
             rbiEligible = True
-            self.plays[playInd].ballLoc = re.search('T([0-9])', batParts[0]).group(1)
+            if re.search('^T[0-9]', batParts[0]) != None:
+                self.plays[playInd].ballLoc = re.search('T([0-9])', batParts[0]).group(1)
             if 'B' not in runEvent:
                 runEvent += ';B-3'
          
