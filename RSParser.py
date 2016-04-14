@@ -48,7 +48,7 @@ class PlayerInfoParser(HTMLParser.HTMLParser):
                 pieces = data.split()
                 self.batHand = pieces[1][0]
                 self.throwHand = pieces[3][0]
-                self.height = int(pieces[5].strip("'"))*12+int(pieces[6].strip('"'))
+                self.height = int(pieces[5].strip("'"))*12+int(round(float(pieces[6].strip('"'))))
                 self.weight = int(pieces[8])
                 
 

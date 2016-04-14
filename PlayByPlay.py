@@ -54,7 +54,7 @@ class PlayByPlay:
     outs = 0
     aPitcher = ''
     hPitcher = ''
-    innning = ''
+    inning = ''
     
     def init(self):
         pass
@@ -207,15 +207,15 @@ class PlayByPlay:
             self.plays[playInd].playType = 'Stolen Base'
             rbiEligible = False
             if 'SB2' in batParts[0]:
-                self.lineup[self.firstBase].SB += 1
+                self.lineup[self.firstBase[1]].SB += 1
                 if '1-' not in runEvent:
                     runEvent += ';1-2'
             if 'SB3' in batParts[0]:
-                self.lineup[self.secondBase].SB += 1
+                self.lineup[self.secondBase[1]].SB += 1
                 if '2-' not in runEvent:
                     runEvent += ';2-3'
             if 'SBH' in batParts[0]:
-                self.lineup[self.thirdBase].SB += 1
+                self.lineup[self.thirdBase[1]].SB += 1
                 if '3-' not in runEvent:
                     runEvent += ';3-H'
                     
@@ -224,19 +224,19 @@ class PlayByPlay:
             self.plays[playInd].playType = 'Caught Stealing'
             rbiEligible = False
             if 'CS2' in batParts[0]:
-                self.lineup[self.firstBase].CS += 1
+                self.lineup[self.firstBase[1]].CS += 1
                 if 'E' not in batParts[0]:
                     runEvent += ';1X2'
                 elif '1-' not in runEvent:
                     runEvent += ';1-2'
             if 'CS3' in batParts[0]:
-                self.lineup[self.secondBase].CS += 1
+                self.lineup[self.secondBase[1]].CS += 1
                 if 'E' not in batParts[0]:
                     runEvent += ';2X3'
                 elif '2-' not in runEvent:
                     runEvent += ';2-3'
             if 'CSH' in batParts[0]:
-                self.lineup[self.thirdBase].CS += 1
+                self.lineup[self.thirdBase[1]].CS += 1
                 if 'E' not in batParts[0]:
                     runEvent += ';3XH'
                 elif '3-' not in runEvent:
