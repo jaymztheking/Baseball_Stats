@@ -26,13 +26,11 @@ class Game:
         self.awayTeam = aTeam
         self.date = date
         
-    def GetGamePark(self, date, con):
-        self.parkKey = GetParkKey(self.homeTeam, date, con)
-        
     def InsertBlankGame(self, con):
         cur = con.cursor()
+        pk = GetParkKey(self.homeTeam, self.date, con)
         sql = 'insert into "GAME" ("GAME_KEY", "PARK_KEY", "GAME_DATE","GAME_TIME","HOME_TEAM_KEY","AWAY_TEAM_KEY")  VALUES (default, %s, \'%s\', \'%s\', %s, %s)' % \
-        (self.GetGamePark(self.date, con),self.date.strftime('%Y-%m-%d'), self.time, self.homeTeam, self.awayTeam)
+        (pk ,self.date.strftime('%Y-%m-%d'), self.time, self.homeTeam, self.awayTeam)
         self.gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
         if self.gameKey == None:
             cur.execute(sql)

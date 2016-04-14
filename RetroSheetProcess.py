@@ -133,7 +133,7 @@ def ProcessRSLog(filename, con):
                 pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PH', row[1], con)
                 
             #Pinch Runner
-            elif int(row[5]) == 11:
+            elif int(row[5]) == 12:
                 team = pbp.hTeam if int(row[3])==1 else pbp.aTeam
                 pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PR', row[1], con)
                 playInd += 1
@@ -168,7 +168,7 @@ def ProcessRSLog(filename, con):
         elif rowType == 'id':
             print(pbp.aAbb+' at '+pbp.hAbb+' - '+gameDate.isoformat())
             if gameDate != date(1500,1,1):
-                #currentGame.InsertBlankGame(con)
+                currentGame.InsertBlankGame(con)
                 currentGame.totalInnings = int(pbp.inning.split(' ')[-1])
                 pbp.pitchers[pbp.hPitcher].IP += currentGame.totalInnings
                 pbp.pitchers[pbp.aPitcher].IP += currentGame.totalInnings
@@ -225,16 +225,15 @@ def ProcessRSLog(filename, con):
                             currentGame.homeHits +=1
                         currentGame.homeRuns = x.runsScored
                     x.gameKey = currentGame.gameKey
-                    #x.InsertPlay(con)
+                    x.InsertPlay(con)
                 if currentGame.homeRuns > currentGame.awayRuns:
                     currentGame.homeTeamWin = True
                 elif currentGame.homeRuns == currentGame.awayRuns:
                     currentGame.tie = True
-                #currentGame.UpdateStats(con)
+                currentGame.UpdateStats(con)
                 
                 #Go Through Pitchers
                 for x in pbp.pitchers.keys():
-                    print(x, pbp.hPitcher, pbp.aPitcher, pbp.pitchers[x].team, pbp.pitchers[pbp.hPitcher].team, pbp.pitchers[pbp.aPitcher].team)
                     if x == wp:
                         pbp.pitchers[x].Win = True
                     elif x == lp:
@@ -242,7 +241,6 @@ def ProcessRSLog(filename, con):
                     elif x == savep:
                         pbp.pitchers[x].Save = True
                     if pbp.pitchers[x].team == pbp.pitchers[pbp.hPitcher].team and x != pbp.hPitcher:
-                        print('Poop!')
                         pbp.pitchers[pbp.hPitcher].IP -= float(pbp.pitchers[x].IP)
                     if pbp.pitchers[x].team == pbp.pitchers[pbp.aPitcher].team and x != pbp.aPitcher:
                         pbp.pitchers[pbp.aPitcher].IP -= float(pbp.pitchers[x].IP)
@@ -253,12 +251,12 @@ def ProcessRSLog(filename, con):
                             if pbp.pitchers[x].Hits == 0:
                                 pbp.pitchers[x].NH = True
                     pbp.pitchers[x].gameKey = currentGame.gameKey
-                    #pbp.pitchers[x].InsertRosterRow(con)
+                    pbp.pitchers[x].InsertRosterRow(con)
                     
                 #Go Through Hitters
-                for x in pbp.lineup.values():
-                    x.gameKey = currentGame.gameKey
-                    #x.InsertLineupRow(con)
+                for x in pbp.lineup.keys():
+                    pbp.lineup[x].game = currentGame.gameKey
+                    pbp.lineup[x].InsertLineupRow(con)
                     
                 #Clear Variables
                 rplays = pbp.plays
