@@ -1,23 +1,11 @@
 import psycopg2
-from PlayerStats import Hitter
+from RetroSheetProcess import ProcessRSLog
 
 pw = 'h4xorz' #raw_input('Password? ')
 con = psycopg2.connect("dbname=bbstats user=bbadmin host=192.168.1.111 password=%s" % pw)
 
-
-
-sql = 'select "USER_ID" from "HITTER_STATS" where "HEIGHT_INCH" = 0'
-cur = con.cursor()
-cur.execute(sql)
-for x in cur:
-    print(x[0])
-    player = Hitter(x[0], con)
-    player.UpdatePlayerInfo(con)
-
-'''
-player = Pitcher('jackj001', con)
-player.UpdatePlayerInfo(con)
-'''
+filename = 'C:\\Users\\James\\Desktop\\Baseball_Stats\\Play by Play Logs\\SAMPLE.EVA'
+p, l, r, g = ProcessRSLog(filename, con)
 
 
 

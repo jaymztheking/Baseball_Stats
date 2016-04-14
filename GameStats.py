@@ -28,8 +28,19 @@ class Game:
         
     def GetGamePark(self, date, con):
         self.parkKey = GetParkKey(self.homeTeam, date, con)
-              
-    def InsertStats(self, con):
+        
+    def InsertBlankGame(self, con):
+        cur = con.cursor()
+        sql = 'insert into "GAME" ("GAME_KEY", "PARK_KEY", "GAME_DATE","GAME_TIME","HOME_TEAM_KEY","AWAY_TEAM_KEY")  VALUES (default, %s, \'%s\', \'%s\', %s, %s)' % \
+        (self.GetGamePark(self.date, con),self.date.strftime('%Y-%m-%d'), self.time, self.homeTeam, self.awayTeam)
+        self.gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
+        if self.gameKey == None:
+            cur.execute(sql)
+            cur.execute('COMMIT;')
+            self.gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
+        return True
+        
+    def InsertFullStats(self, con):
         cur = con.cursor()
         insertSQL = 'insert into "GAME" VALUES (default, %s, \'%s\', \'%s\', \'%s\', %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, \'%s\');' % \
         (self.parkKey, self.date.strftime('%Y-%m-%d'), self.time, self.windDir, self.windSpeed, self.weather, self.totalInnings, self.homeHits, self.awayHits, self.homeRuns, self.awayRuns, self.homeTeam, self.awayTeam, self.temp, self.homeTeamWin, self.tie, self.gameLength, self.homeUmp )
@@ -39,6 +50,13 @@ class Game:
             cur.execute('COMMIT;')
             self.gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
         return True
+        
+    def UpdateStats(self, con):
+        cur = con.cursor()
+        sql = 'update "GAME" set ("WIND_DIR","WIND_SPEED_MPH","WEATHER_CONDITION","TOTAL_INNINGS","HOME_HITS","AWAY_HITS","HOME_RUNS","AWAY_RUNS","GAME_TEMP_F","HOME_TEAM_WIN?","TIE?","GAME_TIME_MINUTES","HOME_UMP_ID") = (\'%s\',%s,\'%s\', %s, %s, %s, %s, %s, %s, \'%s\', \'%s\', %s, \'%s\') WHERE "GAME_KEY" = %s' % \
+        (self.windDir, self.windSpeed, self.weather, self.totalInnings, self.homeHits, self.awayHits, self.homeRuns, self.awayRuns, self.temp, self.homeTeamWin, self.tie, self.gameLength, self.homeUmp, self.gameKey)        
+        cur.execute(sql)
+        cur.execute('COMMIT;')
         
     def CheckForRow(self, con):
         gameKey = GetGameKey(self.homeTeam, self.awayTeam, self.date, self.time, con)
