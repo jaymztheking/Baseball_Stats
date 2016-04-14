@@ -29,6 +29,8 @@ class Play:
         cur = con.cursor()
         sql = 'INSERT INTO "PITCH_RESULT" VALUES(%s, %s, %s, %s, \'%s\', %s, %s, \'%s\', %s, %s, %s, \'%s\', \'%s\', %s, \'%s\', \'%s\', %s, \'%s\', %s, %s)' % \
         (self.gameKey, hk, pk, self.startSit, self.inning, self.strikes, self.balls, self.pitchSeq, self.contactX, self.swingX, self.lookX, self.playType, self.hit, self.resultOuts, self.ballLoc, self.ballType, self.endSit, self.runScored, self.runsScored, self.playNum)
+        cur.execute(sql)
+        cur.execute('COMMIT;')
     
     def CalcPitches(self):
         for pitch in self.pitchSeq:
@@ -114,7 +116,7 @@ class PlayByPlay:
                     self.plays[ind].runScored = True
                     self.lineup[self.firstBase[1]].Runs += 1
                     self.pitchers[pitcherID].Runs += 1
-                    if rbiEligible:
+                    if rbiEligible and 'E' not in run:
                         self.lineup[hitterID].RBI += 1
                     self.plays[playInd].runsScored += 1
                     self.firstBase = None
@@ -126,7 +128,7 @@ class PlayByPlay:
                     self.plays[ind].runScored = True
                     self.lineup[self.secondBase[1]].Runs += 1
                     self.pitchers[pitcherID].Runs += 1
-                    if rbiEligible:
+                    if rbiEligible and 'E' not in run:
                         self.lineup[hitterID].RBI += 1
                     self.plays[playInd].runsScored += 1
                     self.secondBase = None
@@ -135,7 +137,7 @@ class PlayByPlay:
                     self.lineup[self.thirdBase[1]].Runs += 1
                     self.plays[ind].runScored = True
                     self.pitchers[pitcherID].Runs += 1
-                    if rbiEligible:
+                    if rbiEligible and 'E' not in run:
                         self.lineup[hitterID].RBI += 1
                     self.plays[playInd].runsScored += 1
                     self.thirdBase = None
@@ -149,7 +151,7 @@ class PlayByPlay:
                     self.plays[playInd].runScored = True
                     self.lineup[self.plays[playInd].hitterID].Runs += 1
                     self.pitchers[pitcherID].Runs += 1
-                    if rbiEligible:
+                    if rbiEligible and 'E' not in run:
                         self.lineup[hitterID].RBI += 1
                     self.plays[playInd].runsScored += 1
                 elif run[:2] == '1X':
@@ -299,7 +301,7 @@ class PlayByPlay:
                 runEvent += ';B-1'
                 
         #Walk and Intentional Walks
-        if re.search('W', batParts[0]) != None:
+        if re.search('W', batParts[0]) != None and re.search('WP', batParts[0]) == None:
             self.plays[playInd].playType = 'Intentional Walk' if 'IW' in batParts[0] else 'Walk'
             rbiEligible = True
             if 'B-' not in runEvent:
@@ -375,7 +377,7 @@ class PlayByPlay:
                     
         #Fielder's Choice
         if re.search('FC[0-9]', batParts[0]) != None:
-            self.plays[playInd].playType = "Fielder's Choice"
+            self.plays[playInd].playType = "Fielders Choice"
             rbiEligible = True
             self.plays[playInd].ballLoc = re.search('FC([0-9])', batParts[0]).group(1)
             if 'B' not in runEvent:
@@ -393,7 +395,7 @@ class PlayByPlay:
                 runEvent += ';B-1'
             
         #Single
-        if re.search('^S[0-9]?', batParts[0]) != None:
+        if re.search('^S[0-9]?', batParts[0]) != None and re.search('SB[23H]', batParts[0]) == None:
             self.plays[playInd].hit = True
             self.plays[playInd].playType = 'Single'
             rbiEligible = True
@@ -403,7 +405,7 @@ class PlayByPlay:
                 runEvent += ';B-1'
          
         #Double
-        if re.search('^D[0-9]?', batParts[0]) != None:
+        if re.search('^D[0-9]?', batParts[0]) != None and re.search('DI', batParts[0]) == None:
             self.plays[playInd].hit = True
             self.plays[playInd].playType = 'Double'
             rbiEligible = True

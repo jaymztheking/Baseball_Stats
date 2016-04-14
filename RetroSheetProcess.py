@@ -7,7 +7,6 @@ from datetime import date
 
 def ProcessRSLog(filename, con):
     text = open(filename,'a')
-    text.write('\n')
     text.write('id,dunzo')
     text.close()
     text = open(filename,'r')
@@ -198,7 +197,7 @@ def ProcessRSLog(filename, con):
                             pbp.pitchers[x.pitcherID].LD += 1
                         elif x.ballType in ('Fly Ball','Pop Up','Bunt Pop'):
                             pbp.pitchers[x.pitcherID].FB += 1
-                        if x.playType in ('Strikeout','Out','Double Play','Triple Play', "Fielder's Choice",'Reach On Error','Single','Double','Ground Rule Double','Triple','Home Run'):
+                        if x.playType in ('Strikeout','Out','Double Play','Triple Play', "Fielders Choice",'Reach On Error','Single','Double','Ground Rule Double','Triple','Home Run'):
                             pbp.lineup[x.hitterID].AB += 1
                             if x.playType in ('Single', 'Double', 'Ground Rule Double', 'Triple', 'Home Run'):
                                 pbp.lineup[x.hitterID].Hits += 1
@@ -230,6 +229,7 @@ def ProcessRSLog(filename, con):
                             currentGame.homeHits +=1
                         currentGame.homeRuns = x.runsScored
                     x.gameKey = currentGame.gameKey
+
                     x.InsertPlay(con)
                 if currentGame.homeRuns > currentGame.awayRuns:
                     currentGame.homeTeamWin = True
@@ -263,19 +263,22 @@ def ProcessRSLog(filename, con):
                     pbp.lineup[x].game = currentGame.gameKey
                     pbp.lineup[x].InsertLineupRow(con)
                     
-                #Clear Variables
-                rplays = pbp.plays
-                rlineup = pbp.lineup
-                rpitchers = pbp.pitchers
-                rgame = currentGame                    
-                    
-                pbp = PlayByPlay()
-                currentGame = None
-                gameDate = date(1500,1,1)
-                weather = []
-                wp = ''
-                lp = ''
-                savep = ''
-                playInd = 0
+            #Clear Variables
+            rplays = pbp.plays
+            rlineup = pbp.lineup
+            rpitchers = pbp.pitchers
+            rgame = currentGame                    
+                
+            pbp = PlayByPlay()
+            pbp.lineup = {}
+            pbp.plays = {}
+            pbp.pitchers = {}
+            currentGame = None
+            gameDate = date(1500,1,1)
+            weather = []
+            wp = ''
+            lp = ''
+            savep = ''
+            playInd = 0
     return rplays, rlineup, rpitchers, rgame
                 
