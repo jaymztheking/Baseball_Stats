@@ -23,3 +23,4 @@ This project is a collection of Python classes and corresponding PostgreSQL comp
 * End Situation for Home Run ends in 0
 * Start Sit generally doesn't equal end sit when no RBIs
 * Start Sit =21 and End Sit =21 on double plays
+* Game 2077 is weird in Top 8
