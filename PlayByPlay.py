@@ -86,7 +86,7 @@ class PlayByPlay:
                 self.plays[playInd].ballType = 'Fly Ball'
             if re.search('G', x) != None:
                 self.plays[playInd].ballType = 'Ground Ball'
-            if re.search('P', x) != None:
+            if re.search('P', x) != None and re.search('DP', x) == None:
                 self.plays[playInd].ballType = 'Pop Up'
             if re.search('BP', x) != None:
                 self.plays[playInd].ballType = 'Bunt Pop'
@@ -116,7 +116,7 @@ class PlayByPlay:
                     self.plays[ind].runScored = True
                     self.lineup[self.firstBase[1]].Runs += 1
                     self.pitchers[pitcherID].Runs += 1
-                    if rbiEligible and 'E' not in run:
+                    if rbiEligible and ('NR' not in run and 'E' not in run):
                         self.lineup[hitterID].RBI += 1
                     self.plays[playInd].runsScored += 1
                     self.firstBase = None
@@ -128,7 +128,7 @@ class PlayByPlay:
                     self.plays[ind].runScored = True
                     self.lineup[self.secondBase[1]].Runs += 1
                     self.pitchers[pitcherID].Runs += 1
-                    if rbiEligible and 'E' not in run:
+                    if rbiEligible  and ('NR' not in run and 'E' not in run):
                         self.lineup[hitterID].RBI += 1
                     self.plays[playInd].runsScored += 1
                     self.secondBase = None
@@ -137,7 +137,7 @@ class PlayByPlay:
                     self.lineup[self.thirdBase[1]].Runs += 1
                     self.plays[ind].runScored = True
                     self.pitchers[pitcherID].Runs += 1
-                    if rbiEligible and 'E' not in run:
+                    if rbiEligible  and ('NR' not in run and 'E' not in run):
                         self.lineup[hitterID].RBI += 1
                     self.plays[playInd].runsScored += 1
                     self.thirdBase = None
@@ -151,7 +151,7 @@ class PlayByPlay:
                     self.plays[playInd].runScored = True
                     self.lineup[self.plays[playInd].hitterID].Runs += 1
                     self.pitchers[pitcherID].Runs += 1
-                    if rbiEligible and 'E' not in run:
+                    if rbiEligible and ('NR' not in run and 'E' not in run):
                         self.lineup[hitterID].RBI += 1
                     self.plays[playInd].runsScored += 1
                 elif run[:2] == '1X':
@@ -384,7 +384,7 @@ class PlayByPlay:
                 runEvent += ';B-1'
             
         #Reach on Error
-        if re.search('E[0-9]', batParts[0]) != None:
+        if re.search('(^|[^\(])E[0-9]', batParts[0]) != None and re.search('FLE', batParts[0]) == None:
             if self.plays[playInd].playType[:9] != 'Sacrifice':            
                 self.plays[playInd].playType = 'Reach On Error'
                 if self.outs < 2:
