@@ -110,6 +110,7 @@ def ProcessRSLog(filename, con):
             pbp.ProcessRSPlay(row[6],playInd)
             pbp.plays[playInd].endSit = pbp.ReturnSit()
             pbp.plays[playInd].playNum = playInd
+            
         #Substitutions
         elif rowType == 'sub':
             #Pitching Change
