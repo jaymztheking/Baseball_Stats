@@ -17,3 +17,8 @@ This project is a collection of Python classes and corresponding PostgreSQL comp
 * Create table for per plate appearance stats
 * Create play by play scraping for current year
 * Write code to scrape day-of lineups and salaries
+
+##Pitch Result Tests
+* Start Situation is not 30
+* End Situation for Home Run ends in 0
+* Start Sit generally doesn't equal end sit when no RBIs
