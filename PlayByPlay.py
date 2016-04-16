@@ -301,7 +301,7 @@ class PlayByPlay:
                 runEvent += ';B-1'
                 
         #Walk and Intentional Walks
-        if re.search('W', batParts[0]) != None and re.search('WP', batParts[0]) == None:
+        if re.search('W(\+|$)', batParts[0]) != None:
             self.plays[playInd].playType = 'Intentional Walk' if 'IW' in batParts[0] else 'Walk'
             rbiEligible = True
             if 'B-' not in runEvent:
@@ -355,6 +355,8 @@ class PlayByPlay:
                     self.plays[playInd].resultOuts = 2
                     self.plays[playInd].playType = 'Double Play'
                     rbiEligible = False
+                    if (runEvent.count('X') + len(outStr)) == 2:
+                        runEvent += ';B-1'
                 if 'TP' in a:
                     self.outs +=3
                     self.plays[playInd].resultOuts = 3
@@ -441,4 +443,4 @@ class PlayByPlay:
                 runEvent += ';B-H'
                 
         self.GetRSBallType(batParts[1:], playInd)
-        self.CalcRSRunners(runEvent, playInd, rbiEligible)
+        self.CalcRSRunners(runEvent.strip(), playInd, rbiEligible)
