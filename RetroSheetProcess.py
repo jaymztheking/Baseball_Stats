@@ -7,7 +7,7 @@ from datetime import date
 
 def ProcessRSLog(filename, con):
     text = open(filename,'a')
-    text.write('id,dunzo')
+    text.write('\nid,dunzo')
     text.close()
     text = open(filename,'r')
     pbp = PlayByPlay()
@@ -107,7 +107,7 @@ def ProcessRSLog(filename, con):
             pbp.plays[playInd].pitchSeq = row[5]
             pbp.plays[playInd].strikes = int(row[4][1])
             pbp.plays[playInd].balls = int(row[4][0])
-            pbp.ProcessRSPlay(row[6],playInd)
+            pbp.ProcessRSPlay(row[6].strip(),playInd)
             pbp.plays[playInd].endSit = pbp.ReturnSit()
             pbp.plays[playInd].playNum = playInd
             
