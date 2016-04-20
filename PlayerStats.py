@@ -60,7 +60,7 @@ class Pitcher:
         
     def InsertPlayerRow(self, con):
         cur = con.cursor()
-        insertSQL = 'insert into "PITCHER_STATS" values(default, \'%s\', 0, 0, \'1900-01-01\', \'1900-01-01\', \'%s\', \'%s\', \'%s\')' % (self.name.replace("\'","`"), self.throwHand, self.armRelease, self.userid)    
+        insertSQL = 'insert into "PITCHER_STATS" values(default, \'%s\', 0, 0, \'1900-01-01\', \'1900-01-01\', \'%s\', \'%s\', \'%s\')' % (self.name.replace("\'","`").replace('"',''), self.throwHand, self.armRelease, self.userid)    
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')

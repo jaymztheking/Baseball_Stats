@@ -192,7 +192,6 @@ class PlayByPlay:
                 
     def ProcessRSPlay(self, playStr, playInd):
         play = playStr.split('.')
-        #print(self.inning, playStr)
         batEvent = play[0]
         runEvent = play[1] if len(play) == 2 else ''
         batParts = batEvent.split('/')
@@ -246,7 +245,7 @@ class PlayByPlay:
                     runEvent += ';3-H'
          
          #Pick Off
-        if re.search('PO', batParts[0]) != None:
+        if re.search('PO[^C]', batParts[0]) != None:
             self.plays[playInd].playType = 'Pick Off'
             rbiEligible = False
             if 'E' not in batParts[0]:
@@ -301,7 +300,7 @@ class PlayByPlay:
                 runEvent += ';B-1'
                 
         #Walk and Intentional Walks
-        if re.search('W', batParts[0]) != None and re.search('WP', batParts[0]) == None:
+        if re.search('W(\+|$)', batParts[0]) != None:
             self.plays[playInd].playType = 'Intentional Walk' if 'IW' in batParts[0] else 'Walk'
             rbiEligible = True
             if 'B-' not in runEvent:
@@ -332,8 +331,9 @@ class PlayByPlay:
         if re.search('(^|[^B])K', batParts[0]) != None:
             self.plays[playInd].playType = 'Strikeout'
             rbiEligible = False
-            self.plays[playInd].resultOuts = 1
-            self.outs +=1
+            if 'B-' not in runEvent:
+                self.plays[playInd].resultOuts = 1
+                self.outs +=1
             
             
         #One Fielding Out
@@ -346,15 +346,17 @@ class PlayByPlay:
             self.outs += 1
 
         #Force and Tag Outs/Double Play/Triple Play
-        if re.search('^[0-9]{1,3}\([B123]\)', batParts[0]) != None:
+        if re.search('^[0-9]{1,4}\([B123]\)', batParts[0]) != None:
             outStr = re.findall('\([B123]\)', batParts[0])
             self.plays[playInd].ballLoc = batParts[0][0]
             for a in batParts:
                 if 'DP' in a and 'NDP' not in a:
-                    self.outs +=2
-                    self.plays[playInd].resultOuts = 2
+                    self.outs += len(outStr)
+                    self.plays[playInd].resultOuts = len(outStr)
                     self.plays[playInd].playType = 'Double Play'
                     rbiEligible = False
+                    if (runEvent.count('X') + len(outStr)) == 2 and '(B)' not in outStr:
+                        runEvent += ';B-1'
                 if 'TP' in a:
                     self.outs +=3
                     self.plays[playInd].resultOuts = 3
@@ -391,7 +393,7 @@ class PlayByPlay:
                     rbiEligible = True
                 else:
                     rbiEligible = False
-            if 'B' not in runEvent:
+            if 'B-' not in runEvent or 'BX' not in runEvent:
                 runEvent += ';B-1'
             
         #Single
@@ -441,4 +443,4 @@ class PlayByPlay:
                 runEvent += ';B-H'
                 
         self.GetRSBallType(batParts[1:], playInd)
-        self.CalcRSRunners(runEvent, playInd, rbiEligible)
+        self.CalcRSRunners(runEvent.strip(), playInd, rbiEligible)
