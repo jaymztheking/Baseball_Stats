@@ -105,8 +105,8 @@ def ProcessRSLog(filename, con):
             
             #Deal with Pitches
             pbp.plays[playInd].pitchSeq = row[5]
-            pbp.plays[playInd].strikes = int(row[4][1]) if len(row[4]) > 1 else 0
-            pbp.plays[playInd].balls = int(row[4][0]) if len(row[4]) > 1 else 0
+            pbp.plays[playInd].strikes = int(row[4][1]) if (len(row[4]) > 1 and row[4] != '??') else 0
+            pbp.plays[playInd].balls = int(row[4][0]) if (len(row[4]) > 1 and row[4] != '??')else 0
             #print(pbp.inning)
             #print ('Before', row[6].strip(), pbp.thirdBase, pbp.secondBase, pbp.firstBase, pbp.plays[playInd].startSit)
             pbp.ProcessRSPlay(row[6].strip(),playInd)
