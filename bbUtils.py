@@ -101,21 +101,39 @@ def GetHitterKeyfromLU(gameKey, team, batNum, con):
     else:
         return None
     
-def GetRSConversion():
-    diffAbb = {}
-    diffAbb['CHN'] = 'CHC'    
-    diffAbb['CHA'] = 'CHW'
-    diffAbb['ANA'] = 'LAA'
-    diffAbb['KCA'] = 'KCR'
-    diffAbb['TBA'] = 'TBR'
-    diffAbb['NYA'] = 'NYY'
-    diffAbb['SDN'] = 'SDP'
-    diffAbb['NYN'] = 'NYM'
-    diffAbb['WAS'] = 'WSN'
-    diffAbb['SFN'] = 'SFG'
-    diffAbb['LAN'] = 'LAD'
-    diffAbb['SLN'] = 'STL'
-    return diffAbb
+def ConvertTeamAbb(src, teamAbb):
+    if src == 'RS':
+        diffAbb = {}
+        diffAbb['CHN'] = 'CHC'    
+        diffAbb['CHA'] = 'CHW'
+        diffAbb['ANA'] = 'LAA'
+        diffAbb['KCA'] = 'KCR'
+        diffAbb['TBA'] = 'TBR'
+        diffAbb['NYA'] = 'NYY'
+        diffAbb['SDN'] = 'SDP'
+        diffAbb['NYN'] = 'NYM'
+        diffAbb['WAS'] = 'WSN'
+        diffAbb['SFN'] = 'SFG'
+        diffAbb['LAN'] = 'LAD'
+        diffAbb['SLN'] = 'STL'
+        return diffAbb.get(teamAbb, teamAbb)
+    elif src == 'BR':
+        diffAbb = {}
+        diffAbb['CHC'] = 'CHN'    
+        diffAbb['CHW'] = 'CHA'
+        diffAbb['LAA'] = 'ANA'
+        diffAbb['KCR'] = 'KCA'
+        diffAbb['TBR'] = 'TBA'
+        diffAbb['NYY'] = 'NYA'
+        diffAbb['SDP'] = 'SDN'
+        diffAbb['NYM'] = 'NYN'
+        diffAbb['WSN'] = 'WAS'
+        diffAbb['SFG'] = 'SFN'
+        diffAbb['LAD'] = 'LAN'
+        diffAbb['STL'] = 'SLN'
+        return diffAbb.get(teamAbb, teamAbb)
+    else:
+        return teamAbb
 
 def GetPos(num):
     pos = ['P','C','1B','2B','3B','SS','LF','CF','RF','DH']

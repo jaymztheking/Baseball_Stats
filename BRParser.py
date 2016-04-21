@@ -41,20 +41,28 @@ class GameTimeParser(HTMLParser.HTMLParser):
 
 class GameWeatherParser(HTMLParser.HTMLParser):
     startData = False
+    startData1 = False
     weather = ''
+    field = ''
     def handle_starttag(self, tag, attrs):
         if tag == 'div':
             for att in attrs:
                 if att[0]== 'id' and att[1]== 'weather':
                     self.startData = True
+                elif att[0]=='id' and att[1]== 'fieldcond':
+                    self.startData1 = True
         
     def handle_endtag(self, tag):
         if tag == 'div' and self.startData:
             self.startData = False
+        elif tag == 'div' and self.startData1:
+            self.startData1 = False
         
     def handle_data(self, data):
         if self.startData:
             self.weather += data
+        elif self.startData1:
+            self.field += data
 
 class GameUmpParser(HTMLParser.HTMLParser):
     startData = False
