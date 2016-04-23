@@ -19,8 +19,9 @@ def ProcessBRPage(filename, con):
     currentGame = Game(hTeam, aTeam, gameDate, con)
     b = GameTimeParser()
     b.feed(html)
-    timeStr = b.time
-    currentGame.time = str(re.search('[0-9]{1,2}:[0-9]{2}[AP]M', timeStr, flags=re.IGNORECASE).group(0))
+    currentGame.time = b.time
+    lengthStr = b.gamelen.split(':')
+    currentGame.gameLength += int(lengthStr[0]) * 60 + int(lengthStr[1])
     b = GameWeatherParser()
     b.feed(html)
     print b.weather

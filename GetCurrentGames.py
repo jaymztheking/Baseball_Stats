@@ -14,7 +14,7 @@ b= GamesParser()
 b.feed(html)
 for game in b.games:
     fileName = savePath + '%s_@_%s_%s' % (game[1], game[0],year+month.zfill(2)+day.zfill(2))+'.html'
-    gameHTML = urllib2.urlopen(game[2]).read().decode('utf-8').replace('&#183;','*')
+    gameHTML = urllib2.urlopen(game[2]).read().decode('utf-8')
     newFile = open(fileName, 'w')
     newFile.write(gameHTML)
     newFile.close()
