@@ -1,6 +1,6 @@
 from datetime import date
 from bbUtils import GetTeamfromAbb, ConvertTeamAbb
-from BRParser import GameTeamsParser, GameTimeParser, GameWeatherParser
+from BRParser import GameTeamsParser, GameTimeParser, GameWeatherParser, GameUmpParser
 from GameStats import Game
 import re
 
@@ -53,6 +53,9 @@ def ProcessBRPage(filename, con):
         sky = weatherStr[-2].lower()
     field = b.field.lower() if (b.field != '') else 'unknown'
     currentGame.weather = 'Field = '+field+', Prec = '+precip+', Sky = '+sky
+    b = GameUmpParser()
+    b.feed(html)
+    currentGame.homeUmp = str(b.homeump)
     
     
     return currentGame

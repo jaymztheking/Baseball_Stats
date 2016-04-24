@@ -91,7 +91,8 @@ class GameUmpParser(HTMLParser.HTMLParser):
     
     def handle_data(self, data):
         if self.startData:
-            self.homeUmp = re.search('HP - (.*), 1B',data)
+            if re.search('HP ?- ?(.*), 1B',data) != None:
+                self.homeump = re.search('HP ?- ?(.*), 1B',data).group(1)
     
 class GameWinLossSaveParser(HTMLParser.HTMLParser):
     startData = False
