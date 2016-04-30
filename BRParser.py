@@ -130,6 +130,107 @@ class GameWinLossSaveParser(HTMLParser.HTMLParser):
                 self.savePitch = data
                 self.startSave = False
             
+<<<<<<< HEAD
+class BRPlayParser(HTMLParser.HTMLParser):
+    startData = False
+    insideTable = False
+    subRow = False
+    index = 0
+    playNum = 0
+    lineup = {}
+    pitchers = {}
+    plays = {}
+    subs = []
+    
+    def handle_starttag(self, tag, attrs):
+        for att in attrs:
+            if att[0] == 'id' and att[1][:6] == 'event_':
+                self.startData = True
+                self.playNum = int(att[1].split('_')[1])
+                self.plays[self.playNum] = ['','','','','','','','','','','','']
+            if tag == 'td' and self.startData:
+                self.insideTable = True
+            if tag == 'span' and att[0] == 'class' and att[1] == 'ingame_substitution':
+                self.subRow = True
+        
+    def handle_data(self, data):
+        if self.startData and self.insideTable:    
+            self.plays[self.playNum][self.index] = data
+        if self.subRow:
+            self.subs.append([self.playNum,data])
+        
+    def handle_endtag(self, tag):
+        if tag == 'tr' and self.startData:
+            self.startData = False
+            self.index = 0
+        elif tag == 'td' and self.insideTable:
+            self.insideTable = False
+            self.index += 1
+        elif tag == 'span' and self.subRow:
+            self.subRow = False
+            
+class BRLineupParser(HTMLParser.HTMLParser):
+    startData = False
+    tdFound = False
+    lineup = []
+    entry = []
+    def handle_starttag(self,tag,attrs):
+        if tag == 'table':
+            for att in attrs:
+                if att[0] == 'id' and att[1] == 'lineups':
+                    self.startData = True
+        elif self.startData and tag == 'td':
+            self.tdFound = True
+  
+                    
+    def handle_data(self, data):
+        if self.tdFound:
+            self.entry.append(data)
+
+    def handle_endtag(self, tag):
+        if self.startData and tag == 'td':
+            self.tdFound = False
+        elif self.startData and tag == 'tr':
+            self.lineup.append(self.entry)
+            self.entry = []
+        elif self.startData and tag == 'table':
+            self.startData = False
+    
+class BRPitcherParser(HTMLParser.HTMLParser):
+    startData = False
+    tdCount = 0
+    pitcher = []
+    roster = []
+    team = 'A'
+    def handle_starttag(self, tag, attrs):
+        if tag == 'table':
+            for att in attrs:
+                if att[0] == 'id' and len(att[1])>7 and att[1][-8:] == 'pitching':
+                    self.startData = True
+        elif self.startData and tag == 'td':
+            self.tdCount += 1
+    
+    def handle_data(self, data):
+        if self.startData:
+            if self.tdCount == 1:
+                self.pitcher.append(data)
+            elif self.tdCount == 9:
+                self.pitcher.append(data)
+            if data == 'Team Totals':
+                self.team = 'H'
+    
+    def handle_endtag(self, tag):
+        if self.startData and tag == 'table':
+            self.startData = False
+        elif self.startData and tag == 'tr':
+            if len(self.pitcher) > 0 and self.pitcher[0] != 'Team Totals':
+                self.pitcher.append(self.team)
+                self.roster.append(self.pitcher)
+            self.pitcher = []
+            self.tdCount = 0
+        elif self.startData and tag == 'td':
+            self.tdCount += 1
+=======
 class GamesParser(HTMLParser.HTMLParser):
     foundh2 = False
     startData = False
@@ -176,3 +277,4 @@ class GamesParser(HTMLParser.HTMLParser):
     def handle_endtag(self,tag):
         if tag == 'h2':
             self.foundh2 = False
+>>>>>>> origin/master
