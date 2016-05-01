@@ -1,20 +1,18 @@
 from datetime import date
 from bbUtils import GetTeamfromAbb, ConvertTeamAbb
-<<<<<<< HEAD
 from BRParser import GameTeamsParser, GameTimeParser, GameWeatherParser, GameUmpParser, GameWinLossSaveParser, BRLineupParser, BRPitcherParser
-=======
-from BRParser import GameTeamsParser, GameTimeParser, GameWeatherParser, GameUmpParser
->>>>>>> origin/master
 from GameStats import Game
 from LineupStats import Lineup
 from PitchingStats import PitchRoster
 from PlayByPlay import Play, PlayByPlay
 import re
 
+
 def abb(name):
     x = name.split(' ',1)
     x = x[0][0]+'. '+x[1]
     return x
+
 
 def ProcessBRPage(filename, con):
     dateStr = filename.split('_')[-1]
@@ -68,7 +66,6 @@ def ProcessBRPage(filename, con):
     currentGame.weather = 'Field = '+field+', Prec = '+precip+', Sky = '+sky
     b = GameUmpParser()
     b.feed(html)
-<<<<<<< HEAD
     currentGame.homeUmp = b.homeump
     
     #Lineups
@@ -76,7 +73,7 @@ def ProcessBRPage(filename, con):
     b.feed(html)
     winPitch = abb(b.winPitch)
     lossPitch = abb(b.lossPitch)
-    savePitch = abb(b.savePitch)
+    savePitch = '' if len(b.savePitch) == 0 else abb(b.savePitch)
     b = BRLineupParser()
     b.feed(html)
     for line in b.lineup:
@@ -108,12 +105,5 @@ def ProcessBRPage(filename, con):
         pbp.pitchers[abb(name)].earnedRuns = er
     
     #Plays
-=======
-    currentGame.homeUmp = str(b.homeump)
->>>>>>> origin/master
-    
     
     return currentGame, pbp
-    
-    
-    
