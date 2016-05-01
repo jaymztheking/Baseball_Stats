@@ -301,7 +301,9 @@ class PlayerInfoParser(HTMLParser.HTMLParser):
     batHand = ''
     foundWeight = False
     foundHeight = False
-
+    foundBat = False
+    foundBorn = False
+    foundDebut = False
 
     def handle_starttag(self, tag, attrs):
         pass
@@ -317,7 +319,29 @@ class PlayerInfoParser(HTMLParser.HTMLParser):
         elif self.foundHeight:
             self.height = data
             self.foundHeight = False
-
+        elif data == 'Bats:':
+            print('WOO')
+            self.foundBat = True
+        elif self.foundBat:
+            self.batHand = data
+            self.foundBat = False
+        elif data == 'Born':
+            self.foundBorn = True
+        elif self.foundBorn:
+            if data.strip()[0:2] == 'in':
+                self.foundBorn = False
+            elif data != ':':
+                self.birthDate += data.strip()
+        elif data == 'Debut':
+            self.foundDebut = True
+        elif self.foundDebut:
+            if data.strip()[0:4] == '(Age':
+                self.foundDebut = False
+            elif data != ':':
+                self.mlbDebutDate += data.strip()
 
     def handle_endtag(self, tag):
-        pass
+        if tag == 'span' and self.foundBorn:
+            self.foundBorn = False
+        elif tag == 'span' and self.foundDebut:
+            self.foundDebut = False

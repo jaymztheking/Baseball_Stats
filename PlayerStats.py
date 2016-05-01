@@ -1,7 +1,9 @@
 from bbUtils import GetHitterKey, GetPitcherKey
 from RSParser import PlayerInfoParser as RSInfoParser
 from BRParser import PlayerInfoParser as BRInfoParser
+from datetime import datetime, date
 import urllib2
+import re
 
 
 class Hitter:
@@ -31,7 +33,7 @@ class Hitter:
                     '\'1900-01-01\', \'1900-01-01\', \'%s\', \'%s\', \'\')' \
                     % (self.name.replace("\'", "`").replace('"', ''), self.batHand,
                        self.rsuserid)
-        if not self.CheckForRSRow(con):
+        if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
             self.GetInfofromRS(con)
@@ -44,26 +46,20 @@ class Hitter:
                     '\'1900-01-01\', \'1900-01-01\', \'%s\', \'\', \'%s\')' \
                     % (self.name.replace("\'", "`").replace('"', ''), self.batHand,
                        self.bruserid)
-        if not self.CheckForBRRow(con):
+        if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
             self.GetInfofromBR(con)
             return True
         return False
 
-    def CheckForRSRow(self, con):
+    def CheckForRow(self, con):
         playerKey = self.GetHitterKey(con)
         if playerKey < 0:
             return False
         else:
             return True
 
-    def CheckForBRRow(self, con):
-        playerKey = self.GetHitterKey(con)
-        if playerKey < 0:
-            return False
-        else:
-            return True
 
     def GetHitterKey(self, con):
         cur = con.cursor()
@@ -116,12 +112,18 @@ class Hitter:
         b.feed(html)
         cur = con.cursor()
         key = self.GetHitterKey(con)
+        weight = float(re.search('([0-9]*) lb', b.weight).group(1)) if re.search('([0-9]*) lb', b.weight) is not None else 0
+        hFeet = re.search('([0-9])\'', b.height).group(1) if re.search('([0-9])\'', b.height) is not None else 0
+        hInch = re.search('([0-9]*)"', b.height).group(1) if re.search('([0-9])"', b.height) is not None else 0
+        height = float(hFeet) *12 + float(hInch)
+        bDay = datetime.strptime(b.birthDate, '%B %d,%Y')
+        dDay = datetime.strptime(b.mlbDebutDate, '%B %d, %Y')
         if key > 0:
             sql = 'UPDATE "HITTER_STATS" SET "HEIGHT_INCH" = %s, "WEIGHT_LBS" = %s, ' \
                   '"BIRTH_DATE"=\'%s\', "MLB_DEBUT_DATE"=\'%s\', "BAT_HAND"=\'%s\' ' \
                   'WHERE "PLAYER_KEY" = %s' % \
-                  (b.height, b.weight, b.birthDate.strftime('%Y-%m-%d'),
-                   b.debutDate.strftime('%Y-%m-%d'), b.batHand, key)
+                  (height, weight, bDay.strftime('%Y-%m-%d'),
+                   dDay.strftime('%Y-%m-%d'), str(b.batHand.strip()[0]), key)
             cur.execute(sql)
             cur.execute('COMMIT;')
             return True
