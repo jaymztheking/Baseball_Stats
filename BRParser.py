@@ -299,11 +299,13 @@ class PlayerInfoParser(HTMLParser.HTMLParser):
     birthDate = ''
     mlbDebutDate = ''
     batHand = ''
+    throwHand = ''
     foundWeight = False
     foundHeight = False
     foundBat = False
     foundBorn = False
     foundDebut = False
+    foundThrow = False
 
     def handle_starttag(self, tag, attrs):
         pass
@@ -320,11 +322,15 @@ class PlayerInfoParser(HTMLParser.HTMLParser):
             self.height = data
             self.foundHeight = False
         elif data == 'Bats:':
-            print('WOO')
             self.foundBat = True
         elif self.foundBat:
             self.batHand = data
             self.foundBat = False
+        elif data == 'Throws:':
+            self.foundThrow = True
+        elif self.foundThrow:
+            self.throwHand = data
+            self.foundThrow = False
         elif data == 'Born':
             self.foundBorn = True
         elif self.foundBorn:
