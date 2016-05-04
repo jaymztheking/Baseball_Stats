@@ -25,18 +25,18 @@ class Lineup:
     SB = 0 
     CS = 0 
     
-    def __init__(self, game, team, playerName, batnum, pos, ID, con):
+    def __init__(self, game, team, playerName, batnum, pos, ID, src, con):
         self.game = game
         self.team = team
         self.player_bat_num = batnum
         self.player_pos = pos
         self.userID = ID
         
-        playerKey = GetHitterKey(ID, con)
+        playerKey = GetHitterKey(src, ID, con)
         if playerKey == None:
             newPlayer = Hitter(ID, playerName)
             newPlayer.InsertPlayerRow(con)
-            playerKey = GetHitterKey(ID, con)
+            playerKey = newPlayer.GetHitterKey(con)
             self.player = playerKey
         else:
             self.player = playerKey

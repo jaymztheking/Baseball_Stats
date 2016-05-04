@@ -88,8 +88,8 @@ def ProcessBRPage(filename, con):
                 pbp.aPitcher = abb(aName)
             if hPos == 'P':
                 pbp.hPitcher = abb(hName)
-            pbp.lineup[abb(aName)] = Lineup(123, pbp.aTeam, aName, aBatNum, aPos, '', con)
-            pbp.lineup[abb(hName)] = Lineup(123, pbp.hTeam, hName, hBatNum, hPos, '', con)
+            pbp.lineup[abb(aName)] = Lineup(123, pbp.aTeam, aName, aBatNum, aPos, '', 'BR', con)
+            pbp.lineup[abb(hName)] = Lineup(123, pbp.hTeam, hName, hBatNum, hPos, '', 'BR', con)
         elif len(line) == 6:
             pbp.aPitcher = abb(str(line[1]))
             pbp.hPitcher = abb(str(line[4]))
@@ -101,7 +101,7 @@ def ProcessBRPage(filename, con):
         name = str(pitcher[0])
         er = int(pitcher[-2])
         team = pbp.aTeam if pitcher[-1] == 'A' else pbp.hTeam
-        pbp.pitchers[abb(name)] = PitchRoster(123, team, name, '', con)
+        pbp.pitchers[abb(name)] = PitchRoster(123, team, name, '', 'BR', con)
         pbp.pitchers[abb(name)].earnedRuns = er
     
     #Plays

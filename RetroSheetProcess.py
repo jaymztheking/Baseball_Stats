@@ -74,9 +74,9 @@ def ProcessRSLog(filename, con):
                 team = pbp.hTeam
             playerBatNum = row[4]
             playerPos = GetPos(row[5])
-            pbp.lineup[userID] = Lineup(123, team, playerName, int(playerBatNum), playerPos, userID, con)
+            pbp.lineup[userID] = Lineup(123, team, playerName, int(playerBatNum), playerPos, userID, 'RS', con)
             if playerPos == 'P':
-                pbp.pitchers[userID] = PitchRoster(123, team, playerName, userID, con)
+                pbp.pitchers[userID] = PitchRoster(123, team, playerName, userID, 'RS', con)
                 pbp.pitchers[userID].pitcherRole = 'Starter'
                 if int(row[3]) == 0:
                     pbp.aPitcher = userID
@@ -131,19 +131,19 @@ def ProcessRSLog(filename, con):
                 else:
                     pbp.aPitcher = row[1]
                     team = pbp.aTeam
-                pbp.pitchers[row[1]] = PitchRoster(123, team, row[2], row[1], con)
+                pbp.pitchers[row[1]] = PitchRoster(123, team, row[2], row[1], 'RS', con)
                 pbp.pitchers[row[1]].pitcherRole = 'Reliever'
-                pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'P', row[1], con)
+                pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'P', row[1], 'RS', con)
                
             #Pinch Hitter
             elif int(row[5]) == 11:
                 team = pbp.hTeam if int(row[3])==1 else pbp.aTeam
-                pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PH', row[1], con)
+                pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PH', row[1], 'RS', con)
                 
             #Pinch Runner
             elif int(row[5]) == 12:
                 team = pbp.hTeam if int(row[3])==1 else pbp.aTeam
-                pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PR', row[1], con)
+                pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PR', row[1], 'RS', con)
                 playInd += 1
                 pbp.plays[playInd] = Play()
                 pbp.plays[playInd].hitterID = row[1]
@@ -166,7 +166,7 @@ def ProcessRSLog(filename, con):
                team = pbp.hTeam if int(row[3])==1 else pbp.aTeam
                playerPos = GetPos(int(row[5]))
                if row[1] not in pbp.lineup.keys():
-                   pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), playerPos, row[1], con)
+                   pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), playerPos, row[1], 'RS', con)
                    
         #Earned Runs
         elif rowType == 'data':
@@ -235,7 +235,7 @@ def ProcessRSLog(filename, con):
                         currentGame.homeRuns = x.runsScored
                     x.gameKey = currentGame.gameKey
 
-                    x.InsertPlay(con)
+                    x.InsertPlay('RS', con)
                 if currentGame.homeRuns > currentGame.awayRuns:
                     currentGame.homeTeamWin = True
                 elif currentGame.homeRuns == currentGame.awayRuns:

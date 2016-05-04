@@ -23,9 +23,9 @@ class Play:
     startSit = 0
     endSit = 0
 
-    def InsertPlay(self, con):
-        hk = GetHitterKey(self.hitterID, con)
-        pk = GetPitcherKey(self.pitcherID, con)
+    def InsertPlay(self, src, con):
+        hk = GetHitterKey(src, self.hitterID, con)
+        pk = GetPitcherKey(src, self.pitcherID, con)
         cur = con.cursor()
         sql = 'INSERT INTO "PITCH_RESULT" VALUES(%s, %s, %s, %s, \'%s\', %s, %s, \'%s\', %s, %s, %s, \'%s\', \'%s\', %s, \'%s\', \'%s\', %s, \'%s\', %s, %s)' % \
         (self.gameKey, hk, pk, self.startSit, self.inning, self.strikes, self.balls, self.pitchSeq, self.contactX, self.swingX, self.lookX, self.playType, self.hit, self.resultOuts, self.ballLoc, self.ballType, self.endSit, self.runScored, self.runsScored, self.playNum)

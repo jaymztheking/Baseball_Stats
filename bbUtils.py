@@ -60,9 +60,14 @@ def GetGameKeys(hteam, ateam, date, con):
         output.append(row[0])
     return output
     
-def GetHitterKey(uid, con):
+def GetHitterKey(src, uid, con):
     cur = con.cursor()
-    getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where "USER_ID" = \'%s\'' % uid
+    if src == 'BR':
+        getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where "BR_USER_ID" = \'%s\'' % uid
+    elif src == 'RS':
+        getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where "RS_USER_ID" = \'%s\'' % uid
+    else:
+        getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where 1 <> 1'
     cur.execute(getSQL)
     results = cur.fetchall()
     if len(results) == 1:
@@ -70,9 +75,14 @@ def GetHitterKey(uid, con):
     else:
         return None
 
-def GetPitcherKey(uid, con):
+def GetPitcherKey(src, uid, con):
     cur = con.cursor()
-    getSQL = 'select "PLAYER_KEY" from "PITCHER_STATS" where "USER_ID" = \'%s\'' % uid
+    if src == 'BR':
+        getSQL = 'select "PLAYER_KEY" from "PITCHER_STATS" where "BR_USER_ID" = \'%s\'' % uid
+    elif src == 'RS':
+        getSQL = 'select "PLAYER_KEY" from "PITCHER_STATS" where "RS_USER_ID" = \'%s\'' % uid
+    else:
+        getSQL = 'select "PLAYER_KEY" from "PITCHER_STATS" where 1 <> 1'
     cur.execute(getSQL)
     results = cur.fetchall()
     if len(results) == 1:

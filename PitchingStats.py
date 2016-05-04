@@ -30,14 +30,14 @@ class PitchRoster:
     GB = 0 
     FB = 0     
     
-    def __init__(self, game, team, playerName, ID, con):
+    def __init__(self, game, team, playerName, ID, src, con):
         self.gameKey = game
         self.team = team
-        playerKey = GetPitcherKey(ID, con)
+        playerKey = GetPitcherKey(src, ID, con)
         if playerKey == None:
             newPlayer = Pitcher(ID, playerName)
             newPlayer.InsertPlayerRow(con)
-            playerKey = GetPitcherKey(ID, con)
+            playerKey = newPlayer.GetPitcherKey(con)
             self.pitcherKey = playerKey
         else:
             self.pitcherKey = playerKey

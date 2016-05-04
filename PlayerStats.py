@@ -52,6 +52,16 @@ class Hitter:
             return True
         return False
 
+    def InsertPlayerRow(self, con):
+        if self.rsuserid != '':
+            self.InsertRSPlayerRow(con)
+            return True
+        elif self.bruserid != '':
+            self.InsertBRPlayerRow(con)
+            return True
+        else:
+            return False
+
     def CheckForRow(self, con):
         playerKey = self.GetHitterKey(con)
         if playerKey < 0:
@@ -171,6 +181,16 @@ class Pitcher:
             self.GetInfofromBR(con)
             return True
         return False
+
+    def InsertPlayerRow(self, con):
+        if self.rsuserid != '':
+            self.InsertRSPlayerRow(con)
+            return True
+        elif self.bruserid != '':
+            self.InsertBRPlayerRow(con)
+            return True
+        else:
+            return False
 
     def CheckForRow(self, con):
         playerKey = self.GetPitcherKey(con)
