@@ -107,12 +107,12 @@ def ProcessRSLog(filename, con):
             pbp.plays[playInd].pitchSeq = row[5]
             pbp.plays[playInd].strikes = int(row[4][1])
             pbp.plays[playInd].balls = int(row[4][0])
-            print(pbp.inning)
-            print ('Before Play', pbp.thirdBase, pbp.secondBase, pbp.firstBase, pbp.outs, row[6])
+            #print(pbp.inning)
+            #print ('Before Play', pbp.thirdBase, pbp.secondBase, pbp.firstBase, pbp.outs, row[6])
             pbp.ProcessRSPlay(row[6],playInd)
-            print ('After Play', pbp.thirdBase, pbp.secondBase, pbp.firstBase, pbp.outs, pbp.plays[playInd].playType)
+            #print ('After Play', pbp.thirdBase, pbp.secondBase, pbp.firstBase, pbp.outs, pbp.plays[playInd].playType)
             pbp.plays[playInd].endSit = pbp.ReturnSit()
-            print(pbp.ReturnSit())
+            #print(pbp.ReturnSit())
             pbp.plays[playInd].playNum = playInd
             
         #Substitutions
@@ -175,6 +175,7 @@ def ProcessRSLog(filename, con):
                 
         elif rowType == 'id':
             print(pbp.aAbb+' at '+pbp.hAbb+' - '+gameDate.isoformat())
+            print gameDate
             if gameDate != date(1500,1,1):
                 currentGame.InsertBlankGame(con)
                 currentGame.totalInnings = int(pbp.inning.split(' ')[-1])
@@ -196,7 +197,7 @@ def ProcessRSLog(filename, con):
                         pbp.pitchers[x.pitcherID].Strikes += x.lookX + x.swingX + x.contactX
                         pbp.pitchers[x.pitcherID].Balls += x.balls
                         pbp.pitchers[x.pitcherID].pitchCount += x.lookX + x.swingX + x.contactX + x.balls
-                        if x.ballType in ('Ground Ball', 'Bunt Bround Ball'):
+                        if x.ballType in ('Ground Ball', 'Bunt Ground Ball'):
                             pbp.pitchers[x.pitcherID].GB += 1
                         elif x.ballType in ('Line Drive', 'Bunt Line Drive'):
                             pbp.pitchers[x.pitcherID].LD += 1
@@ -228,11 +229,11 @@ def ProcessRSLog(filename, con):
                     if x.inning[:3] == 'Top':
                         if x.hit:
                             currentGame.awayHits +=1
-                        currentGame.awayRuns = x.runsScored
+                        currentGame.awayRuns += x.runsScored
                     else:
                         if x.hit:
                             currentGame.homeHits +=1
-                        currentGame.homeRuns = x.runsScored
+                        currentGame.homeRuns += x.runsScored
                     x.gameKey = currentGame.gameKey
 
                     x.InsertPlay('RS', con)
@@ -240,8 +241,9 @@ def ProcessRSLog(filename, con):
                     currentGame.homeTeamWin = True
                 elif currentGame.homeRuns == currentGame.awayRuns:
                     currentGame.tie = True
+
                 currentGame.UpdateStats(con)
-                
+
                 #Go Through Pitchers
                 for x in pbp.pitchers.keys():
                     if x == wp:

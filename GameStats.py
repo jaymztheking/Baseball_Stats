@@ -51,14 +51,16 @@ class Game:
         
     def UpdateStats(self, con):
         cur = con.cursor()
+
         sql = 'update "GAME" set ("WIND_DIR","WIND_SPEED_MPH","WEATHER_CONDITION","TOTAL_INNINGS","HOME_HITS",' \
               '"AWAY_HITS","HOME_RUNS","AWAY_RUNS","GAME_TEMP_F","HOME_TEAM_WIN?",' \
               '"TIE?","GAME_TIME_MINUTES","HOME_UMP_ID") = (\'%s\',%s,\'%s\', %s, %s, ' \
               '%s, %s, %s, %s, \'%s\', ' \
               '\'%s\', %s, \'%s\') WHERE "GAME_KEY" = %s' % \
-        (self.windDir, self.windSpeed, self.weather, self.totalInnings, self.homeHits,
+         (self.windDir, self.windSpeed, self.weather, self.totalInnings, self.homeHits,
          self.awayHits, self.homeRuns, self.awayRuns, self.temp, self.homeTeamWin,
          self.tie, self.gameLength, self.homeUmp, self.gameKey)
+
         cur.execute(sql)
         cur.execute('COMMIT;')
         
@@ -69,8 +71,6 @@ class Game:
         else:
             return True
 
-    def UpdateStats(self, con):
-        return True
 
 
 
