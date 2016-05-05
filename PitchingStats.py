@@ -35,7 +35,7 @@ class PitchRoster:
         self.team = team
         playerKey = GetPitcherKey(src, ID, con)
         if playerKey == None:
-            newPlayer = Pitcher(ID, playerName)
+            newPlayer = Pitcher(src, ID, playerName)
             newPlayer.InsertPlayerRow(con)
             playerKey = newPlayer.GetPitcherKey(con)
             self.pitcherKey = playerKey
