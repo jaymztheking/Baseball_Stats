@@ -192,6 +192,11 @@ class BRLineupParser(HTMLParser.HTMLParser):
                     self.startData = True
         elif self.startData and tag == 'td':
             self.tdFound = True
+        elif self.tdFound and tag == 'a':
+            for att in attrs:
+                if att[0] == 'href':
+                    userid = re.search('/players/./(.*)\.shtml', att[1]).group(1) if re.search('/players/./(.*)\.shtml', att[1]) else ''
+                    self.entry.append(userid)
 
     def handle_data(self, data):
         if self.tdFound:
@@ -351,3 +356,19 @@ class PlayerInfoParser(HTMLParser.HTMLParser):
             self.foundBorn = False
         elif tag == 'span' and self.foundDebut:
             self.foundDebut = False
+
+
+class BRRSUserIdParser(HTMLParser.HTMLParser):
+    uid = ''
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'a':
+            for att in attrs:
+                if att[0] == 'href' and re.search('http://www.retrosheet.org/boxesetc/./P(.*)\.htm', att[1]):
+                    self.uid = re.search('http://www.retrosheet.org/boxesetc/./P(.*)\.htm', att[1]).group(1)
+
+    def handle_data(self, data):
+        pass
+
+    def handle_endtag(self, tag):
+        pass

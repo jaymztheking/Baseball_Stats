@@ -1,10 +1,9 @@
 
-from BRParser import PlayerInfoParser
+from BRParser import BRRSUserIdParser
 import urllib2
 
-b = PlayerInfoParser()
+b = BRRSUserIdParser()
 url = "http://www.baseball-reference.com/players/a/arenano01.shtml"
 html = urllib2.urlopen(url).read().decode('utf-8').replace('&#183;','*')
 b.feed(html)
-print(vars(b))
-print(b.throwHand)
+print(b.uid)

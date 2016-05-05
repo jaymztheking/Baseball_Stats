@@ -1,4 +1,4 @@
-from bbUtils import GetHitterKey
+from bbUtils import GetHitterKey, GetCrossSiteUserID
 from PlayerStats import Hitter
 
 class Lineup:
@@ -31,13 +31,17 @@ class Lineup:
         self.player_bat_num = batnum
         self.player_pos = pos
         self.userID = ID
-        
         playerKey = GetHitterKey(src, ID, con)
         if playerKey == None:
-            newPlayer = Hitter(src, ID, playerName)
-            newPlayer.InsertPlayerRow(con)
-            playerKey = newPlayer.GetHitterKey(con)
-            self.player = playerKey
+            newID = GetCrossSiteUserID(src, 'RS', ID, con)
+            playerKey = GetHitterKey('RS', newID, con)
+            if playerKey == None:
+                newPlayer = Hitter(src, ID, playerName)
+                newPlayer.InsertPlayerRow(con)
+                playerKey = newPlayer.GetHitterKey(con)
+                self.player = playerKey
+            else:
+                self.player = playerKey
         else:
             self.player = playerKey
     

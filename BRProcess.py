@@ -79,17 +79,19 @@ def ProcessBRPage(filename, con):
     for line in b.lineup:
         if len(line) == 6 and line[0].isdigit():
             aBatNum = int(line[0])
-            aName = str(line[1])
-            aPos = str(line[2]).strip()
-            hBatNum = int(line[3])
-            hName = str(line[4])
-            hPos = str(line[5]).strip()
+            aUID = str(line[1])
+            aName = str(line[2])
+            aPos = str(line[3]).strip()
+            hBatNum = int(line[4])
+            hUID = str(line[5])
+            hName = str(line[6])
+            hPos = str(line[7]).strip()
             if aPos == 'P':
                 pbp.aPitcher = abb(aName)
             if hPos == 'P':
                 pbp.hPitcher = abb(hName)
-            pbp.lineup[abb(aName)] = Lineup(123, pbp.aTeam, aName, aBatNum, aPos, '', 'BR', con)
-            pbp.lineup[abb(hName)] = Lineup(123, pbp.hTeam, hName, hBatNum, hPos, '', 'BR', con)
+            pbp.lineup[abb(aName)] = Lineup(123, pbp.aTeam, aName, aBatNum, aPos, aUID, 'BR', con)
+            pbp.lineup[abb(hName)] = Lineup(123, pbp.hTeam, hName, hBatNum, hPos, hUID, 'BR', con)
         elif len(line) == 6:
             pbp.aPitcher = abb(str(line[1]))
             pbp.hPitcher = abb(str(line[4]))

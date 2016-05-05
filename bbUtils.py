@@ -1,3 +1,6 @@
+from BRParser import BRRSUserIdParser
+import urllib2
+
 def GetTeamfromAbb(abb, con):
    cur = con.cursor()
    sql = 'select "TEAM_KEY" from "TEAM" where "TEAM_ABBREV" = \'%s\'' % abb
@@ -148,3 +151,15 @@ def ConvertTeamAbb(src, teamAbb):
 def GetPos(num):
     pos = ['P','C','1B','2B','3B','SS','LF','CF','RF','DH']
     return pos[int(num)-1]
+
+
+def GetCrossSiteUserID(src, tgt, id, con):
+    if src == 'BR' and tgt == 'RS':
+        url = 'http://www.baseball-reference.com/players/%s/%s.shtml' % (id[0], id)
+        b = BRRSUserIdParser()
+        html = urllib2.urlopen(url).read().decode('utf-8')
+        b.feed(html)
+        return b.uid
+    else:
+        return ''
+
