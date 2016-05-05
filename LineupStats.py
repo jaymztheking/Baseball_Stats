@@ -34,7 +34,7 @@ class Lineup:
         
         playerKey = GetHitterKey(src, ID, con)
         if playerKey == None:
-            newPlayer = Hitter(ID, playerName)
+            newPlayer = Hitter(src, ID, playerName)
             newPlayer.InsertPlayerRow(con)
             playerKey = newPlayer.GetHitterKey(con)
             self.player = playerKey

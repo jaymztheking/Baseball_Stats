@@ -223,9 +223,9 @@ class Pitcher:
             return -1
 
     def GetInfofromRS(self, con):
-        b = RSInfoParser
+        b = RSInfoParser()
         url = "http://www.retrosheet.org/boxesetc/%s/P%s.htm" % (self.rsuserid[0].upper(), self.rsuserid)
-        html = urllib2.urlopen(url).read().decode('utf-8').replace('&#183;', '*')
+        html = urllib2.urlopen(url).read().decode('utf-8')
         b.feed(html)
         cur = con.cursor()
         key = self.GetPitcherKey(con)
