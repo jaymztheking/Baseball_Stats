@@ -9,8 +9,7 @@ This project is a collection of Python classes and corresponding PostgreSQL comp
 * psycopg2
 
 ##Notes
-* Pitcher hot streak flagging should be implemented
-* Use retrosheet for play-by-play
+* 2001-08-04 KCA at MIN has a game time of 6:06Ac, i guess
 
 ##To - Do
 * Run code for 1993 - 2011
