@@ -1,9 +1,11 @@
 
-from BRParser import BRRSUserIdParser
+from BRParser import BRBatterParser
 import urllib2
 
-b = BRRSUserIdParser()
-url = "http://www.baseball-reference.com/players/a/arenano01.shtml"
+b = BRBatterParser()
+url = "http://www.baseball-reference.com/boxes/COL/COL201604270.shtml"
 html = urllib2.urlopen(url).read().decode('utf-8').replace('&#183;','*')
 b.feed(html)
-print(b.uid)
+
+for x in b.batID.keys():
+    print 'Hey', x, b.batID[x]

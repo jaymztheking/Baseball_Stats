@@ -146,10 +146,8 @@ class BRPlayParser(HTMLParser.HTMLParser):
     subRow = False
     index = 0
     playNum = 0
-    lineup = {}
-    pitchers = {}
     plays = {}
-    subs = []
+    subs = {}
 
     def handle_starttag(self, tag, attrs):
         for att in attrs:
@@ -161,12 +159,13 @@ class BRPlayParser(HTMLParser.HTMLParser):
                 self.insideTable = True
             if tag == 'span' and att[0] == 'class' and att[1] == 'ingame_substitution':
                 self.subRow = True
+                self.subs[self.playNum] = ''
 
     def handle_data(self, data):
         if self.startData and self.insideTable:
-            self.plays[self.playNum][self.index] = data
+            self.plays[self.playNum][self.index] += data
         if self.subRow:
-            self.subs.append([self.playNum, data])
+            self.subs[self.playNum] += data
 
     def handle_endtag(self, tag):
         if tag == 'tr' and self.startData:
@@ -177,6 +176,12 @@ class BRPlayParser(HTMLParser.HTMLParser):
             self.index += 1
         elif tag == 'span' and self.subRow:
             self.subRow = False
+
+    def handle_entityref(self, name):
+        if name == 'nbsp' and self.startData and self.insideTable:
+            self.plays[self.playNum][self.index] += ' '
+        elif name == 'nbsp' and self.subRow:
+            self.subs[self.playNum] += ' '
 
 
 class BRLineupParser(HTMLParser.HTMLParser):
@@ -226,6 +231,12 @@ class BRPitcherParser(HTMLParser.HTMLParser):
                     self.startData = True
         elif self.startData and tag == 'td':
             self.tdCount += 1
+        elif self.startData and tag == 'a':
+            for att in attrs:
+                if att[0] == 'href':
+                    if re.search('/([^/])*\.shtml', att[1]) is not None:
+                        uid = re.search('/([^/]*)\.shtml', att[1]).group(1)
+                        self.pitcher.append(uid)
 
     def handle_data(self, data):
         if self.startData:
@@ -247,6 +258,40 @@ class BRPitcherParser(HTMLParser.HTMLParser):
             self.tdCount = 0
         elif self.startData and tag == 'td':
             self.tdCount += 1
+
+
+class BRBatterParser(HTMLParser.HTMLParser):
+    startData = False
+    tdCount = 0
+    batID = {}
+    batValue = ''
+    found = False
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'table':
+            for att in attrs:
+                if att[0] == 'id' and len(att[1]) > 6 and att[1][-7:] == 'batting':
+                    self.startData = True
+        elif tag == 'a' and self.startData and self.found == False:
+            for att in attrs:
+                if att[0] == 'href':
+                    if re.search('/([^/])*\.shtml', att[1]) is not None:
+                        self.batValue = re.search('/([^/]*)\.shtml', att[1]).group(1)
+
+
+
+    def handle_data(self, data):
+        if self.startData and self.found == False:
+            self.batID[data] = self.batValue
+
+
+    def handle_endtag(self, tag):
+        if self.startData and tag == 'table':
+            self.startData = False
+        elif self.startData and tag == 'td' and self.found:
+            self.found = False
+
+
 
 
 class GamesParser(HTMLParser.HTMLParser):

@@ -1,4 +1,4 @@
-from bbUtils import GetPitcherKey
+from bbUtils import GetPitcherKey, GetCrossSiteUserID
 from PlayerStats import Pitcher
 
 
@@ -35,17 +35,30 @@ class PitchRoster:
         self.team = team
         playerKey = GetPitcherKey(src, ID, con)
         if playerKey == None:
-            newPlayer = Pitcher(src, ID, playerName)
-            newPlayer.InsertPlayerRow(con)
-            playerKey = newPlayer.GetPitcherKey(con)
-            self.pitcherKey = playerKey
+            newID = GetCrossSiteUserID(src, 'RS', ID, con)
+            playerKey = GetPitcherKey('RS', newID, con)
+            if playerKey == None:
+                newPlayer = Pitcher(src, ID, playerName)
+                newPlayer.InsertPlayerRow(con)
+                playerKey = newPlayer.GetPitcherKey(con)
+                self.pitcherKey = playerKey
+            else:
+                self.pitcherKey = playerKey
         else:
             self.pitcherKey = playerKey
     
     def InsertRosterRow(self, con):
         cur = con.cursor()
-        insertSQL = 'insert into "PITCH_ROSTER" VALUES (%s, %s, \'%s\', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)' % \
-        (self.gameKey, self.pitcherKey, self.pitcherRole, self.pitchCount, self.K, self.BB, self.HBP, self.earnedRuns, self.IP, self.Strikes, self.Balls, self.ContactStrikes, self.CG, self.SO, self.team, self.NH, self.Win, self.Loss, self.Save, self.SwingStrikes, self.LookStrikes, self.FB, self.GB, self.LD, self.Hits)        
+        insertSQL = 'insert into "PITCH_ROSTER" VALUES (%s, %s, \'%s\', %s, %s, ' \
+                    '%s, %s, %s, %s, %s, ' \
+                    '%s, %s, %s, %s, %s, ' \
+                    '%s, %s, %s, %s, %s, ' \
+                    '%s, %s, %s, %s, %s)' % \
+        (self.gameKey, self.pitcherKey, self.pitcherRole, self.pitchCount, self.K,
+         self.BB, self.HBP, self.earnedRuns, self.IP, self.Strikes,
+         self.Balls, self.ContactStrikes, self.CG, self.SO, self.team,
+         self.NH, self.Win, self.Loss, self.Save, self.SwingStrikes,
+         self.LookStrikes, self.FB, self.GB, self.LD, self.Hits)
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')

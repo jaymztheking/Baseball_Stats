@@ -444,3 +444,6 @@ class PlayByPlay:
                 
         self.GetRSBallType(batParts[1:], playInd)
         self.CalcRSRunners(runEvent.strip(), playInd, rbiEligible)
+
+    def ProcessBRPlay(self, playStr, playInd):
+        pass
