@@ -446,4 +446,254 @@ class PlayByPlay:
         self.CalcRSRunners(runEvent.strip(), playInd, rbiEligible)
 
     def ProcessBRPlay(self, playStr, playInd):
-        pass
+        runEvent = ''
+
+        ###############################################################################
+        #  No Plate Appearance, No At-Bat                                             #
+        ###############################################################################
+        # Non-Plays
+        '''
+        if batParts[0].strip() == 'NP':
+            self.plays[playInd].playType = 'No Play'
+            rbiEligible = False
+        '''
+
+        # Stolen Base
+        if re.search('(.*) Steals (2B|3B|Hm)', playStr) != None:
+            self.plays[playInd].playType = 'Stolen Base'
+            rbiEligible = False
+            if '2B' in playStr:
+                self.lineup[self.firstBase[1]].SB += 1
+            if '3B' in playStr:
+                self.lineup[self.secondBase[1]].SB += 1
+            if 'Hm' in playStr:
+                self.lineup[self.thirdBase[1]].SB += 1
+            bases = [self.firstBase, self.secondBase, self.thirdBase]
+            for base in enumerate(bases):
+                if base[1][1].split(' ')[-1] == re.search('(.*) Steals (2B|3B|Hm)', playStr).group(1):
+
+                    if re.search('(.*) Steals (2B|3B|Hm)', playStr).group(2) == '2B':
+                        self.secondBase = [playInd, base[1]]
+                    elif re.search('(.*) Steals (2B|3B|Hm)', playStr).group(2) == '3B':
+                        self.thirdBase = [playInd, base[1]]
+                    elif re.search('(.*) Steals (2B|3B|Hm)', playStr).group(2) == 'Hm':
+                        self.plays[self.thirdBase[0]].runScored = True
+
+                    if base[0] == 0:
+                        self.firstBase = None
+                    elif base[0] == 1:
+                        self.secondBase = None
+                    elif base[0] == 2:
+                        self.thirdBase = None
+
+
+        # Caught Stealing
+        if re.search('Caught Stealing (2B|3B|Hm)', playStr) != None:
+            self.plays[playInd].playType = 'Caught Stealing'
+            rbiEligible = False
+            if '2B' in playStr:
+                self.lineup[self.firstBase[1]].CS += 1
+            if '3B' in batParts[0]:
+                self.lineup[self.secondBase[1]].CS += 1
+            if 'Hm' in batParts[0]:
+                self.lineup[self.thirdBase[1]].CS += 1
+
+        # Pick Off
+        if re.search('PO[^C]', batParts[0]) != None:
+            self.plays[playInd].playType = 'Pick Off'
+            rbiEligible = False
+            if 'E' not in batParts[0]:
+                self.outs += 1
+                self.plays[playInd].resultOuts = 1
+                if 'PO1' in batParts[0]:
+                    self.firstBase = None
+                elif 'PO2' in batParts[0]:
+                    self.secondBase = None
+                elif 'PO3' in batParts[0]:
+                    self.thirdBase = None
+
+        # Balk
+        if re.search('BK', batParts[0]) != None:
+            self.plays[playInd].playType = 'Balk'
+            rbiEligible = False
+
+        # Passed Ball
+        if re.search('PB', batParts[0]) != None:
+            self.plays[playInd].playType = 'Passed Ball'
+            rbiEligible = False
+
+        # Wild Pitch
+        if re.search('WP', batParts[0]) != None:
+            self.plays[playInd].playType = 'Wild Pitch'
+            rbiEligible = False
+
+        # Defensive Indifference
+        if re.search('DI', batParts[0]) != None:
+            self.plays[playInd].playType = 'Defensive Indifference'
+            rbiEligible = False
+
+        # Error on Foul
+        if re.search('FLE', batParts[0]) != None:
+            self.plays[playInd].playType = 'Error on Foul'
+            rbiEligible = False
+
+        # Misc. Advance
+        if re.search('OA', batParts[0]) != None:
+            self.plays[playInd].playType = 'Unknown Runner Activity'
+            rbiEligible = False
+
+            ###############################################################################
+            #  Plate Appearance, No At-Bat                                                #
+            ###############################################################################
+
+        # Interference
+        if re.search('C$', batParts[0]) != None:
+            self.plays[playInd].playType = 'Interference'
+            rbiEligible = True
+            if 'B-' not in runEvent:
+                runEvent += ';B-1'
+
+        # Walk and Intentional Walks
+        if re.search('W(\+|$)', batParts[0]) != None:
+            self.plays[playInd].playType = 'Intentional Walk' if 'IW' in batParts[0] else 'Walk'
+            rbiEligible = True
+            if 'B-' not in runEvent:
+                runEvent += ';B-1'
+
+        # Hit By Pitch
+        if re.search('HP', batParts[0]) != None:
+            self.plays[playInd].playType = 'Hit By Pitch'
+            rbiEligible = True
+            if 'B-' not in runEvent:
+                runEvent += ';B-1'
+
+        # Sacrifice Fly
+        if 'SF' in playStr:
+            self.plays[playInd].playType = 'Sacrifice Fly'
+            rbiEligible = True
+
+        # Sacrific Hit
+        if 'SH' in playStr:
+            self.plays[playInd].playType = 'Sacrifice Hit'
+            rbiEligible = True
+
+            ###############################################################################
+            #  Plate Appearance, At-Bat                                                   #
+            ###############################################################################
+
+        # Strike Out
+        if re.search('(^|[^B])K', batParts[0]) != None:
+            self.plays[playInd].playType = 'Strikeout'
+            rbiEligible = False
+            if 'B-' not in runEvent:
+                self.plays[playInd].resultOuts = 1
+                self.outs += 1
+
+        # One Fielding Out
+        if re.search('^[0-9]+$', batParts[0]) != None:
+            if self.plays[playInd].playType[:9] != 'Sacrifice':
+                self.plays[playInd].playType = 'Out'
+                rbiEligible = True
+            self.plays[playInd].ballLoc = batParts[0][0]
+            self.plays[playInd].resultOuts = 1
+            self.outs += 1
+
+        # Force and Tag Outs/Double Play/Triple Play
+        if re.search('^[0-9]{1,4}\([B123]\)', batParts[0]) != None:
+            outStr = re.findall('\([B123]\)', batParts[0])
+            self.plays[playInd].ballLoc = batParts[0][0]
+            for a in batParts:
+                if 'DP' in a and 'NDP' not in a:
+                    self.outs += len(outStr)
+                    self.plays[playInd].resultOuts = len(outStr)
+                    self.plays[playInd].playType = 'Double Play'
+                    rbiEligible = False
+                    if (runEvent.count('X') + len(outStr)) == 2 and '(B)' not in outStr:
+                        runEvent += ';B-1'
+                if 'TP' in a:
+                    self.outs += 3
+                    self.plays[playInd].resultOuts = 3
+                    self.plays[playInd].playType = 'Triple Play'
+                    rbiEligible = False
+            if self.plays[playInd].playType not in ('Triple Play', 'Double Play'):
+                self.plays[playInd].playType = 'Out'
+                rbiEligible = True
+                self.outs += 1
+                self.plays[playInd].resultOuts = 1
+                if 'B' not in runEvent and '(B)' not in outStr:
+                    runEvent += ';B-1'
+            for o in outStr:
+                if o == '(1)':
+                    self.firstBase = None
+                elif o == '(2)':
+                    self.secondBase = None
+                elif o == '(3)':
+                    self.thirdBase = None
+
+        # Fielder's Choice
+        if re.search('FC[0-9]', batParts[0]) != None:
+            self.plays[playInd].playType = "Fielders Choice"
+            rbiEligible = True
+            self.plays[playInd].ballLoc = re.search('FC([0-9])', batParts[0]).group(1)
+            if 'B' not in runEvent:
+                runEvent += ';B-1'
+
+        # Reach on Error
+        if re.search('(^|[^\(])E[0-9]', batParts[0]) != None and re.search('FLE', batParts[0]) == None:
+            if self.plays[playInd].playType[:9] != 'Sacrifice':
+                self.plays[playInd].playType = 'Reach On Error'
+                if self.outs < 2:
+                    rbiEligible = True
+                else:
+                    rbiEligible = False
+            if 'B-' not in runEvent or 'BX' not in runEvent:
+                runEvent += ';B-1'
+
+        # Single
+        if re.search('^S[0-9]?', batParts[0]) != None and re.search('SB[23H]', batParts[0]) == None:
+            self.plays[playInd].hit = True
+            self.plays[playInd].playType = 'Single'
+            rbiEligible = True
+            if re.search('^S[0-9]', batParts[0]) != None:
+                self.plays[playInd].ballLoc = re.search('S([0-9])', batParts[0]).group(1)
+            if 'B' not in runEvent:
+                runEvent += ';B-1'
+
+        # Double
+        if re.search('^D[0-9]?', batParts[0]) != None and re.search('DI', batParts[0]) == None:
+            self.plays[playInd].hit = True
+            self.plays[playInd].playType = 'Double'
+            rbiEligible = True
+            if re.search('^D[0-9]', batParts[0]) != None:
+                self.plays[playInd].ballLoc = re.search('D([0-9])', batParts[0]).group(1)
+            if 'B' not in runEvent:
+                runEvent += ';B-2'
+
+        # Groud Rule Double
+        if re.search('DGR', batParts[0]) != None:
+            self.plays[playInd].hit = True
+            self.plays[playInd].playType = 'Ground Rule Double'
+            rbiEligible = True
+            if 'B' not in runEvent:
+                runEvent += ';B-2'
+
+        # Triple
+        if re.search('^T[0-9]?', batParts[0]) != None:
+            self.plays[playInd].hit = True
+            self.plays[playInd].playType = 'Triple'
+            rbiEligible = True
+            if re.search('^T[0-9]', batParts[0]) != None:
+                self.plays[playInd].ballLoc = re.search('T([0-9])', batParts[0]).group(1)
+            if 'B' not in runEvent:
+                runEvent += ';B-3'
+
+        # Home Run
+        if re.search('HR', batParts[0]) != None:
+            self.plays[playInd].hit = True
+            self.plays[playInd].playType = 'Home Run'
+            rbiEligible = True
+            if 'B' not in runEvent:
+                runEvent += ';B-H'
+
+        self.GetBRBallType(batParts[1:], playInd)
+        self.CalcBRRunners(runEvent.strip(), playInd, rbiEligible)

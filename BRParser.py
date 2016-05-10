@@ -281,16 +281,17 @@ class BRBatterParser(HTMLParser.HTMLParser):
 
 
     def handle_data(self, data):
-        if self.startData and self.found == False:
+        if self.startData and self.found == False and self.batValue != '':
             self.batID[data] = self.batValue
+            self.found = True
 
 
     def handle_endtag(self, tag):
         if self.startData and tag == 'table':
             self.startData = False
-        elif self.startData and tag == 'td' and self.found:
+        elif self.startData and tag == 'a' and self.found:
             self.found = False
-
+            self.batValue = ''
 
 
 

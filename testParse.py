@@ -1,11 +1,11 @@
 
-from BRParser import BRBatterParser
+from BRParser import BRPlayParser
 import urllib2
 
-b = BRBatterParser()
+b = BRPlayParser()
 url = "http://www.baseball-reference.com/boxes/COL/COL201604270.shtml"
 html = urllib2.urlopen(url).read().decode('utf-8').replace('&#183;','*')
 b.feed(html)
 
-for x in b.batID.keys():
-    print 'Hey', x, b.batID[x]
+for x in b.plays.values():
+    print x[-1]

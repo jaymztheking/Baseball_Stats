@@ -175,7 +175,6 @@ def ProcessRSLog(filename, con):
                 
         elif rowType == 'id':
             print(pbp.aAbb+' at '+pbp.hAbb+' - '+gameDate.isoformat())
-            print gameDate
             if gameDate != date(1500,1,1):
                 currentGame.InsertBlankGame(con)
                 currentGame.totalInnings = int(pbp.inning.split(' ')[-1])

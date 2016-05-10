@@ -1,7 +1,7 @@
 from datetime import date
 from bbUtils import GetTeamfromAbb, ConvertTeamAbb
 from BRParser import GameTeamsParser, GameTimeParser, GameWeatherParser, GameUmpParser, GameWinLossSaveParser, \
-    BRLineupParser, BRPitcherParser,  BRPlayParser
+    BRLineupParser, BRPitcherParser,  BRPlayParser, BRBatterParser
 from GameStats import Game
 from LineupStats import Lineup
 from PitchingStats import PitchRoster
@@ -22,7 +22,7 @@ def ProcessBRPage(filename, con):
     pbp = PlayByPlay()
     pbp.inning = ''
     playNum = 1
-    playInd = 0    
+    playInd = 0
     
     #Game Stuff
     b = GameTeamsParser()
@@ -112,14 +112,19 @@ def ProcessBRPage(filename, con):
         pbp.pitchers[abb(name)] = PitchRoster(123, team, name, uid, 'BR', con)
         pbp.pitchers[abb(name)].earnedRuns = er
         pbp.pitchers[abb(name)].IP = 0
-    
+
+    #Hitter ID Lookup
+    bb = BRBatterParser()
+    bb.feed(html)
+
+
     #Plays
     b = BRPlayParser()
     b.feed(html)
     for playNum in range(1, playNum+1):
-        pbp.plays[playNum] = Play()
-        pbp.plays[playNum].hitterID = b.plays[playNum][7]
-        pbp.plays[playNum].pitcherID = b.plays[playNum][8]
+        pbp.plays[playInd] = Play()
+        pbp.plays[playInd].hitterID = b.plays[playNum][7]
+        pbp.plays[playInd].pitcherID = b.plays[playNum][8]
 
         #Inning Stuff
         innPre = 'Top' if b.plays[playNum][0][0] == 't' else 'Bot'
@@ -130,16 +135,16 @@ def ProcessBRPage(filename, con):
             pbp.firstBase = None
             pbp.secondBase = None
             pbp.thirdBase = None
-        pbp.plays[playNum].startSit = pbp.ReturnSit()
+        pbp.plays[playInd].startSit = pbp.ReturnSit()
 
         #Pitches
         pitchStr = b.plays[playNum][4]
-        pbp.plays[playNum].pitchSeq = pitchStr.split(') ')[1]
-        pbp.plays[playNum].strikes = int(pitchStr.split('-')[1][0])
-        pbp.plays[playNum].balls = int(pitchStr.split('-')[0][-1])
-        pbp.ProcessBRPlay(b.plays[playNum][11])
-        pbp.plays[playNum].endSit = pbp.ReturnSit()
-        pbp.plays[playNum].playNum = playNum
+        pbp.plays[playInd].pitchSeq = pitchStr.split(') ')[1]
+        pbp.plays[playInd].strikes = int(pitchStr.split('-')[1][0])
+        pbp.plays[playInd].balls = int(pitchStr.split('-')[0][-1])
+        pbp.ProcessBRPlay(b.plays[playNum][11], playInd)
+        pbp.plays[playInd].endSit = pbp.ReturnSit()
+        pbp.plays[playInd].playNum = playInd + 1
 
         #Subs
         if playNum in b.subs.keys():
@@ -147,13 +152,13 @@ def ProcessBRPage(filename, con):
             if re.search('(.*) replaces (.*) pitching', b.subs[playNum]) is not None:
                 newP = re.search('(.*) replaces (.*) pitching', b.subs[playNum]).group(1)
                 #Find Previous Pitcher and calculate innings pitched
-                p = pbp.hPitcher if pbp.innning[0] == 'B' else pbp.aPitcher
+                p = pbp.hPitcher if pbp.inning[0] == 'B' else pbp.aPitcher
                 pbp.pitchers[p].IP += int(pbp.inning.split(' ')[-1])-1
                 for x in pbp.pitchers.keys():
                     if pbp.pitchers[x].team == pbp.pitchers[p].team and x != p:
                         pbp.pitchers[p].IP -= float(pbp.pitchers[x].IP)
                 pbp.pitchers[p].IP += int(pbp.outs) / 3.0
-                if pbp.innning[0] == 'B':
+                if pbp.inning[0] == 'B':
                     pbp.hPitcher = abb(newP)
                     team = pbp.hTeam
                 else:
@@ -168,14 +173,138 @@ def ProcessBRPage(filename, con):
             #Pinch Hitter
             elif re.search('(.*) pinch hits for (.*)', b.subs[playNum]) is not None:
                 newP = re.search('(.*) pinch hits for (.*)', b.subs[playNum]).group(1)
-                team = pbp.hTeam if pbp.innning[0] == 'B' else pbp.aTeam
-                #pbp.lineup[abb(newP)] = Lineup(123, team, newP, 0, 'PH', abb(newP), 'BR', con)
-
+                team = pbp.hTeam if pbp.inning[0] == 'B' else pbp.aTeam
+                batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
+                    if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
+                pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, 'PH', bb.batID[newP], 'BR', con)
 
             #Defensive Sub
+            elif re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]) is not None:
+                newP = re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]).group(1)
+                team = pbp.hTeam if pbp.inning[0] == 'B' else pbp.aTeam
+                batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
+                    if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
+                pos = re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]).group(3)
+                pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, pos, bb.batID[newP], 'BR', con)
 
             #Pinch Runner
+            elif re.search('(.*) pinch runs for', b.subs[playNum]) is not None:
+                newP = re.search('(.*) pinch runs for', b.subs[playNum]).group(1)
+                team = pbp.hTeam if pbp.inning[0] == 'B' else pbp.aTeam
+                batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
+                    if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
+                pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, 'PR', bb.batID[newP], 'BR', con)
+                playInd += 1
+                pbp.plays[playInd] = Play()
+                pbp.plays[playInd].hitterID = abb(re.search('(.*) pinch runs for (.*) \(', b.subs[playNum]).group(1))
+                pbp.plays[playInd].pitcherID = abb(pbp.aPitcher) if pbp.inning[0] == 'B' else abb(pbp.hPitcher)
+                pbp.plays[playInd].inning = pbp.inning
+                pbp.plays[playInd].startSit = pbp.plays[playInd].endSit = pbp.ReturnSit()
+                pbp.plays[playInd].playType = 'Pinch Runner'
+                replacee = re.search('(.*) pinch runs for (.*) \(', b.subs[playNum]).group(2)
+                if pbp.firstBase != None and pbp.firstBase[1] == abb(replacee):
+                    pbp.firstBase = [playInd, abb(newP)]
+                elif pbp.secondBase != None and pbp.secondBase[1] == abb(replacee):
+                    pbp.secondBase = [playInd, abb(newP)]
+                elif pbp.thirdBase != None and pbp.thirdBase[1] == abb(replacee):
+                    pbp.thirdBase = [playInd, abb(newP)]
 
-            #other
+        #Calculate IP for Last Pitchers
+        currentGame.InsertBlankGame(con)
+        currentGame.totalInnings = int(pbp.inning.split(' ')[-1])
+        pbp.pitchers[pbp.hPitcher].IP += currentGame.totalInnings
+        pbp.pitchers[pbp.aPitcher].IP += currentGame.totalInnings
+        if pbp.inning[:3] == 'Top':
+            pbp.pitchers[pbp.aPitcher].IP -= 1
+        elif pbp.inning[:3] == 'Bot':
+            pbp.pitchers[pbp.aPitcher].IP -= float(3 - int(pbp.outs)) / 3.0
 
+
+        #Insert Game, Plays, Pitchers, and Lineups into DB
+        for x in pbp.plays.values():
+            if x.playType not in (
+            'No Play', 'Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball', 'Wild Pitch',
+            'Defensive Indifference', 'Error on Foul', 'Unknown Runner Activity'):
+                x.CalcPitches()
+                pbp.lineup[x.hitterID].PA += 1
+                pbp.pitchers[x.pitcherID].ContactStrikes += x.contactX
+                pbp.pitchers[x.pitcherID].SwingStrikes += x.swingX
+                pbp.pitchers[x.pitcherID].LookStrikes += x.lookX
+                pbp.pitchers[x.pitcherID].Strikes += x.lookX + x.swingX + x.contactX
+                pbp.pitchers[x.pitcherID].Balls += x.balls
+                pbp.pitchers[x.pitcherID].pitchCount += x.lookX + x.swingX + x.contactX + x.balls
+                if x.ballType in ('Ground Ball', 'Bunt Ground Ball'):
+                    pbp.pitchers[x.pitcherID].GB += 1
+                elif x.ballType in ('Line Drive', 'Bunt Line Drive'):
+                    pbp.pitchers[x.pitcherID].LD += 1
+                elif x.ballType in ('Fly Ball', 'Pop Up', 'Bunt Pop'):
+                    pbp.pitchers[x.pitcherID].FB += 1
+                if x.playType in (
+                'Strikeout', 'Out', 'Double Play', 'Triple Play', "Fielders Choice", 'Reach On Error', 'Single',
+                'Double', 'Ground Rule Double', 'Triple', 'Home Run'):
+                    pbp.lineup[x.hitterID].AB += 1
+                    if x.playType in ('Single', 'Double', 'Ground Rule Double', 'Triple', 'Home Run'):
+                        pbp.lineup[x.hitterID].Hits += 1
+                        pbp.pitchers[x.pitcherID].Hits += 1
+                        if x.playType == 'Single':
+                            pbp.lineup[x.hitterID].Single += 1
+                        elif x.playType in ('Double', 'Ground Rule Double'):
+                            pbp.lineup[x.hitterID].Double += 1
+                        elif x.playType == 'Triple':
+                            pbp.lineup[x.hitterID].Triple += 1
+                        elif x.playType == 'Home Run':
+                            pbp.lineup[x.hitterID].HR += 1
+                    elif x.playType == 'Strikeout':
+                        pbp.pitchers[x.pitcherID].K += 1
+                else:
+                    if x.playType in ('Walk', 'Intentional Walk'):
+                        pbp.pitchers[x.pitcherID].BB += 1
+                        pbp.lineup[x.hitterID].BB += 1
+                        pbp.pitchers[x.pitcherID].pitchCount += 1
+                    elif x.playType == 'Hit By Pitch':
+                        pbp.pitchers[x.pitcherID].HBP += 1
+                        pbp.lineup[x.hitterID].HBP += 1
+            if x.inning[:3] == 'Top':
+                if x.hit:
+                    currentGame.awayHits += 1
+                currentGame.awayRuns += x.runsScored
+            else:
+                if x.hit:
+                    currentGame.homeHits += 1
+                currentGame.homeRuns += x.runsScored
+            x.gameKey = currentGame.gameKey
+            x.InsertPlay('BR', con)
+        if currentGame.homeRuns > currentGame.awayRuns:
+            currentGame.homeTeamWin = True
+        elif currentGame.homeRuns == currentGame.awayRuns:
+            currentGame.tie = True
+        currentGame.UpdateStats(con)
+
+        # Go Through Pitchers
+        for x in pbp.pitchers.keys():
+            if x == wp:
+                pbp.pitchers[x].Win = True
+            elif x == lp:
+                pbp.pitchers[x].Loss = True
+            elif x == savep:
+                pbp.pitchers[x].Save = True
+            if pbp.pitchers[x].team == pbp.pitchers[pbp.hPitcher].team and x != pbp.hPitcher:
+                pbp.pitchers[pbp.hPitcher].IP -= float(pbp.pitchers[x].IP)
+            if pbp.pitchers[x].team == pbp.pitchers[pbp.aPitcher].team and x != pbp.aPitcher:
+                pbp.pitchers[pbp.aPitcher].IP -= float(pbp.pitchers[x].IP)
+            if pbp.pitchers[x].IP == 9.0:
+                pbp.pitchers[x].CG = True
+                if pbp.pitchers[x].Runs == 0:
+                    pbp.pitchers[x].SO = True
+                    if pbp.pitchers[x].Hits == 0:
+                        pbp.pitchers[x].NH = True
+            pbp.pitchers[x].gameKey = currentGame.gameKey
+            pbp.pitchers[x].InsertRosterRow(con)
+
+        # Go Through Hitters
+        for x in pbp.lineup.keys():
+            pbp.lineup[x].game = currentGame.gameKey
+            pbp.lineup[x].InsertLineupRow(con)
+
+        playInd += 1
     return currentGame, pbp
