@@ -446,7 +446,6 @@ class PlayByPlay:
         self.CalcRSRunners(runEvent.strip(), playInd, rbiEligible)
 
     def ProcessBRPlay(self, playStr, playInd):
-        runEvent = ''
 
         ###############################################################################
         #  No Plate Appearance, No At-Bat                                             #
@@ -462,41 +461,77 @@ class PlayByPlay:
         if re.search('(.*) Steals (2B|3B|Hm)', playStr) != None:
             self.plays[playInd].playType = 'Stolen Base'
             rbiEligible = False
-            if '2B' in playStr:
-                self.lineup[self.firstBase[1]].SB += 1
-            if '3B' in playStr:
-                self.lineup[self.secondBase[1]].SB += 1
-            if 'Hm' in playStr:
-                self.lineup[self.thirdBase[1]].SB += 1
-            bases = [self.firstBase, self.secondBase, self.thirdBase]
-            for base in enumerate(bases):
-                if base[1][1].split(' ')[-1] == re.search('(.*) Steals (2B|3B|Hm)', playStr).group(1):
+            for x in re.findall('([^;]*) Steals (2B|3B|Hm)', playStr)
+                if '2B' in x[1]:
+                    self.lineup[self.firstBase[1]].SB += 1
+                if '3B' in x[1]:
+                    self.lineup[self.secondBase[1]].SB += 1
+                if 'Hm' in x[1]:
+                    self.lineup[self.thirdBase[1]].SB += 1
+                bases = [self.firstBase, self.secondBase, self.thirdBase]
+                for base in enumerate(bases):
+                    if base[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
+                        if x[1] == '2B':
+                            self.secondBase = base[1]
+                        elif x[1] == '3B':
+                            self.thirdBase = base[1]
+                        elif x[1] == 'Hm':
+                            self.plays[self.thirdBase[0]].runScored = True
 
-                    if re.search('(.*) Steals (2B|3B|Hm)', playStr).group(2) == '2B':
-                        self.secondBase = [playInd, base[1]]
-                    elif re.search('(.*) Steals (2B|3B|Hm)', playStr).group(2) == '3B':
-                        self.thirdBase = [playInd, base[1]]
-                    elif re.search('(.*) Steals (2B|3B|Hm)', playStr).group(2) == 'Hm':
-                        self.plays[self.thirdBase[0]].runScored = True
-
-                    if base[0] == 0:
-                        self.firstBase = None
-                    elif base[0] == 1:
-                        self.secondBase = None
-                    elif base[0] == 2:
-                        self.thirdBase = None
+                        if base[0] == 0:
+                            self.firstBase = None
+                        elif base[0] == 1:
+                            self.secondBase = None
+                        elif base[0] == 2:
+                            self.thirdBase = None
 
 
-        # Caught Stealing
+        # Caught Stealing, assumes no errors
         if re.search('Caught Stealing (2B|3B|Hm)', playStr) != None:
             self.plays[playInd].playType = 'Caught Stealing'
             rbiEligible = False
-            if '2B' in playStr:
-                self.lineup[self.firstBase[1]].CS += 1
-            if '3B' in batParts[0]:
-                self.lineup[self.secondBase[1]].CS += 1
-            if 'Hm' in batParts[0]:
-                self.lineup[self.thirdBase[1]].CS += 1
+            for x in re.findall('([^;]*) Caught Stealing (2B|3B|Hm)', playStr):
+                if '2B' in x[1]:
+                    self.lineup[self.firstBase[1]].CS += 1
+                    self.firstBase = None
+                if '3B' in x[1]:
+                    self.lineup[self.secondBase[1]].CS += 1
+                    self.secondBase = None
+                if 'Hm' in x[1]:
+                    self.lineup[self.thirdBase[1]].CS += 1
+                    self.thirdBase = None
+
+        #General Base Advance
+        if re.search('([^;]*) to (2B|3B)', playStr) != None:
+            bases = [self.firstBase, self.secondBase, self.thirdBase]
+            for x in re.findall('([^;]*) to (2B|3B)(/|;|$)', playStr):
+                for b in enumerate(bases):
+                    if b[1][1].split(' ')[-1].strip(' ') == x[0]:
+                        if x[1] == '2B':
+                            self.secondBase = b[1]
+                        elif x[1] == '3B':
+                            self.thirdBase = b[1]
+
+                        if b[0] == 0:
+                            self.firstBase = None
+                        elif b[0] == 1:
+                            self.secondBase = None
+                        elif b[0] == 2:
+                            self.thirdBase = None
+
+        #Run Scored
+        if re.search('([^;]*) Scores', playStr) != None:
+            for x in re.findall('([^;]*) Scores(/|;|$)', playStr):
+                for b in enumerate(bases):
+                    if base[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
+                        self.plays[base[1][0]].runScored = True
+                        self.plays[playInd].runsScored += 1
+                        if b[0] == 0:
+                            self.firstBase = None
+                        elif b[0] == 1:
+                            self.secondBase = None
+                        elif b[0] == 2:
+                            self.thirdBase = None
 
         # Pick Off
         if re.search('PO[^C]', batParts[0]) != None:
@@ -535,11 +570,6 @@ class PlayByPlay:
         # Error on Foul
         if re.search('FLE', batParts[0]) != None:
             self.plays[playInd].playType = 'Error on Foul'
-            rbiEligible = False
-
-        # Misc. Advance
-        if re.search('OA', batParts[0]) != None:
-            self.plays[playInd].playType = 'Unknown Runner Activity'
             rbiEligible = False
 
             ###############################################################################
