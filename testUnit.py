@@ -1,17 +1,11 @@
 import psycopg2
-import os
-from RetroSheetProcess import ProcessRSLog
+from BRProcess import ProcessBRPage
 
 pw = 'h4xorz' #raw_input('Password? ')
-con = psycopg2.connect("dbname=bbstats user=bbadmin host=192.168.1.111 password=%s" % pw)
+con = psycopg2.connect("dbname=bbtest user=bbadmin host=192.168.1.111 password=%s" % pw)
+filename = 'C:\Users\JMedaugh\Desktop\SDP_@_COL_20160410.html'
 
-path = os.path.dirname(os.path.abspath(__file__))
-
-#** BR Test File ** filename = path+'\\Test Files\\CHC_@_LAA_20160405.html'
-filename = 'C:\Users\JMedaugh\Desktop\PBP\SAMPLE.EVA'
-
-a = ProcessRSLog(filename, con)
-
+a, b = ProcessBRPage(filename, con)
 
 
 

@@ -344,7 +344,7 @@ class GamesParser(HTMLParser.HTMLParser):
             self.foundh2 = False
 
 
-class PlayerInfoParser(HTMLParser.HTMLParser):
+class BRPlayerInfoParser(HTMLParser.HTMLParser):
     height = ''
     weight = ''
     birthDate = ''

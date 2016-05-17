@@ -1,5 +1,5 @@
 from RSParser import PlayerInfoParser as RSInfoParser
-from BRParser import PlayerInfoParser as BRInfoParser
+from BRParser import BRPlayerInfoParser as BRInfoParser
 from datetime import datetime
 import urllib2
 import re
