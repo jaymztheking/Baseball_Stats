@@ -447,7 +447,7 @@ class PlayByPlay:
 
     def ProcessBRPlay(self, playStr, playInd):
         pos = ['','P','C','1B','2B','3B','SS','LF','CF','RF']
-        hitterId = self.plays[playInd].hitterID
+        hitterID = self.plays[playInd].hitterID
         ###############################################################################
         #  No Plate Appearance, No At-Bat                                             #
         ###############################################################################
@@ -474,11 +474,11 @@ class PlayByPlay:
                             self.plays[self.thirdBase[0]].runScored = True
 
                         if base[0] == 0:
-                            self.firstBase = None
+                            self.thirdBase = None
                         elif base[0] == 1:
                             self.secondBase = None
                         elif base[0] == 2:
-                            self.thirdBase = None
+                            self.firstBase = None
 
         # Caught Stealing, assumes no errors
         if re.search('Caught Stealing (2B|3B|Hm)', playStr) != None:
@@ -503,11 +503,11 @@ class PlayByPlay:
                     if b[1] is not None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
                         self.plays[b[1][0]].runScored = True
                         if b[0] == 0:
-                            self.firstBase = None
+                            self.thirdBase = None
                         elif b[0] == 1:
                             self.secondBase = None
                         elif b[0] == 2:
-                            self.thirdBase = None
+                            self.firstBase = None
 
         #General Base Advance
         if re.search('([^;(]*) to (2B|3B)', playStr) != None and re.search('([^;(]*) to (2B|3B)', playStr).group(1)\
@@ -520,7 +520,6 @@ class PlayByPlay:
                             self.secondBase = b[1]
                         elif x[1] == '3B':
                             self.thirdBase = b[1]
-                        print b[0]
                         if b[0] == 0:
                             self.thirdBase = None
                         elif b[0] == 1:
@@ -548,11 +547,11 @@ class PlayByPlay:
         if re.search('Forceout at (1B|2B|3B|Hm)', playStr) != None:
             bases = [self.thirdBase, self.secondBase, self.firstBase]
             for x in re.findall('Forceout at (1B|2B|3B|Hm)', playStr):
-                if x[0] == '2B':
+                if x == '2B':
                     self.firstBase = None
-                elif x[0] == '3B':
+                elif x == '3B':
                     self.secondBase = None
-                elif x[0] == 'Hm':
+                elif x == 'Hm':
                     self.thirdBase = None
 
         # Balk
@@ -637,6 +636,9 @@ class PlayByPlay:
                     self.plays[playInd].ballLoc = str(pos.index(re.search('Groundout: (.*)($|;|-)', playStr).group(1)))
                 except ValueError:
                     self.plays[playInd].ballLoc = ''
+            if re.search('out at (2B|3B|Hm)', playStr) != None:
+                self.firstBase = [playInd, hitterID]
+
 
         #Line Out
         elif re.search('Lineout', playStr) != None:
@@ -724,6 +726,7 @@ class PlayByPlay:
             self.plays[playInd].hit = True
             if re.search('Single to (.{1,2})(;|$)', playStr) is not None:
                 self.plays[playInd].ballLoc = str(pos.index(re.search('Single to (.{1,2})(;|$)', playStr).group(1)))
+            self.firstBase = [playInd, hitterID]
 
         #Double
         elif re.search('Double to ', playStr):
@@ -732,12 +735,14 @@ class PlayByPlay:
             self.plays[playInd].hit = True
             if re.search('Double to (.{1,2})(;|$)', playStr) is not None:
                 self.plays[playInd].ballLoc = str(pos.index(re.search('Double to (.{1,2})(;|$)', playStr).group(1)))
+            self.secondBase = [playInd, hitterID]
 
         #Ground Rule Double
         elif re.search('Ground-rule Double', playStr):
             self.plays[playInd].playType = 'Ground Rule Double'
             rbiEligible = True
             self.plays[playInd].hit = True
+            self.secondBase = [playInd, hitterID]
 
         #Triple
         elif re.search('Triple to ', playStr):
@@ -746,6 +751,7 @@ class PlayByPlay:
             self.plays[playInd].hit = True
             if re.search('Triple to (.{1,2})(;|$)', playStr) is not None:
                 self.plays[playInd].ballLoc = str(pos.index(re.search('Triple to (.{1,2})(;|$)', playStr).group(1)))
+            self.thirdBase = [playInd, hitterID]
 
         #Home Run
         elif re.search('Home Run', playStr):

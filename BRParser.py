@@ -175,6 +175,8 @@ class BRPlayParser(HTMLParser.HTMLParser):
             self.insideTable = False
             self.index += 1
         elif tag == 'span' and self.subRow:
+            self.subs[self.playNum] += ';'
+        elif tag == 'tr' and self.subRow:
             self.subRow = False
 
     def handle_entityref(self, name):

@@ -94,8 +94,6 @@ def ProcessBRPage(filename, con):
             if hPos == 'P':
                 pbp.hPitcher = abb(hName)
             pbp.lineup[abb(aName)] = Lineup(123, pbp.aTeam, aName, aBatNum, aPos, aUID, 'BR', con)
-            print(abb(aName))
-            print(abb(hName))
             pbp.lineup[abb(hName)] = Lineup(123, pbp.hTeam, hName, hBatNum, hPos, hUID, 'BR', con)
         elif len(line) == 6:
             pbp.aPitcher = abb(str(line[1]))
@@ -118,7 +116,15 @@ def ProcessBRPage(filename, con):
     #Hitter ID Lookup
     bb = BRBatterParser()
     bb.feed(html)
-
+    batID = {}
+    for x in bb.batID.keys():
+        batID[abb(x)] = bb.batID[x]
+        for y in pbp.lineup.keys():
+            if abb(x) == y:
+                break
+            elif abb(x)[:11] == y:
+                pbp.lineup[abb(x)] = pbp.lineup[y]
+                del pbp.lineup[y]
 
     #Plays
     b = BRPlayParser()
@@ -131,7 +137,7 @@ def ProcessBRPage(filename, con):
         #Inning Stuff
         innPre = 'Top' if b.plays[playNum][0][0] == 't' else 'Bot'
         prevInn = pbp.inning
-        pbp.inning = innPre + str(b.plays[playNum][0][1])
+        pbp.inning = innPre + ' ' + str(b.plays[playNum][0][1])
         if pbp.inning != prevInn:
             pbp.outs = 0
             pbp.firstBase = None
@@ -144,75 +150,79 @@ def ProcessBRPage(filename, con):
         pbp.plays[playInd].pitchSeq = pitchStr.split(') ')[1]
         pbp.plays[playInd].strikes = int(pitchStr.split('-')[1][0])
         pbp.plays[playInd].balls = int(pitchStr.split('-')[0][-1])
-        pbp.plays[playInd].resultOuts = pbp.outs = b.plays[playNum][5].count('O')
+        pbp.plays[playInd].resultOuts = b.plays[playNum][5].count('O')
+        pbp.outs += b.plays[playNum][5].count('O')
         pbp.plays[playInd].runsScored = b.plays[playNum][5].count('R')
         if pbp.ProcessBRPlay(b.plays[playNum][11], playInd):
             pbp.lineup[b.plays[playNum][7]].RBI += pbp.plays[playInd].runsScored
+
         pbp.plays[playInd].endSit = pbp.ReturnSit()
         pbp.plays[playInd].playNum = playInd + 1
 
         #Subs
         if playNum in b.subs.keys():
-            #Pitching Change
-            if re.search('(.*) replaces (.*) pitching', b.subs[playNum]) is not None:
-                newP = re.search('(.*) replaces (.*) pitching', b.subs[playNum]).group(1)
-                #Find Previous Pitcher and calculate innings pitched
-                p = pbp.hPitcher if pbp.inning[0] == 'B' else pbp.aPitcher
-                pbp.pitchers[p].IP += int(pbp.inning.split(' ')[-1])-1
-                for x in pbp.pitchers.keys():
-                    if pbp.pitchers[x].team == pbp.pitchers[p].team and x != p:
-                        pbp.pitchers[p].IP -= float(pbp.pitchers[x].IP)
-                pbp.pitchers[p].IP += int(pbp.outs) / 3.0
-                if pbp.inning[0] == 'B':
-                    pbp.hPitcher = abb(newP)
-                    team = pbp.hTeam
-                else:
-                    pbp.aPitcher = abb(newP)
-                    team = pbp.aTeam
-                pbp.pitchers[abb(newP)] = PitchRoster(123, team, newP, pitchIDLookup[newP], 'BR', con)
-                pbp.pitchers[abb(newP)].pitcherRole = 'Reliever'
-                batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
-                    if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
-                pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, 'P', pitchIDLookup[newP], 'BR', con)
+            subs = b.subs[playNum].split(';')
+            for sub in subs:#Pitching Change
+                if re.search('(.*) replaces (.*) pitching', sub) is not None:
+                    newP = re.search('(.*) replaces (.*) pitching', sub).group(1)
+                    #Find Previous Pitcher and calculate innings pitched
+                    p = pbp.hPitcher if pbp.inning[0] == 'B' else pbp.aPitcher
+                    pbp.pitchers[p].IP += int(pbp.inning.split(' ')[-1])-1
+                    for x in pbp.pitchers.keys():
+                        if pbp.pitchers[x].team == pbp.pitchers[p].team and x != p:
+                            pbp.pitchers[p].IP -= float(pbp.pitchers[x].IP)
+                    pbp.pitchers[p].IP += int(pbp.outs) / 3.0
+                    if pbp.inning[0] == 'B':
+                        pbp.hPitcher = abb(newP)
+                        team = pbp.hTeam
+                    else:
+                        pbp.aPitcher = abb(newP)
+                        team = pbp.aTeam
+                    pbp.pitchers[abb(newP)] = PitchRoster(123, team, newP, pitchIDLookup[newP], 'BR', con)
+                    pbp.pitchers[abb(newP)].pitcherRole = 'Reliever'
+                    batnum = int(re.search('batting ([0-9])',sub).group(1)) \
+                        if re.search('batting ([0-9])', sub) is not None else 0
+                    pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, 'P', pitchIDLookup[newP], 'BR', con)
 
-            #Pinch Hitter
-            elif re.search('(.*) pinch hits for (.*)', b.subs[playNum]) is not None:
-                newP = re.search('(.*) pinch hits for (.*)', b.subs[playNum]).group(1)
-                team = pbp.hTeam if pbp.inning[0] == 'B' else pbp.aTeam
-                batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
-                    if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
-                pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, 'PH', bb.batID[newP], 'BR', con)
+                #Pinch Hitter
+                if re.search('(.*) pinch hits for (.*)', sub) is not None:
+                    newP = re.search('(.*) pinch hits for (.*)', sub).group(1)
+                    team = pbp.hTeam if pbp.inning[0] == 'B' else pbp.aTeam
+                    batnum = int(re.search('batting ([0-9])', sub).group(1)) \
+                        if re.search('batting ([0-9])', sub) is not None else 0
+                    pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, 'PH', bb.batID[newP], 'BR', con)
 
-            #Defensive Sub
-            elif re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]) is not None:
-                newP = re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]).group(1)
-                team = pbp.hTeam if pbp.inning[0] == 'B' else pbp.aTeam
-                batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
-                    if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
-                pos = re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]).group(3)
-                pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, pos, bb.batID[newP], 'BR', con)
+                #Defensive Sub
+                if re.search('(.*) replaces (.*) playing (.*) batting', sub) is not None:
+                    newP = re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]).group(1)
+                    team = pbp.hTeam if pbp.inning[0] == 'B' else pbp.aTeam
+                    batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
+                        if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
+                    pos = re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]).group(3)
+                    pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, pos, bb.batID[newP], 'BR', con)
 
-            #Pinch Runner
-            elif re.search('(.*) pinch runs for', b.subs[playNum]) is not None:
-                newP = re.search('(.*) pinch runs for', b.subs[playNum]).group(1)
-                team = pbp.hTeam if pbp.inning[0] == 'B' else pbp.aTeam
-                batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
-                    if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
-                pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, 'PR', bb.batID[newP], 'BR', con)
-                playInd += 1
-                pbp.plays[playInd] = Play()
-                pbp.plays[playInd].hitterID = abb(re.search('(.*) pinch runs for (.*) \(', b.subs[playNum]).group(1))
-                pbp.plays[playInd].pitcherID = abb(pbp.aPitcher) if pbp.inning[0] == 'B' else abb(pbp.hPitcher)
-                pbp.plays[playInd].inning = pbp.inning
-                pbp.plays[playInd].startSit = pbp.plays[playInd].endSit = pbp.ReturnSit()
-                pbp.plays[playInd].playType = 'Pinch Runner'
-                replacee = re.search('(.*) pinch runs for (.*) \(', b.subs[playNum]).group(2)
-                if pbp.firstBase != None and pbp.firstBase[1] == abb(replacee):
-                    pbp.firstBase = [playInd, abb(newP)]
-                elif pbp.secondBase != None and pbp.secondBase[1] == abb(replacee):
-                    pbp.secondBase = [playInd, abb(newP)]
-                elif pbp.thirdBase != None and pbp.thirdBase[1] == abb(replacee):
-                    pbp.thirdBase = [playInd, abb(newP)]
+                #Pinch Runner
+                if re.search('(.*) pinch runs for', b.subs[playNum]) is not None:
+                    newP = re.search('(.*) pinch runs for', b.subs[playNum]).group(1)
+                    team = pbp.hTeam if pbp.inning[0] == 'B' else pbp.aTeam
+                    batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
+                        if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
+                    pbp.lineup[abb(newP)] = Lineup(123, team, newP, batnum, 'PR', bb.batID[newP], 'BR', con)
+                    playInd += 1
+                    pbp.plays[playInd] = Play()
+                    pbp.plays[playInd].hitterID = abb(re.search('(.*) pinch runs for (.*) \(', b.subs[playNum]).group(1))
+                    pbp.plays[playInd].pitcherID = abb(pbp.aPitcher) if pbp.inning[0] == 'B' else abb(pbp.hPitcher)
+                    pbp.plays[playInd].inning = pbp.inning
+                    pbp.plays[playInd].startSit = pbp.plays[playInd].endSit = pbp.ReturnSit()
+                    pbp.plays[playInd].playType = 'Pinch Runner'
+                    replacee = re.search('(.*) pinch runs for (.*) \(', b.subs[playNum]).group(2)
+                    if pbp.firstBase != None and pbp.firstBase[1] == abb(replacee):
+                        pbp.firstBase = [playInd, abb(newP)]
+                    elif pbp.secondBase != None and pbp.secondBase[1] == abb(replacee):
+                        pbp.secondBase = [playInd, abb(newP)]
+                    elif pbp.thirdBase != None and pbp.thirdBase[1] == abb(replacee):
+                        pbp.thirdBase = [playInd, abb(newP)]
+
 
         playInd += 1
 
@@ -279,6 +289,7 @@ def ProcessBRPage(filename, con):
                 currentGame.homeHits += 1
             currentGame.homeRuns += x.runsScored
         x.gameKey = currentGame.gameKey
+        x.hitterID = batID[x.hitterID]
         x.InsertPlay('BR', con)
     if currentGame.homeRuns > currentGame.awayRuns:
         currentGame.homeTeamWin = True
