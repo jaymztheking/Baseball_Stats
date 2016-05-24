@@ -12,10 +12,10 @@ This project is a collection of Python classes and corresponding PostgreSQL comp
 * 2001-08-04 KCA at MIN has a game time of 6:06Ac, i guess
 
 ##To - Do
-* Run code for 1993 - 2011
-* Create table for per plate appearance stats
-* Create play by play scraping for current year
-* Write code to scrape day-of lineups and salaries
+* Run code for 1993 - 2001ish
+* Get Current Year Files
+* Run BR script
+* Write code to scrape day-of lineups and salaries (MLB.com? DK?)
 
 ##Pitch Result Tests
 * Start Situation is not 30
