@@ -1,9 +1,10 @@
 
-from BRParser import  BRPlayerInfoParser
+from BRParser import  BRPitcherParser
 import urllib2
 
-b =  BRPlayerInfoParser()
-url = "http://www.baseball-reference.com/players/p/puigya01.shtml"
+b =  BRPitcherParser()
+url = "http://www.baseball-reference.com/boxes/DET/DET201504060.shtml"
 html = urllib2.urlopen(url).read().decode('utf-8').replace('&#183;','*')
 b.feed(html)
-print b.birthDate
+for x in b.roster:
+    print x

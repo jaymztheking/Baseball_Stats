@@ -758,6 +758,7 @@ class PlayByPlay:
             self.plays[playInd].playType = 'Home Run'
             rbiEligible = True
             self.plays[playInd].hit = True
+            self.plays[playInd].runScored = True
 
         #Fill in missing ball types
         if self.plays[playInd].ballType == '':
