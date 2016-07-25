@@ -10,8 +10,8 @@ day = str(input('What day?'))
 url = 'http://www.baseball-reference.com/games/standings.cgi?month=%s&day=%s&year=%s' % (month.zfill(2), day, year)
 '''
 
-startDate = datetime.date(2016,5,7)
-endDate = datetime.date(2016,5,8) #datetime.date.today()
+startDate = datetime.date(2016,5,6)
+endDate = datetime.date(2016,5,7) #datetime.date.today()
 oneDay = datetime.timedelta(1)
 
 while startDate < endDate:
@@ -32,7 +32,7 @@ while startDate < endDate:
             gameNum += 1
         fileName = savePath + '%s_@_%s_%s_%s' % (game[1], game[0], gameNum, year+month.zfill(2)+day.zfill(2))+'.html'
         listOfGames.append(game[1]+game[0])
-        gameHTML = urllib2.urlopen(game[2]).read().decode('utf-8')
+        gameHTML = urllib2.urlopen(game[2]).read()
         newFile = open(fileName, 'w')
         newFile.write(gameHTML)
         newFile.close()
