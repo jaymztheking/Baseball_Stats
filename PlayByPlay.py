@@ -24,6 +24,7 @@ class Play:
     endSit = 0
 
     def InsertPlay(self, src, con):
+        print self.hitterID
         hk = GetHitterKey(src, self.hitterID, con)
         pk = GetPitcherKey(src, self.pitcherID, con)
         cur = con.cursor()
@@ -448,6 +449,7 @@ class PlayByPlay:
     def ProcessBRPlay(self, playStr, playInd):
         pos = ['','P','C','1B','2B','3B','SS','LF','CF','RF']
         hitterID = self.plays[playInd].hitterID
+        rbiEligible = False
         ###############################################################################
         #  No Plate Appearance, No At-Bat                                             #
         ###############################################################################
@@ -713,7 +715,7 @@ class PlayByPlay:
                     str(pos.index(re.search('Triple Play: (.{1,2})(-|;|$)', playStr).group(1)))
 
         #Reach On Error
-        elif re.search('Reach on E', playStr) is not None:
+        elif re.search('Reached on E', playStr) is not None:
             self.plays[playInd].playType = 'Reach On Error'
             rbiEligible = False
             if re.search('Reach on E([0-9])', playStr) is not None:

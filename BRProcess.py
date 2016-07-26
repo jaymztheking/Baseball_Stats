@@ -140,6 +140,7 @@ def ProcessBRPage(filename, con):
         innPre = 'Top' if b.plays[playNum][0][0] == 't' else 'Bot'
         prevInn = pbp.inning
         pbp.inning = innPre + ' ' + str(b.plays[playNum][0][1])
+        pbp.plays[playInd].inning = pbp.inning
         if pbp.inning != prevInn:
             pbp.outs = 0
             pbp.firstBase = None
@@ -150,9 +151,10 @@ def ProcessBRPage(filename, con):
 
         #Pitches
         pitchStr = b.plays[playNum][4]
-        pbp.plays[playInd].pitchSeq = pitchStr.split(' ')[1]
-        pbp.plays[playInd].strikes = int(pitchStr.split('-')[1][0])
-        pbp.plays[playInd].balls = int(pitchStr.split('-')[0][-1])
+        if len(pitchStr.split(' ')) > 1:
+            pbp.plays[playInd].pitchSeq = pitchStr.split(' ')[1]
+            pbp.plays[playInd].strikes = int(pitchStr.split('-')[1][0])
+            pbp.plays[playInd].balls = int(pitchStr.split('-')[0][-1])
         pbp.plays[playInd].resultOuts = b.plays[playNum][5].count('O')
         pbp.outs += b.plays[playNum][5].count('O')
         pbp.plays[playInd].runsScored = b.plays[playNum][5].count('R')
