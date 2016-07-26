@@ -150,7 +150,7 @@ def ProcessBRPage(filename, con):
 
         #Pitches
         pitchStr = b.plays[playNum][4]
-        pbp.plays[playInd].pitchSeq = pitchStr.split(') ')[1]
+        pbp.plays[playInd].pitchSeq = pitchStr.split(' ')[1]
         pbp.plays[playInd].strikes = int(pitchStr.split('-')[1][0])
         pbp.plays[playInd].balls = int(pitchStr.split('-')[0][-1])
         pbp.plays[playInd].resultOuts = b.plays[playNum][5].count('O')
