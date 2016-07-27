@@ -157,7 +157,7 @@ def GetCrossSiteUserID(src, tgt, id, con):
     if src == 'BR' and tgt == 'RS':
         url = 'http://www.baseball-reference.com/players/%s/%s.shtml' % (id[0], id)
         b = BRRSUserIdParser()
-        html = urllib2.urlopen(url).read().decode('utf-8')
+        html = urllib2.urlopen(url).read()
         b.feed(html)
         return b.uid
     else:

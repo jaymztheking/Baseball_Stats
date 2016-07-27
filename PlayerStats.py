@@ -117,7 +117,7 @@ class Hitter:
         if self.bruserid == '':
             return False
         url = 'http://baseball-reference.com/players/%s/%s.shtml' % (self.bruserid[0], self.bruserid)
-        html = urllib2.urlopen(url).read().decode('utf-8').replace('&#183;', '*')
+        html = urllib2.urlopen(url).read().replace('&#183;', '*')
         b.feed(html)
         cur = con.cursor()
         key = self.GetHitterKey(con)

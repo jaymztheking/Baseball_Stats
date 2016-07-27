@@ -24,7 +24,6 @@ class Play:
     endSit = 0
 
     def InsertPlay(self, src, con):
-        print self.hitterID
         hk = GetHitterKey(src, self.hitterID, con)
         pk = GetPitcherKey(src, self.pitcherID, con)
         cur = con.cursor()
@@ -450,6 +449,26 @@ class PlayByPlay:
         pos = ['','P','C','1B','2B','3B','SS','LF','CF','RF']
         hitterID = self.plays[playInd].hitterID
         rbiEligible = False
+
+        # General Base Advance
+        if re.search('([^;(]*) to (2B|3B)', playStr) != None and re.search('([^;(]*) to (2B|3B)', playStr).group(1) \
+                not in ('Single', 'Double', 'Triple'):
+            bases = [self.thirdBase, self.secondBase, self.firstBase]
+            for b in enumerate(bases):
+                for x in re.findall('([^;]*) to (2B|3B)(/|;|$)', playStr):
+                    if b[1] != None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
+                        if x[1] == '2B':
+                            self.secondBase = b[1]
+                        elif x[1] == '3B':
+                            self.thirdBase = b[1]
+                        if b[0] == 0:
+                            self.thirdBase = None
+                        elif b[0] == 1:
+                            self.secondBase = None
+                        elif b[0] == 2:
+                            self.firstBase = None
+                        break
+
         ###############################################################################
         #  No Plate Appearance, No At-Bat                                             #
         ###############################################################################
@@ -502,6 +521,7 @@ class PlayByPlay:
             bases = [self.thirdBase, self.secondBase, self.firstBase]
             for x in re.findall('([^;]*) Scores(/|;|$)', playStr):
                 for b in enumerate(bases):
+
                     if b[1] is not None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
                         self.plays[b[1][0]].runScored = True
                         if b[0] == 0:
@@ -510,25 +530,6 @@ class PlayByPlay:
                             self.secondBase = None
                         elif b[0] == 2:
                             self.firstBase = None
-
-        #General Base Advance
-        if re.search('([^;(]*) to (2B|3B)', playStr) != None and re.search('([^;(]*) to (2B|3B)', playStr).group(1)\
-                not in ('Single', 'Double', 'Triple'):
-            bases = [self.thirdBase, self.secondBase, self.firstBase]
-            for b in enumerate(bases):
-                for x in re.findall('([^;]*) to (2B|3B)(/|;|$)', playStr):
-                    if b[1] != None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
-                        if x[1] == '2B':
-                            self.secondBase = b[1]
-                        elif x[1] == '3B':
-                            self.thirdBase = b[1]
-                        if b[0] == 0:
-                            self.thirdBase = None
-                        elif b[0] == 1:
-                            self.secondBase = None
-                        elif b[0] == 2:
-                            self.firstBase = None
-                        break
 
         #Pick Off
         if re.search('([^;]*) Picked off (1B|2B|3B)', playStr) != None:
@@ -720,6 +721,7 @@ class PlayByPlay:
             rbiEligible = False
             if re.search('Reach on E([0-9])', playStr) is not None:
                 self.plays[playInd].ballLoc = str(re.search('Reach on E([0-9])', playStr).group(1))
+            self.firstBase = [playInd, hitterID]
 
         #Single
         elif re.search('Single to ', playStr):
@@ -775,4 +777,22 @@ class PlayByPlay:
         if self.plays[playInd].ballLoc == '':
             pass
 
+        #Second check for Base Advance (for batter advancing extra on errors)
+        if re.search('([^;(]*) to (2B|3B)', playStr) != None and re.search('([^;(]*) to (2B|3B)', playStr).group(1) \
+                not in ('Single', 'Double', 'Triple'):
+            for x in re.findall('([^;]*) to (2B|3B)(/|;|$)', playStr):
+                if x[0].strip(' ') == hitterID.split(' ')[-1].strip(' '):
+                    if x[1] == '2B':
+                        self.secondBase = [playInd, hitterID]
+                        self.firstBase = None
+                    elif x[1] == '3B':
+                        self.thirdBase = [playInd, hitterID]
+                        self.secondBase = None
+                        self.firstBase = None
+
+        #Second check for Scores (pretty much only on error intensive inside the park home runs)
+        if re.search('([^;]*) Scores', playStr) != None:
+            pass #do this later when we find an example
+
+        print self.inning, self.outs, self.thirdBase, self.secondBase, self.firstBase
         return rbiEligible
