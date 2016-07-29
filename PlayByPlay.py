@@ -450,25 +450,6 @@ class PlayByPlay:
         hitterID = self.plays[playInd].hitterID
         rbiEligible = False
 
-        # General Base Advance
-        if re.search('([^;(]*) to (2B|3B)', playStr) != None and re.search('([^;(]*) to (2B|3B)', playStr).group(1) \
-                not in ('Single', 'Double', 'Triple'):
-            bases = [self.thirdBase, self.secondBase, self.firstBase]
-            for b in enumerate(bases):
-                for x in re.findall('([^;]*) to (2B|3B)(/|;|$)', playStr):
-                    if b[1] != None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
-                        if x[1] == '2B':
-                            self.secondBase = b[1]
-                        elif x[1] == '3B':
-                            self.thirdBase = b[1]
-                        if b[0] == 0:
-                            self.thirdBase = None
-                        elif b[0] == 1:
-                            self.secondBase = None
-                        elif b[0] == 2:
-                            self.firstBase = None
-                        break
-
         ###############################################################################
         #  No Plate Appearance, No At-Bat                                             #
         ###############################################################################
@@ -524,12 +505,35 @@ class PlayByPlay:
 
                     if b[1] is not None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
                         self.plays[b[1][0]].runScored = True
+                        print 'Run', b[1][1], self.inning, self.outs, b
+                        print playStr
                         if b[0] == 0:
                             self.thirdBase = None
                         elif b[0] == 1:
                             self.secondBase = None
                         elif b[0] == 2:
                             self.firstBase = None
+
+        # General Base Advance
+        if re.search('([^;(]*) to (2B|3B)', playStr) != None and re.search('([^;(]*) to (2B|3B)',
+                                                                           playStr).group(1) \
+                not in ('Single', 'Double', 'Triple'):
+            bases = [self.thirdBase, self.secondBase, self.firstBase]
+            for b in enumerate(bases):
+                for x in re.findall('([^;]*) to (2B|3B)(/|;|$)', playStr):
+                    print x
+                    if b[1] != None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
+                        if x[1] == '2B':
+                            self.secondBase = b[1]
+                        elif x[1] == '3B':
+                            self.thirdBase = b[1]
+                        if b[0] == 0:
+                            self.thirdBase = None
+                        elif b[0] == 1:
+                            self.secondBase = None
+                        elif b[0] == 2:
+                            self.firstBase = None
+                        break
 
         #Pick Off
         if re.search('([^;]*) Picked off (1B|2B|3B)', playStr) != None:
