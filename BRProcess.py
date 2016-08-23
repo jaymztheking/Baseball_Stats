@@ -201,7 +201,7 @@ def ProcessBRPage(filename, con):
                 #Defensive Sub
                 if re.search('(.*) replaces (.*) playing (.*) batting', sub) is not None:
                     newP = re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]).group(1)
-                    team = pbp.hTeam if b.plays[playNum+1][0][0] == 'b' else pbp.aTeam
+                    team = pbp.aTeam if b.plays[playNum+1][0][0] == 'b' else pbp.hTeam
                     batnum = int(re.search('batting ([0-9])', b.subs[playNum]).group(1)) \
                         if re.search('batting ([0-9])', b.subs[playNum]) is not None else 0
                     pos = re.search('(.*) replaces (.*) playing (.*) batting', b.subs[playNum]).group(3)

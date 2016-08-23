@@ -96,7 +96,7 @@ class Hitter:
     def GetInfofromRS(self, con):
         b = RSInfoParser()
         url = "http://www.retrosheet.org/boxesetc/%s/P%s.htm" % (self.rsuserid[0].upper(), self.rsuserid)
-        html = urllib2.urlopen(url).read().decode('utf-8').replace('&#183;', '*')
+        html = urllib2.urlopen(url).read().encode('utf-8').replace('&#183;', '*')
         b.feed(html)
         cur = con.cursor()
         key = self.GetHitterKey(con)
@@ -117,7 +117,8 @@ class Hitter:
         if self.bruserid == '':
             return False
         url = 'http://baseball-reference.com/players/%s/%s.shtml' % (self.bruserid[0], self.bruserid)
-        html = urllib2.urlopen(url).read().replace('&#183;', '*')
+        html = urllib2.urlopen(url).read()
+        html = html.decode('utf-8')
         b.feed(html)
         cur = con.cursor()
         key = self.GetHitterKey(con)

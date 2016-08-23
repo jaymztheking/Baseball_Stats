@@ -9,6 +9,8 @@ for file in enumerate(os.listdir('.\\Game HTML Saves\\')):
     filename = '.\\Game HTML Saves\\'+file[1]
     print(filename)
     ProcessBRPage(filename, con)
+    break
+
 
 
 
