@@ -515,9 +515,7 @@ class PlayByPlay:
                             self.firstBase = None
 
         # General Base Advance
-        if re.search('([^;(]*) to (2B|3B)', playStr) != None and re.search('([^;(]*) to (2B|3B)',
-                                                                           playStr).group(1) \
-                not in ('Single', 'Double', 'Triple'):
+        if re.search('([^;(]*) to (2B|3B)', playStr) != None:
             bases = [self.thirdBase, self.secondBase, self.firstBase]
             for b in enumerate(bases):
                 for x in re.findall('([^;]*) to (2B|3B)(/|;|$)', playStr):
