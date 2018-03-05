@@ -12,3 +12,4 @@ Game HTML Saves/
 .idea/vcs.xml
 .idea/workspace.xml
 .idea/modules.xml
+databaseconfig.py

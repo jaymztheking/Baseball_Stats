@@ -27,13 +27,13 @@ def GetTeam(gameKey, teamInd, con):
 
 def GetParkKey(hTeam, date, con):
     cur = con.cursor()
-    sql = 'select "PARK_KEY" from "PARK" where "TEAM_KEY" = %s and "PARK_OPEN_DATE"<= \'%s\' and ("PARK_CLOSE_DATE" is null or "PARK_CLOSE_DATE" >= \'%s\')' % (hTeam, date.strftime('%Y-%m-%d'), date.strftime('%Y-%m-%d'))
+    sql = 'select park_key from park where team_key = %s and park_open_date <= \'%s\' and (park_close_date is null or park_close_date >= \'%s\')' % (hTeam, date.strftime('%Y-%m-%d'), date.strftime('%Y-%m-%d'))
     cur.execute(sql)
     return cur.fetchall()[0][0]
     
 def GetParkTZ(park, con):
     cur = con.cursor()
-    sql = 'select "TIME_ZONE" from "PARK" where "PARK_KEY" = %s' % park
+    sql = 'select time_zone from park where park_key = %s' % park
     cur.execute(sql)
     output = cur.fetchall()
     if len(output) == 1:
@@ -156,11 +156,12 @@ def GetPos(num):
 def GetCrossSiteUserID(src, tgt, id, con):
     if src == 'BR' and tgt == 'RS':
         url = 'http://www.baseball-reference.com/players/%s/%s.shtml' % (id[0], id)
+        print(url)
         b = BRRSUserIdParser()
         html = urllib2.urlopen(url).read()
         html = html.decode('utf-8')
         b.feed(html)
         return b.uid
     else:
-        return ''
+        return 'xxx'
 

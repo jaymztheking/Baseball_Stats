@@ -33,9 +33,13 @@ class Lineup:
         self.userID = ID
         playerKey = GetHitterKey(src, ID, con)
         if playerKey == None:
+            print('PLAYER ID NOT FOUND!!!!')
             newID = GetCrossSiteUserID(src, 'RS', ID, con)
+            print('NEW ID is',newID)
             playerKey = GetHitterKey('RS', newID, con)
+            print playerKey
             if playerKey == None:
+                print('PLAYER ID STILL NOT FOUND!!!!')
                 newPlayer = Hitter(src, ID, playerName)
                 newPlayer.InsertPlayerRow(con)
                 playerKey = newPlayer.GetHitterKey(con)

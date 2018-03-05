@@ -2,7 +2,7 @@ from PlayByPlay import Play, PlayByPlay
 from GameStats import Game
 from LineupStats import Lineup
 from PitchingStats import PitchRoster
-from bbUtils import GetTeamfromAbb, GetPos
+from bbUtils import GetTeamfromAbb, GetPos, GetHitterKey
 from datetime import date
 
 def ProcessRSLog(filename, con):
@@ -138,6 +138,8 @@ def ProcessRSLog(filename, con):
             #Pinch Hitter
             elif int(row[5]) == 11:
                 team = pbp.hTeam if int(row[3])==1 else pbp.aTeam
+                print('SUB !!', row[2])
+                print( GetHitterKey('RS', row[1], con))
                 pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PH', row[1], 'RS', con)
                 
             #Pinch Runner
@@ -184,7 +186,9 @@ def ProcessRSLog(filename, con):
                     pbp.pitchers[pbp.aPitcher].IP -= 1
                 elif pbp.inning[:3] == 'Bot':
                     pbp.pitchers[pbp.aPitcher].IP -= float(3-int(pbp.outs))/3.0
-                    
+
+
+
                 #Go through Plays
                 for x in pbp.plays.values():
                     if x.playType not in ('No Play','Stolen Base','Caught Stealing','Pick Off','Balk','Passed Ball','Wild Pitch','Defensive Indifference','Error on Foul', 'Unknown Runner Activity'):
@@ -234,7 +238,6 @@ def ProcessRSLog(filename, con):
                             currentGame.homeHits +=1
                         currentGame.homeRuns += x.runsScored
                     x.gameKey = currentGame.gameKey
-
                     x.InsertPlay('RS', con)
                 if currentGame.homeRuns > currentGame.awayRuns:
                     currentGame.homeTeamWin = True
@@ -242,6 +245,11 @@ def ProcessRSLog(filename, con):
                     currentGame.tie = True
 
                 currentGame.UpdateStats(con)
+
+                # Go Through Hitters
+                for x in pbp.lineup.keys():
+                    pbp.lineup[x].game = currentGame.gameKey
+                    pbp.lineup[x].InsertLineupRow(con)
 
                 #Go Through Pitchers
                 for x in pbp.pitchers.keys():
@@ -264,10 +272,7 @@ def ProcessRSLog(filename, con):
                     pbp.pitchers[x].gameKey = currentGame.gameKey
                     pbp.pitchers[x].InsertRosterRow(con)
                     
-                #Go Through Hitters
-                for x in pbp.lineup.keys():
-                    pbp.lineup[x].game = currentGame.gameKey
-                    pbp.lineup[x].InsertLineupRow(con)
+
                     
             #Clear Variables
             rplays = pbp.plays
