@@ -1,0 +1,31 @@
+team_key,team_locale,team_mascot,team_abbrev_rs,team_abbrev_br,league,first_season,last_season,regional_division
+1,Arizona,Diamondbacks,ARI,ARI,NL,1998,,West
+2,Atlanta,Braves,ATL,ATL,NL,1876,,East
+3,Baltimore,Orioles,BAL,BAL,AL,1901,,East
+4,Boston,Red Sox,BOS,BOS,AL,1901,,East
+5,Chicago,Cubs,CHN,CHC,NL,1876,,Central
+6,Chicago,White Sox,CHA,CHW,AL,1901,,Central
+7,Cincinnati,Reds,CIN,CIN,NL,1882,,Central
+8,Cleveland,Indians,CLE,CLE,AL,1901,,Central
+9,Colorado,Rockies,COL,COL,NL,1993,,West
+10,Detroit,Tigers,DET,DET,AL,1901,,Central
+11,Houston,Astros,HOU,HOU,AL,1962,,West
+12,Kansas City,Royals,KCA,KCR,AL,1969,,Central
+13,Los Angeles,Angels,ANA,LAA,AL,1961,,West
+14,Los Angeles,Dodgers,LAN,LAD,NL,1884,,West
+15,Miami,Marlins,MIA,MIA,NL,1993,,East
+16,Milwaukee,Brewers,MIL,MIL,NL,1969,,Central
+17,Minnesota,Twins,MIN,MIN,AL,1901,,Central
+18,New York,Mets,NYN,NYM,NL,1962,,East
+19,New York,Yankees,NYA,NYY,AL,1903,,East
+20,Oakland,Athletics,OAK,OAK,AL,1901,,West
+21,Philadelphia,Phillies,PHI,PHI,NL,1883,,East
+22,Pittsburgh,Pirates,PIT,PIT,NL,1882,,Central
+23,San Diego,Padres,SDN,SDP,NL,1969,,West
+24,San Francisco,Giants,SFN,SFG,NL,1883,,West
+25,Seattle,Mariners,SEA,SEA,AL,1977,,West
+26,St. Louis,Cardinals,SLN,STL,NL,1882,,Central
+27,Tampa Bay,Rays,TBA,TBR,AL,1998,,East
+28,Texas,Rangers,TEX,TEX,AL,1961,,West
+29,Toronto,Blue Jays,TOR,TOR,AL,1977,,East
+30,Washington,Nationals,WAS,WSN,AL,1969,,East

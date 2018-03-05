@@ -1,0 +1,31 @@
+park_key,park_name,team_key,park_open_date,park_close_date,park_zip_code,turf_type,roof_type,seating_capacity
+1,Chase Field,1,1998-03-31,,85004,Grass,Retractable,48686
+2,SunTrust Park,2,2017-04-14,,30339,Grass,Open,41149
+3,Oriole Park at Camden Yards,3,1992-04-06,,21230,Grass,Open,45971
+4,Fenway Park,4,2012-04-20,,02215,Grass,Open,37673
+5,Wrigley Field,5,2014-04-23,,60613,Grass,Open,41268
+6,Guaranteed Rate Field,6,1991-04-18,,60616,Grass,Open,40615
+7,Great American Ball Park,7,2003-03-31,,45202,Grass,Open,42319
+8,Progressive Field,8,1994-04-04,,44115,Grass,Open,35051
+9,Coors Field,9,1995-04-26,,80205,Grass,Open,50398
+10,Comerica Park,10,2000-04-11,,48201,Grass,Open,41299
+11,Minute Maid Park,11,2000-04-07,,77002,Grass,Retractable,41168
+12,Kauffman Stadium,12,1973-04-10,,64129,Grass,Open,37903
+13,Angel Stadium,13,2066-04-19,,92806,Grass,Open,45477
+14,Dodger Stadium,14,2062-04-10,,90012,Grass,Open,56000
+15,Marlins Park,15,2012-04-04,,33125,Grass,Retractable,36742
+16,Miller Park,16,2001-04-06,,53214,Grass,Retractable,41900
+17,Target Field,17,2010-04-12,,55403,Grass,Open,38885
+18,Citi Field,18,2009-04-13,,11368,Grass,Open,41922
+19,New Yankee Stadium,19,2009-04-16,,10451,Grass,Open,47422
+20,Oakland–Alameda County Coliseum,20,2068-04-17,,94621,Grass,Open,47170
+21,Citizens Bank Park,21,2004-04-12,,19148,Grass,Open,43651
+22,PNC Park,22,2001-04-09,,15212,Grass,Open,38362
+23,Petco Park,23,2004-04-08,,92101,Grass,Open,40209
+24,AT&T Park,24,2000-04-11,,94107,Grass,Open,41915
+25,Safeco Field,25,1999-07-15,,98134,Grass,Retractable,47943
+26,Busch Stadium III,26,2006-04-10,,63102,Grass,Open,45529
+27,Tropicana Field,27,1998-03-31,,33705,AstroTurf,Fixed,31042
+28,Globe Life Park in Arlington,28,1994-04-11,,76011,Grass,Open,48114
+29,Rogers Centre,29,1989-06-05,,M5V1J1,AstroTurf,Retractable,49282
+30,Nationals Park,30,2008-03-30,,20003,Grass,Open,41339
