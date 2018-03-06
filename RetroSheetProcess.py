@@ -29,11 +29,11 @@ def ProcessRSLog(filename, con):
             if att == 'visteam':
                 pbp.aAbb = row[2].strip()
                 if pbp.aTeam == 0:
-                    pbp.aTeam = GetTeamfromAbb(pbp.aAbb, con)
+                    pbp.aTeam = GetTeamfromAbb(pbp.aAbb, 'RS', con)
             elif att == 'hometeam':
                 pbp.hAbb = row[2].strip()
                 if pbp.hTeam == 0:
-                    pbp.hTeam = GetTeamfromAbb(pbp.hAbb, con)
+                    pbp.hTeam = GetTeamfromAbb(pbp.hAbb, 'RS', con)
             elif att == 'date':
                 datePieces = row[2].split('/')
                 gameDate = date(int(datePieces[0]),int(datePieces[1]),int(datePieces[2]))

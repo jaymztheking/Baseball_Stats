@@ -1,8 +1,8 @@
-import HTMLParser
+import html.parser
 import re
 from datetime import datetime
 
-class PlayerInfoParser(HTMLParser.HTMLParser):
+class PlayerInfoParser(html.parser.HTMLParser):
     startData = False
     firstGameFound = False
     getFirstGame = False

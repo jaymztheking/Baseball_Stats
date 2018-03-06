@@ -505,8 +505,8 @@ class PlayByPlay:
 
                     if b[1] is not None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
                         self.plays[b[1][0]].runScored = True
-                        print 'Run', b[1][1], self.inning, self.outs, b
-                        print playStr
+                        print('Run', b[1][1], self.inning, self.outs, b)
+                        print(playStr)
                         if b[0] == 0:
                             self.thirdBase = None
                         elif b[0] == 1:
@@ -519,7 +519,7 @@ class PlayByPlay:
             bases = [self.thirdBase, self.secondBase, self.firstBase]
             for b in enumerate(bases):
                 for x in re.findall('([^;]*) to (2B|3B)(/|;|$)', playStr):
-                    print x
+                    print(x)
                     if b[1] != None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
                         if x[1] == '2B':
                             self.secondBase = b[1]
@@ -796,5 +796,5 @@ class PlayByPlay:
         if re.search('([^;]*) Scores', playStr) != None:
             pass #do this later when we find an example
 
-        print self.inning, self.outs, self.thirdBase, self.secondBase, self.firstBase
+        print(self.inning, self.outs, self.thirdBase, self.secondBase, self.firstBase)
         return rbiEligible

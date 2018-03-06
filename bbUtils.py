@@ -1,9 +1,13 @@
 from BRParser import BRRSUserIdParser
-import urllib2
+import urllib.request
 
-def GetTeamfromAbb(abb, con):
+def GetTeamfromAbb(abb, src, con):
    cur = con.cursor()
-   sql = 'select "TEAM_KEY" from "TEAM" where "TEAM_ABBREV" = \'%s\'' % abb
+   if src == 'RS':
+       srcabb = 'team_abbrev_rs'
+   else:
+       srcabb = 'team_abbrev_bs'
+   sql = 'select team_key from team where %s = \'%s\'' % (srcabb, abb)
    cur.execute(sql)
    results = cur.fetchall()
    if len(results) == 1:
@@ -14,10 +18,10 @@ def GetTeamfromAbb(abb, con):
 def GetTeam(gameKey, teamInd, con):
     cur = con.cursor()
     if teamInd == 'A':
-        team = 'AWAY_TEAM_KEY'
+        team = 'away_team_key'
     else:
-        team = 'HOME_TEAM_KEY'
-    sql = 'select "%s" from "GAME" where "GAME_KEY" = %s' % (team, gameKey)
+        team = 'home_team_key'
+    sql = 'select %s from game where game_key = %s' % (team, gameKey)
     cur.execute(sql)
     results = cur.fetchall()
     if len(results) == 1:
@@ -30,20 +34,10 @@ def GetParkKey(hTeam, date, con):
     sql = 'select park_key from park where team_key = %s and park_open_date <= \'%s\' and (park_close_date is null or park_close_date >= \'%s\')' % (hTeam, date.strftime('%Y-%m-%d'), date.strftime('%Y-%m-%d'))
     cur.execute(sql)
     return cur.fetchall()[0][0]
-    
-def GetParkTZ(park, con):
-    cur = con.cursor()
-    sql = 'select time_zone from park where park_key = %s' % park
-    cur.execute(sql)
-    output = cur.fetchall()
-    if len(output) == 1:
-        return output[0][0]
-    else:
-        return ''
         
 def GetGameKey(hteam, ateam, date, time, con):
     cur = con.cursor()        
-    checkSQL = 'select "GAME_KEY" from "GAME" where "HOME_TEAM_KEY" = %s and "AWAY_TEAM_KEY" = %s and "GAME_DATE" = \'%s\' and "GAME_TIME" = \'%s\'' % \
+    checkSQL = 'select game_key from game where home_team_key = %s and away_team_key = %s and game_date = \'%s\' and game_time = \'%s\'' % \
     (hteam, ateam, date.strftime('%Y-%m-%d'), time)
     cur.execute(checkSQL)
     results = cur.fetchall()
@@ -55,7 +49,7 @@ def GetGameKey(hteam, ateam, date, time, con):
 def GetGameKeys(hteam, ateam, date, con):
     cur = con.cursor()        
     output = []
-    checkSQL = 'select "GAME_KEY" from "GAME" where "HOME_TEAM_KEY" = %s and "AWAY_TEAM_KEY" = %s and "GAME_DATE" = \'%s\' order by "GAME_TIME"' % \
+    checkSQL = 'select game_key from game where home_team_key = %s and away_team_key = %s and game_date = \'%s\' order by game_time' % \
     (hteam, ateam, date.strftime('%Y-%m-%d'))
     cur.execute(checkSQL)
     results = cur.fetchall()
@@ -66,11 +60,11 @@ def GetGameKeys(hteam, ateam, date, con):
 def GetHitterKey(src, uid, con):
     cur = con.cursor()
     if src == 'BR':
-        getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where "BR_USER_ID" = \'%s\'' % uid
+        getSQL = 'select player_key from hitter where br_user_id = \'%s\'' % uid
     elif src == 'RS':
-        getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where "RS_USER_ID" = \'%s\'' % uid
+        getSQL = 'select player_key from hitter where rs_user_id = \'%s\'' % uid
     else:
-        getSQL = 'select "PLAYER_KEY" from "HITTER_STATS" where 1 <> 1'
+        getSQL = 'select player_key from hitter where 1 <> 1'
     cur.execute(getSQL)
     results = cur.fetchall()
     if len(results) == 1:
@@ -81,11 +75,11 @@ def GetHitterKey(src, uid, con):
 def GetPitcherKey(src, uid, con):
     cur = con.cursor()
     if src == 'BR':
-        getSQL = 'select "PLAYER_KEY" from "PITCHER_STATS" where "BR_USER_ID" = \'%s\'' % uid
+        getSQL = 'select player_key from pitcher where br_user_id = \'%s\'' % uid
     elif src == 'RS':
-        getSQL = 'select "PLAYER_KEY" from "PITCHER_STATS" where "RS_USER_ID" = \'%s\'' % uid
+        getSQL = 'select player_key from pitcher where rs_user_id = \'%s\'' % uid
     else:
-        getSQL = 'select "PLAYER_KEY" from "PITCHER_STATS" where 1 <> 1'
+        getSQL = 'select player_key from pitcher where 1 <> 1'
     cur.execute(getSQL)
     results = cur.fetchall()
     if len(results) == 1:
@@ -158,7 +152,8 @@ def GetCrossSiteUserID(src, tgt, id, con):
         url = 'http://www.baseball-reference.com/players/%s/%s.shtml' % (id[0], id)
         print(url)
         b = BRRSUserIdParser()
-        html = urllib2.urlopen(url).read()
+        request = urllib.request.Request(url)
+        html = urllib.request.urlopen(request).read()
         html = html.decode('utf-8')
         b.feed(html)
         return b.uid

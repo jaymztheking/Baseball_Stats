@@ -1,7 +1,7 @@
-import HTMLParser, re
+import html.parser, re
 
 
-class GameTeamsParser(HTMLParser.HTMLParser):
+class GameTeamsParser(html.parser.HTMLParser):
     awayTeamAbb = ''
     homeTeamAbb = ''
     startData = False
@@ -25,7 +25,7 @@ class GameTeamsParser(HTMLParser.HTMLParser):
         pass
 
 
-class GameTimeParser(HTMLParser.HTMLParser):
+class GameTimeParser(html.parser.HTMLParser):
     startData = False
     startData1 = False
     time = ''
@@ -55,7 +55,7 @@ class GameTimeParser(HTMLParser.HTMLParser):
                 self.gamelen = str(re.search('[0-9]{1,2}:[0-9]{2}', data).group(0))
 
 
-class GameWeatherParser(HTMLParser.HTMLParser):
+class GameWeatherParser(html.parser.HTMLParser):
     startData = False
     startData1 = False
     weather = ''
@@ -82,7 +82,7 @@ class GameWeatherParser(HTMLParser.HTMLParser):
             self.field += data
 
 
-class GameUmpParser(HTMLParser.HTMLParser):
+class GameUmpParser(html.parser.HTMLParser):
     startData = False
     homeump = ''
 
@@ -102,7 +102,7 @@ class GameUmpParser(HTMLParser.HTMLParser):
                 self.homeump = re.search('HP ?- ?(.*), 1B', data).group(1)
 
 
-class GameWinLossSaveParser(HTMLParser.HTMLParser):
+class GameWinLossSaveParser(html.parser.HTMLParser):
     startData = False
     startWin = False
     startLoss = False
@@ -140,7 +140,7 @@ class GameWinLossSaveParser(HTMLParser.HTMLParser):
                 self.startSave = False
 
 
-class BRPlayParser(HTMLParser.HTMLParser):
+class BRPlayParser(html.parser.HTMLParser):
     startData = False
     insideTable = False
     subRow = False
@@ -186,7 +186,7 @@ class BRPlayParser(HTMLParser.HTMLParser):
             self.subs[self.playNum] += ' '
 
 
-class BRLineupParser(HTMLParser.HTMLParser):
+class BRLineupParser(html.parser.HTMLParser):
     startData = False
     tdFound = False
     lineup = []
@@ -219,7 +219,7 @@ class BRLineupParser(HTMLParser.HTMLParser):
             self.startData = False
 
 
-class BRPitcherParser(HTMLParser.HTMLParser):
+class BRPitcherParser(html.parser.HTMLParser):
     startData = False
     tdCount = 0
     pitcher = []
@@ -262,7 +262,7 @@ class BRPitcherParser(HTMLParser.HTMLParser):
             self.tdCount += 1
 
 
-class BRBatterParser(HTMLParser.HTMLParser):
+class BRBatterParser(html.parser.HTMLParser):
     startData = False
     tdCount = 0
     batID = {}
@@ -297,7 +297,7 @@ class BRBatterParser(HTMLParser.HTMLParser):
 
 
 
-class GamesParser(HTMLParser.HTMLParser):
+class GamesParser(html.parser.HTMLParser):
     foundh2 = False
     startData = False
     games = []
@@ -346,7 +346,7 @@ class GamesParser(HTMLParser.HTMLParser):
             self.foundh2 = False
 
 
-class BRPlayerInfoParser(HTMLParser.HTMLParser):
+class BRPlayerInfoParser(html.parser.HTMLParser):
     height = ''
     weight = ''
     birthDate = ''
@@ -406,7 +406,7 @@ class BRPlayerInfoParser(HTMLParser.HTMLParser):
             self.foundDebut = False
 
 
-class BRRSUserIdParser(HTMLParser.HTMLParser):
+class BRRSUserIdParser(html.parser.HTMLParser):
     uid = ''
 
     def handle_starttag(self, tag, attrs):

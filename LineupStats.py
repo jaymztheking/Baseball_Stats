@@ -37,7 +37,7 @@ class Lineup:
             newID = GetCrossSiteUserID(src, 'RS', ID, con)
             print('NEW ID is',newID)
             playerKey = GetHitterKey('RS', newID, con)
-            print playerKey
+            print(playerKey)
             if playerKey == None:
                 print('PLAYER ID STILL NOT FOUND!!!!')
                 newPlayer = Hitter(src, ID, playerName)
