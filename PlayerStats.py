@@ -109,7 +109,11 @@ class Hitter:
 	def GetInfofromRS(self, con):
 		b = RSInfoParser()
 		url = "http://www.retrosheet.org/boxesetc/%s/P%s.htm" % (self.rsuserid[0].upper(), self.rsuserid)
-		html = urllib.request.urlopen(urllib.request.Request(url)).read().decode('utf-8').replace('&#183;', '*')
+		try:
+			html = urllib.request.urlopen(urllib.request.Request(url)).read().decode('utf-8').replace('&#183;', '*')
+		except:
+			print('Cannot connect to RetroSheet')
+			return False
 		b.feed(html)
 		cur = con.cursor()
 		key = self.GetHitterKey(con)
@@ -189,7 +193,7 @@ class Pitcher:
 	def InsertRSPlayerRow(self, con):
 		cur = con.cursor()
 		insertSQL = 'insert into %s values(default, \'%s\', 0, 0, \'1900-01-01\', \'1900-01-01\',' \
-					' \'%s\', \'%s\', \'%s\', \'\')' % (self.table,
+					' \'%s\', \'%s\', \'%s\')' % (self.table,
 														self.name.replace("\'", "`").replace('"', ''), self.throwHand,
 														self.armRelease, self.rsuserid)
 		if not self.CheckForRow(con):
@@ -255,7 +259,12 @@ class Pitcher:
 	def GetInfofromRS(self, con):
 		b = RSInfoParser()
 		url = "http://www.retrosheet.org/boxesetc/%s/P%s.htm" % (self.rsuserid[0].upper(), self.rsuserid)
-		html = html = urllib.request.urlopen(urllib.request.Request(url)).read().decode('utf-8')
+		try:
+			html = html = urllib.request.urlopen(urllib.request.Request(url)).read().decode('utf-8')
+		except:
+			print('Cannot connect to RetroSheet')
+			return False
+
 		b.feed(html)
 		cur = con.cursor()
 		key = self.GetPitcherKey(con)
