@@ -8,7 +8,7 @@ class Play:
     pitcherID = ''
     inning = ''
     pitchSeq = ''
-    runScored = False
+    batterScored = False
     runsScored = 0
     playType = ''
     ballType =''
@@ -22,16 +22,18 @@ class Play:
     swingX = 0
     startSit = 0
     endSit = 0
+    atBat = False
+    plateApp = False
 
     def InsertPlay(self, src, con):
         hk = GetHitterKey(src, self.hitterID, con)
         pk = GetPitcherKey(src, self.pitcherID, con)
         cur = con.cursor()
-        sql = 'INSERT INTO "PITCH_RESULT" VALUES(%s, %s, %s, %s, \'%s\', %s, %s, \'%s\', %s, %s, %s, \'%s\', \'%s\', %s, \'%s\', \'%s\', %s, \'%s\', %s, %s)' % \
-        (self.gameKey, hk, pk, self.startSit, self.inning, self.strikes, self.balls, self.pitchSeq, self.contactX, self.swingX, self.lookX, self.playType, self.hit, self.resultOuts, self.ballLoc, self.ballType, self.endSit, self.runScored, self.runsScored, self.playNum)
+        sql = 'INSERT INTO play VALUES(%s, %s, %s, %s, %s, %s, \'%s\', \'%s\', %s, %s, %s, %s, %s, \'%s\', %s, %s, \'%s\', \'%s\', %s, %s, %s, %s)' % \
+        (self.gameKey, hk, pk, self.playNum, self.startSit, self.endSit, self.inning, self.pitchSeq, self.strikes, self.balls, self.contactX, self.swingX, self.lookX, self.playType, self.hit, self.resultOuts, self.ballLoc, self.ballType, self.batterScored, self.runsScored, self.atBat, self.plateApp)
         cur.execute(sql)
         cur.execute('COMMIT;')
-    
+
     def CalcPitches(self):
         for pitch in self.pitchSeq:
             if pitch in ('F','X','L','O','R','T','Y'):
@@ -40,7 +42,7 @@ class Play:
                 self.lookX +=1
             elif pitch in ('S','M','Q'):
                 self.swingX += 1
-                           
+
 
 class PlayByPlay:
     aTeam = 0
@@ -57,10 +59,10 @@ class PlayByPlay:
     aPitcher = ''
     hPitcher = ''
     inning = ''
-    
+
     def init(self):
         pass
-        
+
     def ReturnSit(self):
         output = self.outs * 10
         if output >= 30:
@@ -73,7 +75,7 @@ class PlayByPlay:
             if self.thirdBase != None:
                 output += 4
             return output
-        
+
     def GetRSBallType(self, batMods, playInd):
         for x in batMods:
             if re.search('^[0-9]{1,2}$', x) != None:
@@ -94,7 +96,7 @@ class PlayByPlay:
                 self.plays[playInd].ballType = 'Bunt Line Drive'
             if re.search('BG', x) != None:
                 self.plays[playInd].ballType = 'Bunt Ground Ball'
-        
+
     def CalcRSRunners(self, runEvent, playInd, rbiEligible):
         sorter = {'3':1,'2':2,'1':3,'B':4}
         hitterID = self.plays[playInd].hitterID
@@ -113,7 +115,7 @@ class PlayByPlay:
                     self.firstBase = None
                 elif run[:3] == '1-H':
                     ind = self.firstBase[0]
-                    self.plays[ind].runScored = True
+                    self.plays[ind].batterScored = True
                     self.lineup[self.firstBase[1]].Runs += 1
                     self.pitchers[pitcherID].Runs += 1
                     if rbiEligible and ('NR' not in run and 'E' not in run):
@@ -125,7 +127,7 @@ class PlayByPlay:
                     self.secondBase = None
                 elif run[:3] == '2-H':
                     ind = self.secondBase[0]
-                    self.plays[ind].runScored = True
+                    self.plays[ind].batterScored = True
                     self.lineup[self.secondBase[1]].Runs += 1
                     self.pitchers[pitcherID].Runs += 1
                     if rbiEligible  and ('NR' not in run and 'E' not in run):
@@ -135,7 +137,7 @@ class PlayByPlay:
                 elif run[:3] == '3-H':
                     ind = self.thirdBase[0]
                     self.lineup[self.thirdBase[1]].Runs += 1
-                    self.plays[ind].runScored = True
+                    self.plays[ind].batterScored = True
                     self.pitchers[pitcherID].Runs += 1
                     if rbiEligible  and ('NR' not in run and 'E' not in run):
                         self.lineup[hitterID].RBI += 1
@@ -148,7 +150,7 @@ class PlayByPlay:
                 elif run[:3] == 'B-3':
                     self.thirdBase = [playInd, self.plays[playInd].hitterID]
                 elif run[:3] == 'B-H':
-                    self.plays[playInd].runScored = True
+                    self.plays[playInd].batterScored = True
                     self.lineup[self.plays[playInd].hitterID].Runs += 1
                     self.pitchers[pitcherID].Runs += 1
                     if rbiEligible and ('NR' not in run and 'E' not in run):
@@ -189,7 +191,7 @@ class PlayByPlay:
                 elif run[:3] == '2-1':
                     self.firstBase = self.secondBase
                     self.secondBase = None
-                
+
     def ProcessRSPlay(self, playStr, playInd):
         play = playStr.split('.')
         batEvent = play[0]
@@ -198,12 +200,12 @@ class PlayByPlay:
 
 ###############################################################################
 #  No Plate Appearance, No At-Bat                                             #
-###############################################################################        
+###############################################################################
         #Non-Plays
         if batParts[0].strip() == 'NP':
             self.plays[playInd].playType = 'No Play'
             rbiEligible = False
-        
+
         #Stolen Base
         if re.search('SB[23H]', batParts[0]) != None:
             self.plays[playInd].playType = 'Stolen Base'
@@ -220,7 +222,7 @@ class PlayByPlay:
                 self.lineup[self.thirdBase[1]].SB += 1
                 if '3-' not in runEvent:
                     runEvent += ';3-H'
-                    
+
         #Caught Stealing
         if re.search('CS[23H]', batParts[0]) != None:
             self.plays[playInd].playType = 'Caught Stealing'
@@ -243,7 +245,7 @@ class PlayByPlay:
                     runEvent += ';3XH'
                 elif '3-' not in runEvent:
                     runEvent += ';3-H'
-         
+
          #Pick Off
         if re.search('PO[^C]', batParts[0]) != None:
             self.plays[playInd].playType = 'Pick Off'
@@ -257,32 +259,32 @@ class PlayByPlay:
                     self.secondBase = None
                 elif 'PO3' in batParts[0]:
                     self.thirdBase = None
-         
+
         #Balk
         if re.search('BK', batParts[0]) != None:
             self.plays[playInd].playType = 'Balk'
             rbiEligible = False
-            
+
         #Passed Ball
         if re.search('PB', batParts[0]) != None:
             self.plays[playInd].playType = 'Passed Ball'
             rbiEligible = False
-        
+
         #Wild Pitch
         if re.search('WP', batParts[0]) != None:
             self.plays[playInd].playType = 'Wild Pitch'
             rbiEligible = False
-            
+
         #Defensive Indifference
         if re.search('DI', batParts[0]) != None:
             self.plays[playInd].playType = 'Defensive Indifference'
             rbiEligible = False
-            
+
         #Error on Foul
         if re.search('FLE', batParts[0]) != None:
             self.plays[playInd].playType = 'Error on Foul'
             rbiEligible = False
-            
+
         #Misc. Advance
         if re.search('OA', batParts[0]) != None:
             self.plays[playInd].playType = 'Unknown Runner Activity'
@@ -291,42 +293,42 @@ class PlayByPlay:
 ###############################################################################
 #  Plate Appearance, No At-Bat                                                #
 ###############################################################################
-            
+
         #Interference
         if re.search('C$', batParts[0]) != None:
             self.plays[playInd].playType = 'Interference'
             rbiEligible = True
             if 'B-' not in runEvent:
                 runEvent += ';B-1'
-                
+
         #Walk and Intentional Walks
         if re.search('W(\+|$)', batParts[0]) != None:
             self.plays[playInd].playType = 'Intentional Walk' if 'IW' in batParts[0] else 'Walk'
             rbiEligible = True
             if 'B-' not in runEvent:
                 runEvent += ';B-1'
-        
+
         #Hit By Pitch
         if re.search('HP', batParts[0]) != None:
             self.plays[playInd].playType = 'Hit By Pitch'
             rbiEligible = True
             if 'B-' not in runEvent:
                 runEvent += ';B-1'
-            
+
         #Sacrifice Fly
         if 'SF' in playStr:
             self.plays[playInd].playType = 'Sacrifice Fly'
             rbiEligible = True
-            
+
         #Sacrific Hit
         if 'SH' in playStr:
             self.plays[playInd].playType = 'Sacrifice Hit'
             rbiEligible = True
-            
+
 ###############################################################################
 #  Plate Appearance, At-Bat                                                   #
-###############################################################################        
-          
+###############################################################################
+
         #Strike Out
         if re.search('(^|[^B])K', batParts[0]) != None:
             self.plays[playInd].playType = 'Strikeout'
@@ -334,11 +336,11 @@ class PlayByPlay:
             if 'B-' not in runEvent:
                 self.plays[playInd].resultOuts = 1
                 self.outs +=1
-            
-            
+
+
         #One Fielding Out
         if re.search('^[0-9]+$', batParts[0]) != None:
-            if self.plays[playInd].playType[:9] != 'Sacrifice':            
+            if self.plays[playInd].playType[:9] != 'Sacrifice':
                 self.plays[playInd].playType = 'Out'
                 rbiEligible = True
             self.plays[playInd].ballLoc = batParts[0][0]
@@ -473,7 +475,7 @@ class PlayByPlay:
                         elif x[1] == '3B':
                             self.thirdBase = base[1]
                         elif x[1] == 'Hm':
-                            self.plays[self.thirdBase[0]].runScored = True
+                            self.plays[self.thirdBase[0]].batterScored = True
 
                         if base[0] == 0:
                             self.thirdBase = None
@@ -504,7 +506,7 @@ class PlayByPlay:
                 for b in enumerate(bases):
 
                     if b[1] is not None and b[1][1].split(' ')[-1].strip(' ') == x[0].strip(' '):
-                        self.plays[b[1][0]].runScored = True
+                        self.plays[b[1][0]].batterScored = True
                         print('Run', b[1][1], self.inning, self.outs, b)
                         print(playStr)
                         if b[0] == 0:
@@ -764,7 +766,7 @@ class PlayByPlay:
             self.plays[playInd].playType = 'Home Run'
             rbiEligible = True
             self.plays[playInd].hit = True
-            self.plays[playInd].runScored = True
+            self.plays[playInd].batterScored = True
 
         #Fill in missing ball types
         if self.plays[playInd].ballType == '':
