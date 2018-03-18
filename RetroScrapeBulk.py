@@ -5,6 +5,7 @@ from RetroSheetProcess import ProcessRSLog
 
 con = psycopg2.connect("dbname=%s user=%s host=%s password=%s" % (cfg.dbname, cfg.user, cfg.host, cfg.pw))
 cur = con.cursor()
+cur.execute(open(".\\Baseball Database\\SQL Create Table Scripts\\restart.sql","r").read())
 cur.execute("Select * from team where team_key = 9")
 tst = cur.fetchall()
 print(tst)
