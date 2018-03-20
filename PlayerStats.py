@@ -194,8 +194,7 @@ class Pitcher:
 		cur = con.cursor()
 		insertSQL = 'insert into %s values(default, \'%s\', 0, 0, \'1900-01-01\', \'1900-01-01\',' \
 					' \'%s\', \'%s\', \'%s\')' % (self.table,
-														self.name.replace("\'", "`").replace('"', ''), self.throwHand,
-														self.armRelease, self.rsuserid)
+														self.name.replace("\'", "`").replace('"', ''), self.throwHand, self.rsuserid, self.bruserid)
 		if not self.CheckForRow(con):
 			cur.execute(insertSQL)
 			cur.execute('COMMIT;')

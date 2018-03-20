@@ -42,14 +42,13 @@ class Game:
         cur = con.cursor()
 
         sql = 'update game set (wind_dir, wind_speed_mph, weather_condition, total_innings, home_hits,' \
-              'away_hits, home_runs, away_runs, game_temp_f, home_team_win?,' \
-              'tie?, game_time_minutes, home_ump_id) = (\'%s\',%s,\'%s\', %s, %s, ' \
+              'away_hits, home_runs, away_runs, game_temp_f, home_team_win, ' \
+              'tie, game_time_minutes, home_ump_id) = (\'%s\',%s,\'%s\', %s, %s, ' \
               '%s, %s, %s, %s, \'%s\', ' \
               '\'%s\', %s, \'%s\') WHERE game_key = %s' % \
          (self.windDir, self.windSpeed, self.weather, self.totalInnings, self.homeHits,
          self.awayHits, self.homeRuns, self.awayRuns, self.temp, self.homeTeamWin,
          self.tie, self.gameLength, self.homeUmp, self.gameKey)
-
         cur.execute(sql)
         cur.execute('COMMIT;')
         

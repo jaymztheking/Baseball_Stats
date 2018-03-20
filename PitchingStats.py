@@ -49,16 +49,16 @@ class PitchRoster:
     
     def InsertRosterRow(self, con):
         cur = con.cursor()
-        insertSQL = 'insert into "PITCH_ROSTER" VALUES (%s, %s, \'%s\', %s, %s, ' \
+        insertSQL = 'insert into pitchboxscore VALUES (%s, %s, %s, \'%s\', %s, %s, ' \
                     '%s, %s, %s, %s, %s, ' \
                     '%s, %s, %s, %s, %s, ' \
                     '%s, %s, %s, %s, %s, ' \
-                    '%s, %s, %s, %s, %s)' % \
-        (self.gameKey, self.pitcherKey, self.pitcherRole, self.pitchCount, self.K,
-         self.BB, self.HBP, self.earnedRuns, self.IP, self.Strikes,
-         self.Balls, self.ContactStrikes, self.CG, self.SO, self.team,
+                    '%s, %s, %s, %s)' % \
+        (self.gameKey, self.team, self.pitcherKey, self.pitcherRole, self.pitchCount, self.K,
+         self.BB, self.HBP, self.Hits, self.earnedRuns, self.IP, self.Strikes,
+         self.Balls, self.CG, self.SO,
          self.NH, self.Win, self.Loss, self.Save, self.SwingStrikes,
-         self.LookStrikes, self.FB, self.GB, self.LD, self.Hits)
+         self.LookStrikes, self.ContactStrikes, self.FB, self.GB, self.LD)
         if not self.CheckForRow(con):
             cur.execute(insertSQL)
             cur.execute('COMMIT;')
@@ -67,7 +67,7 @@ class PitchRoster:
     
     def CheckForRow(self, con):
         cur = con.cursor()
-        checkSQL = 'select 1 from "PITCH_ROSTER" where "GAME_KEY" = %s and "PITCHER_KEY" = %s' % (self.gameKey, self.pitcherKey)
+        checkSQL = 'select 1 from pitchboxscore where game_key = %s and player_key = %s' % (self.gameKey, self.pitcherKey)
         cur.execute(checkSQL)
         results = cur.fetchall()
         if len(results) == 0:

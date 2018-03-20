@@ -12,15 +12,15 @@ CREATE TABLE public.game
     away_team_key integer NOT NULL,
     wind_dir character varying(15) COLLATE pg_catalog."default",
     wind_speed_mph smallint,
-    weather_condition character varying(30) COLLATE pg_catalog."default",
+    weather_condition character varying(60) COLLATE pg_catalog."default",
     total_innings smallint,
     home_hits smallint,
     away_hits smallint,
     home_runs smallint,
     away_runs smallint,
     game_temp_f smallint,
-    "home_team_win?" boolean,
-    "tie?" boolean,
+    home_team_win boolean,
+    tie boolean,
     game_time_minutes smallint,
     home_ump_id character varying(15) COLLATE pg_catalog."default",
     CONSTRAINT game_pkey PRIMARY KEY (game_key),
@@ -43,8 +43,6 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.game
-    OWNER to babypng;
-
-GRANT ALL ON TABLE public.game TO babypng;
+    OWNER to py;
 
 GRANT ALL ON TABLE public.game TO py;

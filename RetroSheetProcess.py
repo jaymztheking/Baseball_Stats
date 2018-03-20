@@ -138,8 +138,8 @@ def ProcessRSLog(filename, con):
             #Pinch Hitter
             elif int(row[5]) == 11:
                 team = pbp.hTeam if int(row[3])==1 else pbp.aTeam
-                print('SUB !!', row[2])
-                print( GetHitterKey('RS', row[1], con))
+                #print('SUB !!', row[2])
+                #print( GetHitterKey('RS', row[1], con))
                 pbp.lineup[row[1]] = Lineup(123, team, row[2], int(row[4]), 'PH', row[1], 'RS', con)
                 
             #Pinch Runner
@@ -194,6 +194,7 @@ def ProcessRSLog(filename, con):
                     if x.playType not in ('No Play','Stolen Base','Caught Stealing','Pick Off','Balk','Passed Ball','Wild Pitch','Defensive Indifference','Error on Foul', 'Unknown Runner Activity'):
                         x.CalcPitches()
                         pbp.lineup[x.hitterID].PA += 1
+                        x.plateApp = True
                         pbp.pitchers[x.pitcherID].ContactStrikes += x.contactX
                         pbp.pitchers[x.pitcherID].SwingStrikes += x.swingX
                         pbp.pitchers[x.pitcherID].LookStrikes += x.lookX
@@ -208,6 +209,7 @@ def ProcessRSLog(filename, con):
                             pbp.pitchers[x.pitcherID].FB += 1
                         if x.playType in ('Strikeout','Out','Double Play','Triple Play', "Fielders Choice",'Reach On Error','Single','Double','Ground Rule Double','Triple','Home Run'):
                             pbp.lineup[x.hitterID].AB += 1
+                            x.atBat = True
                             if x.playType in ('Single', 'Double', 'Ground Rule Double', 'Triple', 'Home Run'):
                                 pbp.lineup[x.hitterID].Hits += 1
                                 pbp.pitchers[x.pitcherID].Hits += 1
