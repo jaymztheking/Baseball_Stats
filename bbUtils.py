@@ -1,12 +1,26 @@
 from BRParser import BRRSUserIdParser
 import urllib.request
 
+def GetHitterKey(userID, src, con):
+    cur = con.cursor()
+    if src == 'RS':
+        srcabb = 'rs_user_id'
+    else:
+        srcabb = 'br_user_id'
+    sql = 'select player_key from hitter where %s = \'%s\'' % (srcabb, userID)
+    cur.execute(sql)
+    results = cur.fetchall()
+    if len(results) == 1:
+        return results[0][0]
+    else:
+        return None
+
 def GetTeamfromAbb(abb, src, con):
    cur = con.cursor()
    if src == 'RS':
        srcabb = 'team_abbrev_rs'
    else:
-       srcabb = 'team_abbrev_bs'
+       srcabb = 'team_abbrev_br'
    sql = 'select team_key from team where %s = \'%s\'' % (srcabb, abb)
    cur.execute(sql)
    results = cur.fetchall()
@@ -56,21 +70,6 @@ def GetGameKeys(hteam, ateam, date, con):
     for row in results:
         output.append(row[0])
     return output
-    
-def GetHitterKey(src, uid, con):
-    cur = con.cursor()
-    if src == 'BR':
-        getSQL = 'select player_key from hitter where br_user_id = \'%s\'' % uid
-    elif src == 'RS':
-        getSQL = 'select player_key from hitter where rs_user_id = \'%s\'' % uid
-    else:
-        getSQL = 'select player_key from hitter where 1 <> 1'
-    cur.execute(getSQL)
-    results = cur.fetchall()
-    if len(results) == 1:
-        return results[0][0]
-    else:
-        return None
 
 def GetPitcherKey(src, uid, con):
     cur = con.cursor()
