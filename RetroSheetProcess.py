@@ -240,6 +240,7 @@ def ProcessRSLog(filename, con):
                             currentGame.homeHits +=1
                         currentGame.homeRuns += x.runsScored
                     x.gameKey = currentGame.gameKey
+                    #print(x.inning, x.playType)
                     x.InsertPlay('RS', con)
                 if currentGame.homeRuns > currentGame.awayRuns:
                     currentGame.homeTeamWin = True
