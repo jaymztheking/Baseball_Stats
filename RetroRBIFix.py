@@ -3,12 +3,14 @@ import os
 import datetime
 import databaseconfig as cfg
 from bbUtils import GetGameKey, GetTeamfromAbb, GetHitterKey
+from multiprocessing import Pool
 
 
-def SetRBIFalse(game, hitter, playNum, con):
-    sql = 'update play set rbi_elig = False ' \
+def SetRBIRuns(game, hitter, playNum, runs, con):
+    cur = con.cursor()
+    sql = 'update play set rbis_in =  greatest(runs_in - %d,0)' \
           'where game_key = %s and hitter_key = %s and play_seq_no = %s' \
-          % (game, hitter, playNum)
+          % (runs, game, hitter, playNum)
     cur.execute(sql)
     cur.execute('COMMIT;')
 
@@ -19,7 +21,7 @@ def FixRBI(filename, con):
     text.close()
     text = open(filename,'r')
     game = 0
-    playInd = 0
+    playInd = 1
     hTeam = 0
     aTeam = 0
     date = datetime.date(1500,1,1)
@@ -56,40 +58,53 @@ def FixRBI(filename, con):
 
         #Add Pinch Hitters to Lineup
         elif rowType == 'sub':
-            if int(row[5]) == 11:
-                userID = row[1]
-                lineup[userID] = GetHitterKey(userID, 'RS', con)
+            userID = row[1]
+            lineup[userID] = GetHitterKey(userID, 'RS', con)
 
         #Scan Plays for RBI Ineligibility
         elif rowType == 'play':
+            noRBI = 0
+            runstr = ''
             userID = row[3].strip()
+            playStr = row[6] if row[6].find('.') == -1 else row[6][row[6].find('.')+1:]
+            baseStr = playStr.strip().split(';')
+            for runner in baseStr:
+                if ('NR' in runner) or ('-H' in runner and '(E' in runner):
+                    noRBI +=1
+                    runstr += runner
+                if ('XH' in runner) and ('E' in runner)and ('MREV' not in runner):
+                    noRBI += 1
+                    runstr += runner
+            if noRBI > 0:
+                inEligPlays.append((lineup[userID], playInd, noRBI, runstr))
             playInd += 1
-            playStr = row[6]
-            if ('NR' in playStr):
-                inEligPlays.append((lineup[userID],playInd))
 
         #Reached End of Game
         elif rowType == 'id':
             if date != datetime.date(1500, 1, 1):
                 game = GetGameKey(hTeam, aTeam, date, time, con)
                 for play in inEligPlays:
-                    print(play)
-                    SetRBIFalse(game, play[0], play[1], con)
+                    print(game, play)
+                    SetRBIRuns(game, play[0], play[1], play[2], con)
                 game = 0
-                playInd = 0
-                lineup = {}
-                inEligPlays.clear()
+                playInd = 1
+                hTeam = 0
+                aTeam = 0
                 date = datetime.date(1500, 1, 1)
+                time = ''
+                lineup = {}
+                inEligPlays = []
 
+def unitFunc(file):
+    print(file)
+    con = psycopg2.connect("dbname=%s user=%s host=%s password=%s" % (cfg.dbname, cfg.user, cfg.host, cfg.pw))
+    if '.EV' in file:
+        filename = '.\\Play by Play Logs\\' + str(2017) + '\\' + file
+        FixRBI(filename, con)
+        con.close()
 
-con = psycopg2.connect("dbname=%s user=%s host=%s password=%s" % (cfg.dbname, cfg.user, cfg.host, cfg.pw))
-cur = con.cursor()
-year = 2017
-while year> 2016:
-    for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
-            print(file)
-            if '.EV' in file[1]:
-                filename = '.\\Play by Play Logs\\'+str(year)+'\\'+file[1]
-                FixRBI(filename, con)
-    year -= 1
-con.close()
+if __name__ == '__main__':
+    files = os.listdir('.\\Play by Play Logs\\'+str(2017))
+    p = Pool()
+    p.map(unitFunc, files)
+    print('Done')
