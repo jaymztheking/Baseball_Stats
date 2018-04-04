@@ -8,11 +8,17 @@ from multiprocessing import Pool
 
 def SetRBIRuns(game, hitter, playNum, runs, con):
     cur = con.cursor()
-    sql = 'update play set rbis_in =  greatest(runs_in - %d,0)' \
-          'where game_key = %s and hitter_key = %s and play_seq_no = %s' \
-          % (runs, game, hitter, playNum)
+    sql = 'select rbis_in from play where game_key = %s and play_seq_no = %s'\
+        % (game, playNum)
     cur.execute(sql)
-    cur.execute('COMMIT;')
+    results = cur.fetchall()
+    rbis = results[0][0]
+    if rbis > 0:
+        sql = 'update play set rbis_in =  greatest(runs_in - %d,0)' \
+              'where game_key = %s and hitter_key = %s and play_seq_no = %s' \
+              % (runs, game, hitter, playNum)
+        cur.execute(sql)
+        cur.execute('COMMIT;')
 
 
 def FixRBI(filename, con):
@@ -54,12 +60,15 @@ def FixRBI(filename, con):
         #Lineup Dictionary
         elif rowType == 'start':
             userID = row[1]
-            lineup[userID] = GetHitterKey(userID, 'RS', con)
+            lineup[userID] = GetHitterKey('RS', userID, con)
 
         #Add Pinch Hitters to Lineup
         elif rowType == 'sub':
             userID = row[1]
-            lineup[userID] = GetHitterKey(userID, 'RS', con)
+            lineup[userID] = GetHitterKey('RS', userID, con)
+            if int(row[5]) == 12:
+                playInd += 1
+
 
         #Scan Plays for RBI Ineligibility
         elif rowType == 'play':

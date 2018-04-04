@@ -9,8 +9,8 @@ cur = con.cursor()
 cur.execute("Select * from team where team_key = 9")
 tst = cur.fetchall()
 print(tst)
-year = 2017
-while year> 2016:
+year = 2011
+while year> 2010:
     for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
             print(file)   
             if '.EV' in file[1]:

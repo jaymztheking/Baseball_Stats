@@ -298,7 +298,6 @@ class BRBatterParser(html.parser.HTMLParser):
 
 
 class GamesParser(html.parser.HTMLParser):
-    foundh2 = False
     startData = False
     games = []
     BRabbrevs = ['ARI', 'ATL', 'BAL', 'BOS', 'CHC', 'CHW', 'CIN', 'CLE', 'COL', 'DET', 'HOU', 'KCR', 'LAA', 'LAD',
@@ -310,40 +309,20 @@ class GamesParser(html.parser.HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         prefix = "http://www.baseball-reference.com"
+        if tag == 'div' and len(attrs) > 0 and attrs[0][1] == 'game_summaries':
+            self.startData = True
         if self.startData and tag == 'a':
             for att in attrs:
                 if att[0] == 'href' and att[1][:6] == '/boxes':
-                    self.games.append([self.h, self.a, prefix + att[1]])
-
-
-        elif tag == 'h2':
-            self.foundh2 = True
+                    self.games.append(att[1])
 
     def handle_data(self, data):
-        if self.foundh2 and data[:19] == 'Standings and Games':
-            self.startData = True
-        elif data == 'Standings Up to and Including this Date':
+        if data == 'Up To This Date':
             self.startData = False
-        elif self.startData:
-            data = data.replace(' ', '').strip('@').strip('\n')
-            if data in self.BRabbrevs:
-                if self.lastIn == 'H':
-                    self.a = data
-                    self.lastIn = 'A'
-                elif self.lastIn == 'A':
-                    self.h = data
-                    self.lastIn = 'H'
-            elif data.strip('@') in self.BRabbrevs:
-                if self.lastIn == 'H':
-                    self.a = data.strip(' ').strip('@')
-                    self.lastIn = 'A'
-                elif self.lastIn == 'A':
-                    self.h = data.strip(' ').strip('@')
-                    self.lastIn = 'H'
 
     def handle_endtag(self, tag):
-        if tag == 'h2':
-            self.foundh2 = False
+        pass
+
 
 
 class BRPlayerInfoParser(html.parser.HTMLParser):

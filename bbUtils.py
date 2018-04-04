@@ -1,7 +1,7 @@
 from BRParser import BRRSUserIdParser
 import urllib.request
 
-def GetHitterKey(userID, src, con):
+def GetHitterKey(src, userID, con):
     cur = con.cursor()
     if src == 'RS':
         srcabb = 'rs_user_id'
