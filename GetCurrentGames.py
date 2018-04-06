@@ -10,7 +10,7 @@ day = str(input('What day?'))
 url = 'http://www.baseball-reference.com/games/standings.cgi?month=%s&day=%s&year=%s' % (month.zfill(2), day, year)
 '''
 
-startDate = datetime.date(2018,3,29)
+startDate = datetime.date(2018,3,30)
 endDate = datetime.date(2018,4,3)
 oneDay = datetime.timedelta(1)
 
