@@ -1,5 +1,6 @@
-from Baseball import Game
-from datetime import date, time
+import json
 
-a = Game().GetCurSeq()
-print(a)
+with open('TeamLookup.json', 'r') as out:
+	team = json.load(out)
+
+print(type(team))

@@ -73,7 +73,9 @@ class Game(Record):
         self.fields['game_temp_f'] = (float, 'null', '')
         self.fields['wind_dir'] = (str, 'not null', '')
         self.fields['wind_speed_mph'] = (float, 'null', '')
-        self.fields['weather_condition'] = (str, 'null', '')
+        self.fields['field_condition'] = (str, 'null', '')
+        self.fields['precipitation'] = (str, 'null', '')
+        self.fields['sky_cond'] = (str, 'null', '')
         self.fields['total_innings'] = (int, 'null', '')
         self.fields['home_hits'] = (int, 'null', '')
         self.fields['away_hits'] = (int, 'null', '')
@@ -81,15 +83,16 @@ class Game(Record):
         self.fields['away_runs'] = (int, 'null', ''),
         self.fields['home_team_win'] = (bool, 'null', '')
         self.fields['tie'] = (bool, 'null', '')
-        self.fields['game_time_seconds'] = (int, 'null', '')
+        self.fields['game_time_minutes'] = (int, 'null', '')
         self.fields['home_ump_id'] = (str, 'null', '')
+        self.fields['attendance'] = (int, 'null', '')
         super(Game, self).__init__()
 
     def DBInsert(self):
         sql = super(Game, self).CreateInsertSQL('game')
         if super(Game, self).ExecuteQuery(sql) is not None:
             self.inserted = True
-            self.values['game_key'] = self.GetCurSeq(con)
+            self.values['game_key'] = super(Game, self).ReturnSingleQuery('select currval(\'game_game_key_seq\')')
             return True
         else:
             return False
@@ -99,14 +102,9 @@ class Game(Record):
             return self.values['game_key']
         elif self.values['game_id'] is not None:
             sql = 'select game_key from game where game_id = ' + self.values['game_id']
+            return self.ReturnSingleQuery(sql)
         else:
-            print('Not enough data to pull game key')
             return None
-
-        return super(Game, self).ReturnSingleQuery(sql, con)
-
-    def GetCurSeq(self):
-        return super(Game, self).ReturnSingleQuery('select currval(\'game_game_key_seq\')')
 
 
 class HitBoxScore(Record):
