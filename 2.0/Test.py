@@ -1,6 +1,6 @@
-import json
+from Retro import RSLog
 
-with open('TeamLookup.json', 'r') as out:
-	team = json.load(out)
 
-print(type(team))
+x = RSLog('.\\Play by Play Logs\\2017\\2017ANX.EVA')
+x.ParseLog()
+

@@ -1,6 +1,10 @@
 from datetime import date, time
 import psycopg2
+import GameSim
 import databaseconfig as cfg
+
+PosLookup = ['X','P','C','1B','2B','3B','SS','LF','CF','RF','PH','PR']
+
 
 class Record:
     def __init__(self):
@@ -109,13 +113,67 @@ class Game(Record):
 
 class HitBoxScore(Record):
     def __init__(self):
-        pass
+        self.fields = {}
+        self.fields['game_key'] = (int, 'not null', 'foreign key')
+        self.fields['team_key'] = (int, 'not null', 'foreign key')
+        self.fields['player_key'] = (int, 'not null', 'foreign key')
+        self.fields['batting_num'] = (int, 'null', '')
+        self.fields['position'] = (str, 'null', '')
+        self.fields['plate_app'] = (int, 'null', '')
+        self.fields['at_bat'] = (int, 'null', '')
+        self.fields['hits'] = (int, 'null', '')
+        self.fields['bb'] = (int, 'null', '')
+        self.fields['ibb'] = (int, 'null', '')
+        self.fields['hbp'] = (int, 'null', '')
+        self.fields['runs'] = (int, 'null', '')
+        self.fields['rbi'] = (int, 'null', '')
+        self.fields['single'] = (int, 'null', '')
+        self.fields['double'] = (int, 'null', '')
+        self.fields['triple'] = (int, 'null', '')
+        self.fields['hr'] = (int, 'null', '')
+        self.fields['sb'] = (int, 'null', '')
+        self.fields['cs'] = (int, 'null', '')
+        super(HitBoxScore, self).__init__()
+
+    def DBInsert(self):
+        sql = super(HitBoxScore, self).CreateInsertSQL('hitboxscore')
+        if super(HitBoxScore, self).ExecuteQuery(sql) is not None:
+            self.inserted = True
+            return True
+        else:
+            return False
 
 
 class PitchBoxScore(Record):
     def __init__(self):
-        pass
-
+        self.fields = {}
+        self.fields['game_key'] = (int, 'not null', 'foreign key')
+        self.fields['team_key'] = (int, 'not null', 'foreign key')
+        self.fields['player_key'] = (int, 'not null', 'foreign key')
+        self.fields['pitch_role'] = (str, 'not null', '')
+        self.fields['pitch_count'] = (int, 'null', '')
+        self.fields['K'] = (int, 'null', '')
+        self.fields['BB'] = (int, 'null', '')
+        self.fields['IBB'] = (int, 'null', '')
+        self.fields['HBP'] = (int, 'null', '')
+        self.fields['hits'] = (int, 'null', '')
+        self.fields['earned_runs'] = (int, 'null', '')
+        self.fields['IP'] = (float, 'null', '')
+        self.fields['strikes'] = (int, 'null', '')
+        self.fields['balls'] = (int, 'null', '')
+        self.fields['complete_game'] = (bool, 'null', '')
+        self.fields['shut_out'] = (bool, 'null', '')
+        self.fields['no_hitter'] = (bool, 'null', '')
+        self.fields['win'] = (bool, 'null', '')
+        self.fields['loss'] = (bool, 'null', '')
+        self.fields['save'] = (bool, 'null', '')
+        self.fields['swing_strikes'] = (int, 'null', '')
+        self.fields['look_strikes'] = (int, 'null', '')
+        self.fields['contact_strikes'] = (int, 'null', '')
+        self.fields['flyballs'] = (int, 'null', '')
+        self.fields['groundballs'] = (int, 'null', '')
+        self.fields['line_drives'] = (int, 'null', '')
+        super(PitchBoxScore, self).__init__()
 
 class Hitter(Record):
     def __init__(self):
@@ -129,8 +187,72 @@ class Pitcher(Record):
 
 class Play(Record):
     def __init__(self):
-        pass
+        self.fields = {}
+        self.fields['game_key'] = (int, 'not null', 'foreign key')
+        self.fields['play_seq_no'] = (int, 'not null', '')
+        self.fields['hitter_key'] = (int, 'not null', 'foreign key')
+        self.fields['pitcher_key'] = (int, 'not null', 'foreign key')
+        self.fields['top_bot_inn'] = (int, 'null', '')
+        self.fields['inning_num'] = (int, 'null', '')
+        self.fields['pitch_seq'] = (str, 'null', '')
+        self.fields['play_seq'] = (str, 'null', '')
+        self.fields['play_type'] = (str, 'null', '')
+        self.fields['plate_app'] = (bool, 'null', '')
+        self.fields['at_bat'] = (bool, 'null', '')
+        self.fields['hit'] = (bool, 'null', '')
+        self.fields['strikes'] = (int, 'null', '')
+        self.fields['balls'] = (int, 'null', '')
+        self.fields['contact_x'] = (int, 'null', '')
+        self.fields['swing_x'] = (int, 'null', '')
+        self.fields['look_x'] = (int, 'null', '')
+        self.fields['ball_loc'] = (str, 'null', '')
+        self.fields['ball_type'] = (str, 'null', '')
+        super(Play, self).__init__()
 
+
+class Base(Record):
+    def __init__(self):
+        self.fields = {}
+        self.fields['game_key'] = (int, 'not null', 'foreign key')
+        self.fields['play_seq_no'] = (int, 'not null', '')
+        self.fields['run_seq'] = (str, 'null', '')
+        self.fields['top_bot_inn'] = (int, 'null', '')
+        self.fields['inning_num'] = (int, 'null', '')
+        self.fields['start_outs'] = (int, 'null', '')
+        self.fields['end_outs'] = (int, 'null', '')
+        self.fields['start_first'] = (str, 'null', '')
+        self.fields['start_second'] = (str, 'null', '')
+        self.fields['start_third'] = (str, 'null', '')
+        self.fields['end_first'] = (str, 'null', '')
+        self.fields['end_second'] = (str, 'null', '')
+        self.fields['end_third'] = (str, 'null', '')
+        self.fields['second_stolen'] = (bool, 'null', '')
+        self.fields['third_stolen'] = (bool, 'null', '')
+        self.fields['home_stolen'] = (bool, 'null', '')
+        self.fields['total_sb'] = (int, 'null', '')
+        self.fields['second_caught'] = (bool, 'null', '')
+        self.fields['third_caught'] = (bool, 'null', '')
+        self.fields['home_caught'] = (bool, 'null', '')
+        self.fields['total_cs'] = (int, 'null', '')
+        self.fields['batter_scored'] = (bool, 'null', '')
+        self.fields['first_scored'] = (bool, 'null', '')
+        self.fields['second_scored'] = (bool, 'null', '')
+        self.fields['third_scored'] = (bool, 'null', '')
+        self.fields['total_runs'] = (int, 'null', '')
+        self.fields['rbi'] = (int, 'null', '')
+        super(Base, self).__init__()
+
+    def GetStartStateFromSim(self, GameSim):
+        self.values['start_outs'] = GameSim.outs
+        self.values['start_first'] = GameSim.first_base
+        self.values['start_second'] = GameSim.second_base
+        self.values['start_third'] = GameSim.third_base
+
+    def GetEndStateFromSim(self, GameSim):
+        self.values['end_outs'] = GameSim.outs
+        self.values['end_first'] = GameSim.start_first
+        self.values['end_second'] = GameSim.start_second
+        self.values['end_third'] = GameSim.start_third
 
 class Team(Record):
     def __init__(self):
