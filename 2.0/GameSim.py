@@ -13,6 +13,7 @@ class GameSim:
         self.outs = 0
 
     def ProcessRSBase(self, runstr, currentBase):
+        batter_scored  = first_scored = second_scored = third_scored = False
         sorter = {'3': 1, '2': 2, '1': 3, 'B': 4}
         if runstr != '':
             runners = filter(None, runstr.split(';'))
@@ -27,16 +28,16 @@ class GameSim:
                     self.third_base = self.first_base
                     self.first_base = ''
                 elif run[:3] == '1-H':
-                    currentBase.first_scored = True
+                    first_scored = True
                     self.first_base = ''
                 elif run[:3] == '2-3':
                     self.third_base = self.second_base
                     self.second_base = ''
                 elif run[:3] == '2-H':
-                    currentBase.second_scored = True
+                    second_scored = True
                     self.second_base = ''
                 elif run[:3] == '3-H':
-                    currentBase.third_scored = True
+                    third_scored = True
                     self.third_base = ''
                 elif run[:3] == 'B-1':
                     self.first_base = self.batter
@@ -45,33 +46,36 @@ class GameSim:
                 elif run[:3] == 'B-3':
                     self.third_base = self.batter
                 elif run[:3] == 'B-H':
-                    currentBase.batter_scored = True
+                    batter_scored = True
                 elif run[:2] == '1X':
                     if 'E' not in run:
                         self.outs += 1
                         self.first_base = ''
                     else:
-                        run  = run[:3].replace('X', '-')
-                        currentBase = self.ProcessRSBase(run, currentBase)
+                        run = run[:3].replace('X', '-')
+                        (batter_scored, first_scored, second_scored, third_scored) = \
+                            self.ProcessRSBase(run, currentBase)
                 elif run[:2] == '2X':
                     if 'E' not in run:
                         self.outs += 1
                         self.second_base = ''
                     else:
                         run = run[:3].replace('X', '-')
-                        currentBase = self.ProcessRSBase(run, currentBase)
+                        (batter_scored, first_scored, second_scored, third_scored) = \
+                            self.ProcessRSBase(run, currentBase)
                 elif run[:2] == '3X':
                     if 'E' not in run:
                         self.outs += 1
                         self.third_base = ''
                     else:
                         run = run[:3].replace('X', '-')
-                        currentBase = self.ProcessRSBase(run, currentBase)
+                        (batter_scored, first_scored, second_scored, third_scored) = \
+                            self.ProcessRSBase(run, currentBase)
                 #Jean Segura Memorial Code
                 elif run[:3] == '2-1':
                     self.first_base = self.second_base
                     self.second_base = None
-        return currentBase
+        return (batter_scored, first_scored, second_scored, third_scored)
 
     def GetRunsRBI(self, playtype, currentBase):
         currentBase.values['total_runs'] = currentBase.values['second_scored'] + currentBase.values['third_scored'] \
@@ -91,4 +95,4 @@ class GameSim:
                     currentBase.values['rbi'] -= 1
                 elif('XH' in runner) and ('E' in runner) and ('MREV' not in runner):
                     currentBase.values['rbi'] -= 1
-        return currentBase
+        return (currentBase.values['total_runs'], currentBase.values['rbi'])
