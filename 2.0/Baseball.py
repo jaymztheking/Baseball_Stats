@@ -242,6 +242,10 @@ class Base(Record):
         self.fields['rbi'] = (int, 'null', '')
         super(Base, self).__init__()
 
+        for x in self.values.keys():
+            if self.fields[x][0] == bool:
+                self.values[x] = False
+
     def GetStartStateFromSim(self, GameSim):
         self.values['start_outs'] = GameSim.outs
         self.values['start_first'] = GameSim.first_base
@@ -250,9 +254,9 @@ class Base(Record):
 
     def GetEndStateFromSim(self, GameSim):
         self.values['end_outs'] = GameSim.outs
-        self.values['end_first'] = GameSim.start_first
-        self.values['end_second'] = GameSim.start_second
-        self.values['end_third'] = GameSim.start_third
+        self.values['end_first'] = GameSim.first_base
+        self.values['end_second'] = GameSim.second_base
+        self.values['end_third'] = GameSim.third_base
 
 class Team(Record):
     def __init__(self):

@@ -55,13 +55,37 @@ class RSLog:
 		#Need Game Stuff and Box Scores
 		pass
 
+	def GetBallType(self):
+		for x in self.currentPlay.values['play_seq'].split('/')[1:]:
+			if re.search('^[0-9]{1,2}$', x) != None:
+				self.currentPlay.values['ball_loc'] = x
+			if re.search('^B?[LFGP][0-9]', x) != None:
+				self.currentPlay.values['ball_loc'] = re.search('^B?[LFGP]([0-9])', x).group(1)
+			if re.search('L', x) != None:
+				return 'Line Drive'
+			if re.search('F', x) != None:
+				return 'Fly Ball'
+			if re.search('G', x) != None:
+				return 'Ground Ball'
+			if re.search('P', x) != None and re.search('DP', x) == None:
+				return 'Pop Up'
+			if re.search('BP', x) != None:
+				return 'Bunt Pop'
+			if re.search('BL', x) != None:
+				return 'Bunt Line Drive'
+			if re.search('BG', x) != None:
+				return 'Bunt Ground Ball'
+		return ''
+
 	def GetPlayType(self):
 		playseq = self.currentPlay.values['play_seq']
+		playtyp = playseq.split('/')[0]
+		playname = ''
 		runseq = self.currentBase.values['run_seq']
 
 		# Stolen Base
-		if re.search('SB[23H]', playseq) != None:
-			if 'SB2' in playseq:
+		if re.search('SB[23H]', playtyp) != None:
+			if 'SB2' in playtyp:
 				self.currentBase.values['second_stolen'] = True
 				if '1-' not in runseq:
 					self.currentBase.values['run_seq'] += ';1-2'
@@ -73,10 +97,12 @@ class RSLog:
 				self.currentBase.values['home_stolen'] = True
 				if '3-' not in runseq:
 					self.currentBase.values['run_seq'] += ';3-H'
-			return 'Stolen Base'
+			self.currentBase.values['total_sb'] = self.currentBase.values['second_stolen'] + \
+				+ self.currentBase.values['third_stolen'] + self.currentBase.values['home_stolen']
+			playname =  'Stolen Base'
 
 		# Caught Stealing
-		if re.search('CS[23H]', playseq) != None:
+		if re.search('CS[23H]', playtyp) != None:
 			if 'CS2' in playseq:
 				self.currentBase.values['second_caught'] = True
 				if 'E' not in playseq:
@@ -95,10 +121,12 @@ class RSLog:
 					runseq += ';3XH'
 				elif '3-' not in runseq:
 					runseq += ';3-H'
-			return 'Caught Stealing'
+			self.currentBase.values['total_cs'] = self.currentBase.values['second_caught'] + \
+				self.currentBase.values['third_caught'] + self.currentBase.values['home_caught']
+			playname = 'Caught Stealing'
 
 		#Pick Off
-		if re.search('PO[^C]', playseq) != None:
+		if re.search('PO[^C]', playtyp) != None:
 			if 'E' not in runseq:
 				self.currentSim.outs += 1
 				if 'PO1' in runseq:
@@ -107,70 +135,147 @@ class RSLog:
 					self.currentSim.second_base = ''
 				if 'PO3' in runseq:
 					self.currentSim.third_base = ''
-			return 'Pick Off'
+			playname = 'Pick Off'
 
 		#Balk
-		if re.search('BK', playseq) != None:
-			return 'Balk'
+		if re.search('BK', playtyp) != None:
+			playname = 'Balk'
 
 		#Passed Ball
-		if re.search('PB', playseq) != None:
-			return 'Passed Ball'
+		if re.search('PB', playtyp) != None:
+			playname = 'Passed Ball'
 
 		#Wild Pitch
-		if re.search('WP', playseq) != None:
-			return 'Wild Pitch'
+		if re.search('WP', playtyp) != None:
+			playname = 'Wild Pitch'
 
 		#Defensive Indifference
-		if re.search('DI', playseq) != None:
-			return 'Defensive Indifference'
+		if re.search('DI', playtyp) != None:
+			playname = 'Defensive Indifference'
 
 		#Error on Foul
-		if re.search('FLE', playseq) != None:
-			return 'Error on Foul'
+		if re.search('FLE', playtyp) != None:
+			playname = 'Error on Foul'
 
 		#Misc
-		if re.search('OA', playseq) != None:
-			return 'Unknown Runner Activity'
+		if re.search('OA', playtyp) != None:
+			playname = 'Unknown Runner Activity'
 
 		#Interference
-		if re.search('C$', playseq) != None:
+		if re.search('C$', playtyp) != None:
 			if 'B-' not in runseq:
 				runseq += ';B-1'
-			return 'Interference'
+			playname = 'Interference'
 
 		#Walks
-		if re.search('W(\+|$)', playseq) != None:
+		if re.search('W(\+|$)', playtyp) != None:
 			if 'B-' not in runseq:
 				runseq += ';B-1'
-			return 'Intentional Walk' if 'IW' in playseq else 'Walk'
+			playname = 'Intentional Walk' if 'IW' in playseq else 'Walk'
 
 		#HBP
-		if re.search('W(\+|$)', playseq) != None:
+		if re.search('W(\+|$)', playtyp) != None:
 			if 'B-' not in runseq:
 				runseq += ';B-1'
-			return 'Hit By Pitch'
+			playname = 'Hit By Pitch'
 
 		#Sac Fly
 		if 'SF' in playseq:
-			return 'Sacrifice Fly'
+			playname = 'Sacrifice Fly'
 
 		#Sac Hit
 		if 'SH' in playseq:
-			return 'Sacrifice Hit'
+			playname = 'Sacrifice Hit'
 
 		#Strikeout
-		if re.search('(^|[^B])K', playseq) != None:
+		if re.search('(^|[^B])K', playtyp) != None:
 			if 'B-' not in runseq:
 				self.currentSim.outs += 1
-			return 'Strikeout'
+			playname = 'Strikeout'
 
 		#one Fielding Out
-		if re.search('^[0-9]+$', playseq) != None:
+		if re.search('^[0-9]+$', playtyp) != None:
 			self.currentPlay.values['ball_loc'] = playseq[0]
 			self.currentSim.outs += 1
-			return 'Out'
+			playname = 'Out'
 
+		#Force and Tag Outs/Double Play/Triple Play
+		if re.search('^[0-9]{1,4}\([B123]\)', playtyp) != None:
+			outstr = re.findall('\([B123]\)', playseq)
+			self.currentPlay.values['ball_loc'] = playseq[0]
+			for a in playseq.split('/'):
+				if 'DP' in a and 'NDP' not in a:
+					self.currentSim.outs += len(outstr)
+					playname = 'Double Play'
+					if (self.currentBase.values['run_seq'].count('X') + len(outstr)) == 2 and '(B)' not in outstr:
+						self.currentBase.values['run_seq'] += ';B-1'
+				if 'TP' in a:
+					self.currentSim.outs += 3
+					playname = 'Triple Play'
+			if playname not in ('Triple Play', 'Double Play'):
+				self.currentSim.outs += 1
+				playname = 'Out'
+				if 'B' not in self.currentBase.values['run_seq'] and '(B)' not in outstr:
+					self.currentBase.values['run_seq'] += ';B-1'
+			for o in outstr:
+				if o == '(1)':
+					self.currentSim.first_base = ''
+				elif o == '(2)':
+					self.currentSim.second_base = ''
+				elif o == '(3)':
+					self.currentSim.third_base = ''
+
+		#Fielders Choice
+		if re.search('FC[0-9]', playtyp) != None:
+			playname = 'Fielders Choice'
+			self.currentPlay.values['ball_loc'] = re.search('FC([0-9])', playtyp).group(1)
+			if 'B' not in self.currentBase.values['run_seq']:
+				self.currentBase.values['run_seq'] += ';B-1'
+
+		#Reach On Error
+		if re.search('(^|[^\(])E[0-9]', playtyp) != None and re.search('FLE', playtyp) == None:
+			if playname[:9] != 'Sacrifice':
+				playname = 'Reach On Error'
+			if 'B-' not in self.currentBase.values['run_seq'] or 'BX' not in self.currentBase.values['run_seq']:
+				self.currentBase.values['run_seq'] += ';B-1'
+
+		#Single
+		if re.search('^S[0-9]?', playtyp) != None and re.search('SB[23H]', playtyp) == None:
+			playname = 'Single'
+			if re.search('^S([0-9])', playtyp) != None:
+				self.currentPlay.values['ball_loc'] = re.search('S([0-9])', playtyp).group(1)
+			if 'B' not in self.currentBase.values['run_seq']:
+				self.currentBase.values['run_seq'] += ';B-1'
+
+		#Double
+		if re.search('^D[0-9]?', playtyp) != None and re.search('DI', playtyp) == None:
+			playname = 'Double'
+			if re.search('^D[0-9]', playtyp) != None:
+				self.currentPlay.values['ball_loc'] = re.search('D([0-9])', playtyp).group(1)
+			if 'B' not in self.currentBase.values['run_seq']:
+				self.currentBase.values['run_seq'] += ';B-2'
+
+		#Ground Rule Double
+		if re.search('DGR', playtyp) != None:
+			playname = 'Ground Rule Double'
+			if 'B' not in self.currentBase.values['run_seq']:
+				self.currentBase.values['run_seq'] += ';B-2'
+
+		#Triple
+		if re.search('^T[0-9]?', playtyp) != None:
+			playname = 'Triple'
+			if re.search('^T[0-9]', playtyp) != None:
+				self.currentPlay.values['ball_loc'] = re.search('T([0-9])', playtyp).group(1)
+			if 'B' not in self.currentBase.values['run_seq']:
+				self.currentBase.values['run_seq'] += ';B-3'
+
+		#Home Run
+		if re.search('HR', playtyp) != None:
+			playname = 'Home Run'
+			if 'B' not in self.currentBase.values['run_seq']:
+				self.currentBase.values['run_seq'] += ';B-H'
+
+		return playname
 
 	def LogEndProcess(self):
 		for x in self.gamelineups.values():
@@ -258,6 +363,10 @@ class RSLog:
 			self.currentPlay.values['play_seq'] = str(row[6].split('.')[0])
 			self.currentBase.values['run_seq']= str(row[6].split('.')[1]) if len(row[6].split('.')) == 2 else ''
 			self.currentPlay.values['play_type'] = self.GetPlayType()
+			self.currentPlay.values['ball_type'] = self.GetBallType()
+			self.currentBase = self.currentSim.ProcessRSBase(self.currentBase.values['run_seq'], self.currentBase)
+			self.currentBase = self.currentSim.GetRunsRBI(self.currentPlay.values['play_type'], self.currentBase)
+			self.currentBase.GetEndStateFromSim(self.currentSim)
 			self.plays.append(self.currentPlay)
 			self.bases.append(self.currentBase)
 		return True
