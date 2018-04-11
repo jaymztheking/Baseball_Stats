@@ -78,24 +78,24 @@ class GameSim:
         return (batter_scored, first_scored, second_scored, third_scored)
 
     def GetRunsRBI(self, playtype, currentBase):
-        currentBase.values['total_runs'] = currentBase.values['second_scored'] + currentBase.values['third_scored'] \
-            + currentBase.values['batter_scored'] + currentBase.values['first_scored']
+        currentBase.total_runs = currentBase.second_scored + currentBase.third_scored \
+            + currentBase.batter_scored + currentBase.first_scored
         if playtype in ('Interference','Walk','Hit By Pitch','Sacrifice Fly','Sacrifice Hit','Out','Fielders Choice', \
                         'Single','Double','Ground Rule Double','Triple','Home Run'):
-            currentBase.values['rbi'] = currentBase.values['total_runs']
+            currentBase.rbi = currentBase.total_runs
         elif playtype == 'Reach on Error' and self.outs < 2:
-            currentBase.values['rbi'] = currentBase.values['total_runs']
+            currentBase.rbi = currentBase.total_runs
         else:
-            currentBase.values['rbi'] = 0
+            currentBase.rbi = 0
 
-        if currentBase.values['rbi'] > 0:
-            runs = currentBase.values['run_seq']
+        if currentBase.rbi > 0:
+            runs = currentBase.run_seq
             for runner in runs.split(';'):
                 if('NR' in runner) or ('-H' in runner and '(E' in runner):
-                    currentBase.values['rbi'] -= 1
+                    currentBase.rbi -= 1
                 elif('XH' in runner) and ('E' in runner) and ('MREV' not in runner):
-                    currentBase.values['rbi'] -= 1
-        return (currentBase.values['total_runs'], currentBase.values['rbi'])
+                    currentBase.rbi -= 1
+        return (currentBase.total_runs, currentBase.rbi)
 
     def ProcessRSPlayType(self, playtype):
         if playtype in ('Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball','Wild Pitch', \
