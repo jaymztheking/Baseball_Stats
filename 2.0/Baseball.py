@@ -1,18 +1,30 @@
 from datetime import date, time
-import psycopg2
-import GameSim
+import psycopg2, json
 import databaseconfig as cfg
-
-PosLookup = ['X','P','C','1B','2B','3B','SS','LF','CF','RF','PH','PR']
+from RSParser import PlayerInfoParser
+import urllib.request
 
 
 class Record:
     def __init__(self):
         self.inserted = False
         self.values = {}
-        for field in self.fields.keys():
-            self.values[field] = None
-        self.values['game_key'] = -1  # dummy code
+        try:
+            for field in self.fields.keys():
+                if self.fields[field][0] == bool:
+                    self.values[field] = False
+                elif self.fields[field][0] == int:
+                    self.values[field] = 0
+                elif self.fields[field][0] == str:
+                    self.values[field] = ''
+                elif self.fields[field][0] == float:
+                    self.values[field] = 0.0
+                elif self.fields[field][0] == date:
+                    self.values[field] = date(1500, 1, 1)
+                else:
+                    self.values[field] = None
+        except AttributeError:
+            pass
 
     @staticmethod
     def Connect():
@@ -63,6 +75,15 @@ class Record:
         else:
             return None
 
+    @staticmethod
+    def ReturnQuery(sql):
+        con = Record.Connect()
+        cur = con.cursor()
+        cur.execute(sql)
+        results = cur.fetchall()
+        con.close()
+        return results
+
 
 class Game(Record):
     def __init__(self):
@@ -73,7 +94,7 @@ class Game(Record):
         self.fields['game_time'] = (time, 'not null', '')
         self.fields['home_team_key'] = (int, 'not null', 'foreign key')
         self.fields['away_team_key'] = (int, 'not null', 'foreign key')
-        self.fields['park_key'] = (int, 'not null', 'foreign key')
+        self.fields['park_key'] = (int, 'null', 'foreign key')
         self.fields['game_temp_f'] = (float, 'null', '')
         self.fields['wind_dir'] = (str, 'not null', '')
         self.fields['wind_speed_mph'] = (float, 'null', '')
@@ -84,7 +105,7 @@ class Game(Record):
         self.fields['home_hits'] = (int, 'null', '')
         self.fields['away_hits'] = (int, 'null', '')
         self.fields['home_runs'] = (int, 'null', '')
-        self.fields['away_runs'] = (int, 'null', ''),
+        self.fields['away_runs'] = (int, 'null', '')
         self.fields['home_team_win'] = (bool, 'null', '')
         self.fields['tie'] = (bool, 'null', '')
         self.fields['game_time_minutes'] = (int, 'null', '')
@@ -110,6 +131,15 @@ class Game(Record):
         else:
             return None
 
+    @staticmethod
+    def GetGameLookup():
+        GameLookup = {}
+        Record().Connect()
+        result = Record().ReturnQuery('select game_id, game_key from game')
+        for i in result:
+            GameLookup[i[0]] = int(i[1])
+        return GameLookup
+
 
 class HitBoxScore(Record):
     def __init__(self):
@@ -121,6 +151,7 @@ class HitBoxScore(Record):
         self.fields['position'] = (str, 'null', '')
         self.fields['plate_app'] = (int, 'null', '')
         self.fields['at_bat'] = (int, 'null', '')
+        self.fields['so'] = (int, 'null', '')
         self.fields['hits'] = (int, 'null', '')
         self.fields['bb'] = (int, 'null', '')
         self.fields['ibb'] = (int, 'null', '')
@@ -175,14 +206,91 @@ class PitchBoxScore(Record):
         self.fields['line_drives'] = (int, 'null', '')
         super(PitchBoxScore, self).__init__()
 
+
 class Hitter(Record):
     def __init__(self):
-        pass
+        self.fields = {}
+        self.fields['player_key'] = (int, 'not null', 'primary key')
+        self.fields['name'] = (str, 'null', '')
+        self.fields['height_inch'] = (float, 'null', '')
+        self.fields['weight_lbs'] = (float, 'null', '')
+        self.fields['birth_date'] = (date, 'null', '')
+        self.fields['mlb_debut_date'] = (date, 'null', '')
+        self.fields['bat_hand'] = (str, 'null', '')
+        self.fields['throw_hand'] = (str, 'null', '')
+        self.fields['rs_user_id'] = (str, 'null', '')
+        self.fields['br_user_id'] = (str, 'null', '')
+        super(Hitter, self).__init__()
+
+    def GetInfofromRS(self):
+        rs = PlayerInfoParser()
+        url = "http://www.retrosheet.org/boxesetc/%s/P%s.htm" % \
+              (self.values['rs_user_id'][0].upper(), self.values['rs_user_id'])
+        try:
+            html = urllib.request.urlopen(urllib.request.Request(url)).read().decode('utf-8').replace('&#183;', '*')
+        except:
+            print('Cannot connect to RetroSheet')
+            return False
+        rs.feed(html)
+        self.values['name'] = rs.name
+        self.values['bat_hand'] = rs.batHand
+        self.values['throw_hand'] = rs.throwHand
+        self.values['birth_date'] = rs.birthDate
+        self.values['mlb_debut_date'] = rs.debutDate
+        self.values['height_inch'] = float(rs.height)
+        self.values['weight_lbs'] = float(rs.weight)
+
+    @staticmethod
+    def GetHitterRSLookup():
+        HitterLookup = {}
+        Record().Connect()
+        result = Record().ReturnQuery('select rs_user_id, player_key from hitter')
+        for i in result:
+            HitterLookup[i[0]] = int(i[1])
+        return HitterLookup
 
 
 class Pitcher(Record):
     def __init__(self):
-        pass
+        self.fields = {}
+        self.fields['player_key'] = (int, 'not null', 'primary key')
+        self.fields['name'] = (str, 'null', '')
+        self.fields['height_inch'] = (float, 'null', '')
+        self.fields['weight_lbs'] = (float, 'null', '')
+        self.fields['birth_date'] = (date, 'null', '')
+        self.fields['mlb_debut_date'] = (date, 'null', '')
+        self.fields['bat_hand'] = (str, 'null', '')
+        self.fields['throw_hand'] = (str, 'null', '')
+        self.fields['rs_user_id'] = (str, 'null', '')
+        self.fields['br_user_id'] = (str, 'null', '')
+        super(Pitcher, self).__init__()
+
+    def GetInfofromRS(self):
+        rs = PlayerInfoParser()
+        url = "http://www.retrosheet.org/boxesetc/%s/P%s.htm" % \
+              (self.values['rs_user_id'][0].upper(), self.values['rs_user_id'])
+        try:
+            html = urllib.request.urlopen(urllib.request.Request(url)).read().decode('utf-8').replace('&#183;', '*')
+        except:
+            print('Cannot connect to RetroSheet')
+            return False
+        rs.feed(html)
+        self.values['name'] = rs.name
+        self.values['bat_hand'] = rs.batHand
+        self.values['throw_hand'] = rs.throwHand
+        self.values['birth_date'] = rs.birthDate
+        self.values['mlb_debut_date'] = rs.debutDate
+        self.values['height_inch'] = float(rs.height)
+        self.values['weight_lbs'] = float(rs.weight)
+
+    @staticmethod
+    def GetPitcherRSLookup():
+        PitcherLookup = {}
+        Record().Connect()
+        result = Record().ReturnQuery('select rs_user_id, player_key from pitcher')
+        for i in result:
+            PitcherLookup[i[0]] = int(i[1])
+        return PitcherLookup
 
 
 class Play(Record):
@@ -214,7 +322,7 @@ class Base(Record):
     def __init__(self):
         self.fields = {}
         self.fields['game_key'] = (int, 'not null', 'foreign key')
-        self.fields['play_seq_no'] = (int, 'not null', '')
+        self.fields['play_seq_no'] = (int, 'not null', 'foreign key')
         self.fields['run_seq'] = (str, 'null', '')
         self.fields['top_bot_inn'] = (int, 'null', '')
         self.fields['inning_num'] = (int, 'null', '')
@@ -266,3 +374,9 @@ class Team(Record):
 class Park(Record):
     def __init__(self):
         pass
+
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Record):
+            return {'fields': o.fields, 'values': o.values}

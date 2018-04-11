@@ -1,8 +1,11 @@
 from Retro import RSLog
+import time
 
 
-x = RSLog('.\\Play by Play Logs\\2017\\2017ANX.EVA')
+start = time.time()
+x = RSLog('.\\Play by Play Logs\\2017\\2017MIA.EVN')
 x.ParseLog()
-for i in x.gamebases.keys():
-	for j in x.gamebases[i]:
-		print(j.values['total_runs'])
+end = time.time()
+print(end-start)
+
+

@@ -5,39 +5,24 @@
 CREATE TABLE public.play
 (
     game_key integer NOT NULL,
+    play_seq_no smallint NOT NULL,
     hitter_key integer NOT NULL,
     pitcher_key integer NOT NULL,
-    play_seq_no smallint NOT NULL,
-    start_sit smallint,
-    end_sit smallint,
-    inning character varying(10) COLLATE pg_catalog."default",
-    pitch_seq character varying(25) COLLATE pg_catalog."default",
+    top_bot_inn smallint,
+    inning_num smallint,
+    pitch_seq character varying(30) COLLATE pg_catalog."default",
+    play_seq character varying(30) COLLATE pg_catalog."default",
+    play_type character varying(20) COLLATE pg_catalog."default",
+    plate_app boolean,
+    at_bat boolean,
+    hit boolean,
     strikes smallint,
     balls smallint,
     contact_x smallint,
     swing_x smallint,
     look_x smallint,
-    play_type character varying(25) COLLATE pg_catalog."default",
-    "hit?" boolean,
-    result_outs smallint,
     ball_loc character varying(10) COLLATE pg_catalog."default",
-    ball_type character varying(25) COLLATE pg_catalog."default",
-    "batter_scored?" boolean,
-    runs_in smallint,
-    "at_bat?" boolean,
-    "plate_app?" boolean,
-    CONSTRAINT game_fkey FOREIGN KEY (game_key)
-        REFERENCES public.game (game_key) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT hitter_fkey FOREIGN KEY (hitter_key)
-        REFERENCES public.hitter (player_key) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT pitcher_fkey FOREIGN KEY (pitcher_key)
-        REFERENCES public.pitcher (player_key) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+    ball_type character varying(20) COLLATE pg_catalog."default"
 )
 WITH (
     OIDS = FALSE
@@ -49,4 +34,4 @@ ALTER TABLE public.play
 
 GRANT ALL ON TABLE public.play TO babypng;
 
-GRANT ALL ON TABLE public.play TO py;
+GRANT INSERT, SELECT, UPDATE, REFERENCES, TRIGGER ON TABLE public.play TO py;

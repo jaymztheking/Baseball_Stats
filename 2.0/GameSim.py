@@ -96,3 +96,21 @@ class GameSim:
                 elif('XH' in runner) and ('E' in runner) and ('MREV' not in runner):
                     currentBase.values['rbi'] -= 1
         return (currentBase.values['total_runs'], currentBase.values['rbi'])
+
+    def ProcessRSPlayType(self, playtype):
+        if playtype in ('Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball','Wild Pitch', \
+                        'Defensive Indifference', 'Error on Foul', 'Unknown Runner Activity'):
+            plate_app = False
+            at_bat =  False
+        else:
+            plate_app = True
+            if playtype in ('Interference', 'Intentional Walk', 'Walk', 'Hit By Pitch', 'Sacrifice Fly' \
+                            'Sacrifice Hit'):
+                at_bat = False
+            else:
+                at_bat = True
+        if playtype in ('Single', 'Double', 'Ground Rule Double', 'Triple', 'Home Run'):
+            hit = True
+        else:
+            hit = False
+        return (plate_app, at_bat, hit)
