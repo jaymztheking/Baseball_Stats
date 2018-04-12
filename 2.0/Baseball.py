@@ -31,7 +31,7 @@ class Game(DecBase):
     park_key = Column(SmallInteger, ForeignKey("park.park_key"), nullable=False)
     game_temp_f = Column(Float)
     wind_dir = Column(String(20))
-    wind_speed_mph = Column(String(20))
+    wind_speed_mph = Column(Float)
     field_condition = Column(String(20))
     precipitation = Column(String(20))
     sky_cond = Column(String(20))
@@ -55,6 +55,22 @@ class Game(DecBase):
         self.away_hits = 0
         self.home_runs = 0
         self.away_runs = 0
+
+    @staticmethod
+    def AddGames(games):
+        con = Session()
+        con.add_all(games)
+        con.commit()
+        return True
+
+    @staticmethod
+    def GetGameLookup():
+        con = Session()
+        lookup = {}
+        for x in con.query(Game):
+            lookup[x.game_id] = x.game_key
+        con.close()
+        return lookup
 
 
 class HitBoxScore(DecBase):
@@ -99,6 +115,13 @@ class HitBoxScore(DecBase):
         self.hr = 0
         self.sb = 0
         self.cs = 0
+
+    @staticmethod
+    def AddLineups(lineups):
+        con = Session()
+        con.add_all(lineups)
+        con.commit()
+        return True
 
 
 class PitchBoxScore(DecBase):
@@ -157,6 +180,13 @@ class PitchBoxScore(DecBase):
         self.groundballs = 0
         self.line_drives = 0
 
+    @staticmethod
+    def AddRosters(rosters):
+        con = Session()
+        con.add_all(rosters)
+        con.commit()
+        return True
+
 class Hitter(DecBase):
     player_key = Column(Integer, primary_key=True)
     name = Column(String(30))
@@ -196,6 +226,7 @@ class Hitter(DecBase):
         lookup = {}
         for x in con.query(Hitter):
             lookup[x.rs_user_id] = x.player_key
+        con.close()
         return lookup
 
     @staticmethod
@@ -281,6 +312,13 @@ class Play(DecBase):
     def __repr__(self):
         return "<Play (game_key=%s, play_seq_no='%s')>" % (self.game_key, self.play_seq_no)
 
+    @staticmethod
+    def AddPlays(plays):
+        con = Session()
+        con.add_all(plays)
+        con.commit()
+        return True
+
 
 class Base(DecBase):
     game_key = Column(Integer, ForeignKey("game.game_key"), primary_key=True)
@@ -351,6 +389,13 @@ class Base(DecBase):
         self.end_first = GameSim.first_base
         self.end_second = GameSim.second_base
         self.end_third = GameSim.third_base
+
+    @staticmethod
+    def AddBases(bases):
+        con = Session()
+        con.add_all(bases)
+        con.commit()
+        return True
 
 
 class Team(DecBase):

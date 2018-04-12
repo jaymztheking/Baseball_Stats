@@ -1,26 +1,17 @@
 from Retro import RSLog
-import time
+import time, os
 
-'''
+
 start = time.time()
-x = RSLog('.\\Play by Play Logs\\2017\\2017ANX.EVA')
-x.ParseLog()
-end = time.time()
-print(end-start)
-'''
+print(time.strftime('%I:%M:%S %p', time.localtime(start)))
+year = 2017
+for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
+	print(file[1])
+	x = RSLog('.\\Play by Play Logs\\2017\\'+file[1])
+	x.ParseLog()
+	print(time.strftime('%I:%M:%S %p', time.localtime(time.time())))
 
-from Baseball import Hitter
-newguys = []
-newguy = Hitter()
-newguy.rs_user_id = 'gonzc001'
-newguy.GetInfofromRS()
-newguys.append(newguy)
-newguy = Hitter()
-newguy.rs_user_id = 'altuj001'
-newguy.GetInfofromRS()
-newguys.append(newguy)
-Hitter().AddNewHitters(newguys)
-print(Hitter().GetHitterRSLookup())
+
 
 
 
