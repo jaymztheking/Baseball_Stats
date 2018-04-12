@@ -19,7 +19,7 @@ class MyBase(object):
 
 engine = create_engine("postgresql://%s:%s@%s/%s" % (cfg.user, cfg.pw, cfg.host, cfg.dbname))
 DecBase = declarative_base(cls=MyBase)
-Session = sessionmaker(bind=engine)
+Session = sessionmaker(bind=engine, expire_on_commit=False)
 
 class Game(DecBase):
     game_key = Column(Integer, primary_key=True)
@@ -69,7 +69,6 @@ class Game(DecBase):
         lookup = {}
         for x in con.query(Game):
             lookup[x.game_id] = x.game_key
-        con.close()
         return lookup
 
 
@@ -226,7 +225,6 @@ class Hitter(DecBase):
         lookup = {}
         for x in con.query(Hitter):
             lookup[x.rs_user_id] = x.player_key
-        con.close()
         return lookup
 
     @staticmethod
@@ -257,7 +255,6 @@ class Pitcher(DecBase):
         rs = PlayerInfoParser()
         url = "http://www.retrosheet.org/boxesetc/%s/P%s.htm" % \
               (self.rs_user_id[0].upper(), self.rs_user_id)
-        print(url)
         try:
             html = urllib.request.urlopen(urllib.request.Request(url)).read().decode('utf-8').replace('&#183;', '*')
         except:
