@@ -108,10 +108,10 @@ class GameSim:
         if playtype in ('Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball','Wild Pitch', \
                         'Defensive Indifference', 'Error on Foul', 'Unknown Runner Activity'):
             plate_app = False
-            at_bat =  False
+            at_bat = False
         else:
             plate_app = True
-            if playtype in ('Interference', 'Intentional Walk', 'Walk', 'Hit By Pitch', 'Sacrifice Fly' \
+            if playtype in ('Interference', 'Intentional Walk', 'Walk', 'Hit By Pitch', 'Sacrifice Fly', \
                             'Sacrifice Hit'):
                 at_bat = False
             else:

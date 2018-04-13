@@ -215,13 +215,13 @@ class RSLog:
 			playname = 'Strikeout'
 
 		# one Fielding Out
-		if re.search('^[0-9]+$', playtyp) != None:
+		if re.search('^[0-9]+$', playtyp) != None and 'Sacrifice' not in playname:
 			self.currentPlay.ball_loc = playseq[0]
 			self.currentSim.outs += 1
 			playname = 'Out'
 
 		# Force and Tag Outs/Double Play/Triple Play
-		if re.search('^[0-9]{1,4}\([B123]\)', playtyp) != None:
+		if re.search('^[0-9]{1,4}\([B123]\)', playtyp) != None and 'Sacrifice' not in playname:
 			outstr = re.findall('\([B123]\)', playseq)
 			self.currentPlay.ball_loc = playseq[0]
 			for a in playseq.split('/'):
@@ -247,16 +247,15 @@ class RSLog:
 					self.currentSim.third_base = ''
 
 		# Fielders Choice
-		if re.search('FC[0-9]', playtyp) != None:
+		if re.search('FC[0-9]', playtyp) != None  and 'Sacrifice' not in playname:
 			playname = 'Fielders Choice'
 			self.currentPlay.ball_loc = re.search('FC([0-9])', playtyp).group(1)
 			if 'B' not in self.currentBase.run_seq:
 				self.currentBase.run_seq += ';B-1'
 
 		# Reach On Error
-		if re.search('(^|[^\(])E[0-9]', playtyp) != None and re.search('FLE', playtyp) == None:
-			if playname[:9] != 'Sacrifice':
-				playname = 'Reach On Error'
+		if re.search('(^|[^\(])E[0-9]', playtyp) != None and re.search('FLE', playtyp) == None \
+				and 'Sacrifice' not in playname:
 			if 'B-' not in self.currentBase.run_seq or 'BX' not in self.currentBase.run_seq:
 				self.currentBase.run_seq += ';B-1'
 
@@ -293,8 +292,14 @@ class RSLog:
 		# Home Run
 		if re.search('HR', playtyp) != None:
 			playname = 'Home Run'
+			basenum = 0
+			bases = [self.currentSim.first_base, self.currentSim.second_base, self.currentSim.third_base]
 			if 'B' not in self.currentBase.run_seq:
 				self.currentBase.run_seq += ';B-H'
+			for base in bases:
+				basenum += 1
+				if base != '':
+					self.currentBase.run_seq += ';%s-H' % basenum
 
 		return playname
 
@@ -641,7 +646,11 @@ class RSLog:
 									self.lineup[self.currentSim.third_base].batting_num == int(row[4]):
 						self.currentSim.third_base = row[1]
 				else:
-					self.ScrapeLineupRow(row)
+					if row[1] in self.lineup.keys():
+						self.lineup[row[1]].batting_num = int(row[4])
+						self.lineup[row[1]].position = PosLookup[int(row[5])]
+					else:
+						self.ScrapeLineupRow(row)
 			elif rowType == 'data':
 				if row[1] == 'er':
 					self.pitroster[row[2]].earned_runs += int(row[3])
@@ -657,4 +666,5 @@ class RSLog:
 				else:
 					# convert ids to keys
 					print('Done Scraping')
-					return self.LogEndProcess()
+					return [self.games, self.gamebases, self.gameplays, self.gamelineups, self.gamepitroster]
+					#return self.LogEndProcess()
