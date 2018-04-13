@@ -329,6 +329,8 @@ class RSLog:
 		elif play == 'Strikeout':
 			self.lineup[batter].so += 1
 		if self.currentBase.second_stolen is True:
+			if[first] == '':
+				pass
 			self.lineup[first].sb += 1
 		if self.currentBase.third_stolen is True:
 			self.lineup[second].sb += 1
@@ -561,12 +563,12 @@ class RSLog:
 			self.currentPlay.play_seq_no = self.play_seq
 			self.currentBase.play_seq_no = self.play_seq
 			self.currentPlay.hitter_key = str(row[3])
-			self.currentPlay.top_bot_inn = int(row[2])
+			self.currentPlay.top_bot_inn = self.currentBase.top_bot_inn =  int(row[2])
 			if int(row[2]) == 0:
 				self.currentPlay.pitcher_key = self.currentSim.activeHomePitcher
 			else:
 				self.currentPlay.pitcher_key = self.currentSim.activeAwayPitcher
-			self.currentPlay.inning_num = int(row[1])
+			self.currentPlay.inning_num = self.currentBase.inning_num = int(row[1])
 			self.currentPlay.balls = int(row[4][0])
 			self.currentPlay.strikes = int(row[4][1])
 			self.currentPlay.pitch_seq = str(row[5])

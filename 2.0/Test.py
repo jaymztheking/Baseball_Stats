@@ -15,6 +15,3 @@ for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
 
 
 
-
-
-

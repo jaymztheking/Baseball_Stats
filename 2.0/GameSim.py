@@ -71,6 +71,13 @@ class GameSim:
                         run = run[:3].replace('X', '-')
                         (batter_scored, first_scored, second_scored, third_scored) = \
                             self.ProcessRSBase(run, currentBase)
+                elif run[:2] == 'BX':
+                    if 'E' not in run:
+                        self.outs += 1
+                    else:
+                        run = run[:3].replace('X', '-')
+                        (batter_scored, first_scored, second_scored, third_scored) = \
+                            self.ProcessRSBase(run, currentBase)
                 #Jean Segura Memorial Code
                 elif run[:3] == '2-1':
                     self.first_base = self.second_base
