@@ -8,24 +8,14 @@ class Row:
 class InfoRow(Row):
     def __init__(self, gameid, row, rowcount):
         self.attribute = row[1]
-        self.value = str(row[2])
+        self.value = row[2]
         super(InfoRow, self).__init__(gameid, row, rowcount)
-
-
-class StartRow(Row):
-    def __init__(self, gameid, row, rowcount):
-        self.playerid = row[1]
-        self.playername = row[2].strip('"')
-        self.teamind = row[3]
-        self.batnum = row[4]
-        self.posnum = row[5]
-        super(StartRow, self).__init__(gameid, row, rowcount)
 
 
 class PlayRow(Row):
     def __init__(self, gameid, row, rowcount):
         self.inningnum = row[1]
-        self.toporbotinn = row[2]
+        self.topbotinn = row[2]
         self.playerid = row[3]
         self.pitchcount = row[4]
         self.pitchseq = row[5]
@@ -52,21 +42,20 @@ class RSLog:
     def __init__(self, filename):
         self.filename = filename
 
-    def generate_rows(self):
-        rows = []
+    def scrape(self):
         rowcount = 0
         text = open(self.filename, 'r')
-        currentgame = None
         for line in text:
-            row = line.split(',')
+            row = line.strip('\n').split(',')
             rowtype = row[0]
             rowcount += 1
             if rowtype == 'id':
                 currentgame = row[1]
+                currentsim = GameSim(row[1])
             elif rowtype == 'info':
-                rows.append(InfoRow(currentgame, row, rowcount))
+                currentsim.read_info_row_data(InfoRow(currentgame, row, rowcount))
             elif rowtype == 'start':
-                rows.append(StartRow(currentgame, row, rowcount))
+                currentsim.read_start_row_data(StartRow(currentgame, row, rowcount))
             elif rowtype == 'play':
                 rows.append(PlayRow(currentgame, row, rowcount))
             elif rowtype == 'sub':

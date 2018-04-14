@@ -49,22 +49,47 @@ class Game(DecBase):
     def __repr__(self):
         return "<Game (game_key=%s, game_id='%s')>" % (self.game_key, self.game_id)
 
-    def __init__(self):
+    def __init__(self, gameid):
+        self.game_id = gameid
         self.total_innings = 0
         self.home_hits = 0
         self.away_hits = 0
         self.home_runs = 0
         self.away_runs = 0
 
+    def add_info(self, row):
+        gameinfo = {'visteam': 'away_team_key',
+                    'hometeam': 'home_team_key',
+                    'date': 'game_date',
+                    'starttime': 'game_time',
+                    'umphome': 'home_ump_id',
+                    'temp': 'game_temp_f',
+                    'winddir': 'wind_dir',
+                    'windspeed': 'wind_speed_mph',
+                    'fieldcond': 'field_condition',
+                    'precip': 'precipitation',
+                    'sky': 'sky_cond',
+                    'timeofgame': 'game_time_minutes',
+                    'attendance': 'attendance'
+                    }
+        if row.attribute in gameinfo.keys():
+            setattr(self, gameinfo[row.attribute], row.value)
+
     @staticmethod
-    def AddGames(games):
+    def add_games(games):
         con = Session()
         con.add_all(games)
         con.commit()
         return True
 
+    def add(self):
+        con = Session()
+        con.add(self)
+        con.commit()
+        return True
+
     @staticmethod
-    def GetGameLookup():
+    def get_game_lookup():
         con = Session()
         lookup = {}
         for x in con.query(Game):
@@ -98,7 +123,7 @@ class HitBoxScore(DecBase):
         return "<HitBoxScore (game_key=%s, team_key='%s', player_key='%s')>" % \
                (self.game_key, self.team_key, self.player_key)
 
-    def __init__(self):
+    def __init__(self, row=None):
         self.plate_app = 0
         self.at_bat = 0
         self.so = 0
@@ -114,6 +139,13 @@ class HitBoxScore(DecBase):
         self.hr = 0
         self.sb = 0
         self.cs = 0
+        if row is not None:
+            self.batting_num = row.batnum
+            self.position = row.position
+
+    def update(self, row):
+        self.batting_num = row.batnum
+        self.position = row.position
 
     @staticmethod
     def AddLineups(lineups):
@@ -155,7 +187,7 @@ class PitchBoxScore(DecBase):
         return "<PitchBoxScore (game_key=%s, team_key='%s', player_key='%s')>" % \
                (self.game_key, self.team_key, self.player_key)
 
-    def __init__(self):
+    def __init__(self, lineup=None, role=None):
         self.pitch_count = 0
         self.k = 0
         self.bb = 0
@@ -178,6 +210,11 @@ class PitchBoxScore(DecBase):
         self.flyballs = 0
         self.groundballs = 0
         self.line_drives = 0
+
+        if lineup is not None:
+            self.team_key = lineup.team_key
+        if role is not None:
+            self.pitch_role = role
 
     @staticmethod
     def AddRosters(rosters):
@@ -305,6 +342,31 @@ class Play(DecBase):
     look_x = Column(SmallInteger)
     ball_loc = Column(String(10))
     ball_type = Column(String(20))
+
+    def __init__(self, sim, row):
+        self.play_seq_no = sim.playcount
+        self.hitter_key = sim.batter
+        self.top_bot_inn = sim.topbotinn
+        self.inning_num = sim.inning
+        self.pitch_seq = row.pitchseq
+        self.play_seq = row.playseq
+        if int(sim.topbotinn) == 0:
+            self.pitcher_key = sim.activehomepitcher
+        else:
+            self.pitcher_key = sim.activeawaypitcher
+        self.calc_pitch_data()
+
+    def calc_pitch_data(self):
+        for pitch in self.pitch_seq:
+            if pitch in ('F', 'X', 'L', 'O', 'R', 'T'):
+                self.contact_x += 1
+            elif pitch == 'C':
+                self.look_x += 1
+            elif pitch in ('S', 'M', 'Q', 'K'):
+                self.swing_x += 1
+            elif pitch in ('B', 'H', 'I', 'P', 'U', 'Y'):
+                self.balls += 1
+            self.strikes = self.contact_x + self.look_x + self.swing_x
 
     def __repr__(self):
         return "<Play (game_key=%s, play_seq_no='%s')>" % (self.game_key, self.play_seq_no)
