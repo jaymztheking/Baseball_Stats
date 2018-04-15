@@ -58,7 +58,7 @@ def get_rs_play(playseq):
 			playname = 'Sacrifice Fly'
 
 		# Sac Hit
-		if 'SH' in playseq:
+		if 'SH' in playseq and 'CSH' not in playseq:
 			playname = 'Sacrifice Hit'
 
 		# Strikeout
@@ -84,8 +84,7 @@ def get_rs_play(playseq):
 			playname = 'Fielders Choice'
 
 		# Reach On Error
-		if re.search('(^|[^\(])E[0-9]', playtyp) != None and re.search('FLE', playtyp) == None \
-				and 'Sacrifice' not in playname:
+		if re.search('^[0-9]?E[0-9]', playtyp) != None and 'Sacrifice' not in playname:
 			playname = 'Reach On Error'
 
 		# Single
@@ -110,20 +109,108 @@ def get_rs_play(playseq):
 
 		return playname
 
-def get_rs_run_seq(runseq, playseq):
+def get_rs_run_seq(runseq, playseq, playname, sim):
 	#Stolen Base
 	playtyp = playseq.split('/')[0]
 	if re.search('SB[23H]', playtyp) != None:
 		if runseq == '':
-			base = re.search('SB([23H])').group(1)
-			if base == '2':
+			if 'SB2' in playtyp:
 				runseq += ';1*2'
-			elif base == '3':
+			if 'SB3' in playtyp:
 				runseq += ';2*3'
-			elif base == 'H':
+			if 'SBH' in playtyp:
 				runseq += ';3*H'
 		else:
 			runseq = runseq.replace('-', '*')
 
+	#Caught Stealing
+	if re.search('CS[23H]', playtyp) != None:
+		base = re.search('CS([23H])').group(1)
+		if re.search('E[0-9]', playtyp) != None and runseq == '':
+			if base == '2':
+				runseq += ';1-2'
+			elif base == '3':
+				runseq += ';2-3'
+			elif base == 'H':
+				runseq += ';3-H'
+		else:
+			if base == '2':
+				runseq += ';1#2'
+			elif base == '3':
+				runseq += ';2#3'
+			elif base == 'H':
+				runseq += ';3#H'
+
+	#Pickoff
+	if re.search('PO[^C]', playtyp) != None:
+		base = re.search('PO([23H])').group(1)
+		if re.search('E[0-9]', playtyp) != None and runseq == '':
+			if base == '1':
+				runseq += ';1-2'
+			elif base == '2':
+				runseq += ';2-3'
+			elif base == '3':
+				runseq += ';3-H'
+		else:
+			if base == '1':
+				runseq += ';1X1'
+			elif base == '2':
+				runseq += ';2X2'
+			elif base == '3':
+				runseq += ';3X3'
+
+	#1 Base Advancement: Walk, Interference, HBP, FC, ROE, Single
+	if playname in ('Walk', 'intentional Walk', 'Interference', 'Hit By Pitch', 'Fielders Choice', 'Reach On Error',
+					  'Single'):
+		if 'B' not in runseq:
+			runseq += ';B-1'
+
+	#2 Base Advancement: Double and GRD
+	elif playname in ('Double', 'Ground Rule Double'):
+		if 'B' not in runseq:
+			runseq += ';B-2'
+
+	#3 Base Advancement: Triple
+	elif playname == 'Triple':
+		if 'B' not in runseq:
+			runseq += ';B-3'
+
+	elif playname == 'Home Run':
+		if 'B' not in runseq:
+			runseq += ';B-H'
+		if sim.first_base != '':
+			runseq += ';1-H'
+		if sim.second_base != '':
+			runseq += ';2-H'
+		if sim.third_base != '':
+			runseq += ';3-H'
+
+	#Figure out Double Play and Fielding out mess
+
 
 	return runseq
+
+def get_ball_type(playseq):
+	ballloc = ''
+	balltype = ''
+	for x in playseq.split('/')[1:]:
+		if re.search('^[0-9]{1,2}$', x) != None:
+			ballloc = x
+		if re.search('^B?[LFGP][0-9]', x) != None:
+			ballloc = re.search('^B?[LFGP]([0-9])', x).group(1)
+		if re.search('L', x) != None:
+			balltype = 'Line Drive'
+		if re.search('F', x) != None:
+			balltype = 'Fly Ball'
+		if re.search('G', x) != None:
+			balltype = 'Ground Ball'
+		if re.search('P', x) != None and re.search('DP', x) == None:
+			balltype = 'Pop Up'
+		if re.search('BP', x) != None:
+			balltype = 'Bunt Pop'
+		if re.search('BL', x) != None:
+			balltype = 'Bunt Line Drive'
+		if re.search('BG', x) != None:
+			balltype = 'Bunt Ground Ball'
+
+	return (ballloc, balltype)

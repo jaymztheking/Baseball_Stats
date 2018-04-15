@@ -349,7 +349,7 @@ class Play(DecBase):
         self.top_bot_inn = sim.topbotinn
         self.inning_num = sim.inning
         self.pitch_seq = row.pitchseq
-        self.play_seq = row.playseq
+        self.play_seq = row.playseq.strip('/MREV').strip('/UREV')
         if int(sim.topbotinn) == 0:
             self.pitcher_key = sim.activehomepitcher
         else:

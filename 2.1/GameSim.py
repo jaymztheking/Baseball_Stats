@@ -90,28 +90,8 @@ class GameSim:
             currentplay = Play(self, row)
             currentbase = Base(self, row)
             currentplay.play_type = get_rs_play(currentplay.playseq)
-            self.get_ball_type()
-
-    def get_ball_type(self):
-        for x in self.play_seq.split('/')[1:]:
-            if re.search('^[0-9]{1,2}$', x) != None:
-                self.ball_loc = x
-            if re.search('^B?[LFGP][0-9]', x) != None:
-                self.ball_loc = re.search('^B?[LFGP]([0-9])', x).group(1)
-            if re.search('L', x) != None:
-                self.ball_type = 'Line Drive'
-            if re.search('F', x) != None:
-                self.ball_type = 'Fly Ball'
-            if re.search('G', x) != None:
-                self.ball_type = 'Ground Ball'
-            if re.search('P', x) != None and re.search('DP', x) == None:
-                self.ball_type = 'Pop Up'
-            if re.search('BP', x) != None:
-                self.ball_type = 'Bunt Pop'
-            if re.search('BL', x) != None:
-                self.ball_type = 'Bunt Line Drive'
-            if re.search('BG', x) != None:
-                self.ball_type = 'Bunt Ground Ball'
+            currentplay.ball_loc, currentplay.ball_type = get_rs_ball_type(currentplay.playseq)
+            currentbase.run_seq = get_rs_run_seq(currentbase.run_seq, currentplay.play_seq, currentplay.play_type, self)
 
     def sub_in_starters(self):
         for userid in self.lineup.keys():
