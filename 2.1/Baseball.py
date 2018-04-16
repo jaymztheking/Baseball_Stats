@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declared_attr, declarative_base
 from sqlalchemy.orm import sessionmaker
 from RSParser import PlayerInfoParser
 import databaseconfig as cfg
-import urllib.request
+import urllib.request, re
 
 class MyBase(object):
     @declared_attr
@@ -354,6 +354,9 @@ class Play(DecBase):
             self.pitcher_key = sim.activehomepitcher
         else:
             self.pitcher_key = sim.activeawaypitcher
+        self.contact_x = 0
+        self.look_x = 0
+        self.swing_x = 0
         self.calc_pitch_data()
 
     def calc_pitch_data(self):
@@ -411,14 +414,15 @@ class Base(DecBase):
     def __repr__(self):
         return "<Base (game_key=%s, play_seq_no='%s')>" % (self.game_key, self.play_seq_no)
 
-    def __init__(self):
-        self.top_bot_inn = 0
-        self.inning_num = 0
-        self.start_outs = 0
+    def __init__(self, sim, row):
+        self.run_seq = row.playseq.split('.')[1] if len(row.playseq.split('.')) > 1 else ''
+        self.top_bot_inn = row.topbotinn
+        self.inning_num = row.inningnum
+        self.start_outs = sim.outs
         self.end_outs = 0
-        self.start_first = ''
-        self.start_second = ''
-        self.start_third = ''
+        self.start_first = sim.first_base
+        self.start_second = sim.second_base
+        self.start_third = sim.third_base
         self.end_first = ''
         self.end_second = ''
         self.end_third = ''
@@ -437,17 +441,23 @@ class Base(DecBase):
         self.total_runs = 0
         self.rbi = 0
 
-    def GetStartStateFromSim(self, GameSim):
-        self.start_outs = GameSim.outs
-        self.start_first = GameSim.first_base
-        self.start_second = GameSim.second_base
-        self.start_third = GameSim.third_base
+    def calc_end_play_stats(self, sim):
+        sorter = {'3': 1, '2': 2, '1': 3, 'B': 4}
+        stealslookup = {'*2': 'second_stolen', '*3': 'third_stolen', '*H': 'home_stolen'}
+        self.end_outs = sim.outs
+        self.end_first = sim.first_base
+        self.end_second = sim.second_base
+        self.end_third = sim.third_base
+        runners = filter(None, self.run_seq.split(';'))
+        runners = sorted(runners, key=lambda base: sorter[base[0]])
+        for run in runners:
+            print(run)
+            if re.search('^[123](\*[23H])$', run) != None:
+                setattr(self, stealslookup[re.search('^[123](\*[23H])$', run).group(1)], True)
 
-    def GetEndStateFromSim(self, GameSim):
-        self.end_outs = GameSim.outs
-        self.end_first = GameSim.first_base
-        self.end_second = GameSim.second_base
-        self.end_third = GameSim.third_base
+
+
+
 
     @staticmethod
     def AddBases(bases):

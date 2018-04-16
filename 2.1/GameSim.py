@@ -1,5 +1,6 @@
 from Baseball import Game, HitBoxScore, PitchBoxScore, Play, Base
 from datetime import date, datetime
+import re
 import RetroPlayConverter
 
 import json
@@ -93,9 +94,41 @@ class GameSim:
             currentplay.play_type = get_rs_play(currentplay.playseq)
             currentplay.ball_loc, currentplay.ball_type = get_rs_ball_type(currentplay.playseq)
             currentbase.run_seq = get_rs_run_seq(currentbase.run_seq, currentplay.play_seq, currentplay.play_type, self)
-            #move_runners(currentbase.run_seq)
-            #calculate steals, caughts, and scores for base
-            #increment lineup and roster fields
+            self.get_outs(currentplay.play_type, currentbase.run_seq)
+            self.move_runners(currentbase.run_seq)
+            currentbase.calc_end_play_stats(self)
+            #increment lineup, roster, and gamesim fields
+
+    def get_outs(self, playtype, runseq):
+        if playtype == 'Triple Play':
+            self.outs = 3
+        else:
+            for char in runseq:
+                if char in ('#','X'):
+                    self.outs += 1
+
+    def move_runners(self, runseq):
+        sorter = {'3': 1, '2': 2, '1': 3, 'B': 4}
+        baselookup = {'B':'batter', '1':'first_base', '2':'second_base', '3':'third_base'}
+        runseq = runseq.split(';')
+        runners = filter(None, runseq)
+        runners = sorted(runners, key=lambda base: sorter[base[0]])
+        #Stupid Jean Segura Play
+        if '2-1' in runners[0]:
+            runners.insert(len(runners), runners.pop(0))
+        #Successful Advance
+        for run in runners:
+            # Successful Advance
+            if re.search('([B123])[-\*]([123])', run) != None:
+                setattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(2)],
+                        getattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(1)]))
+                setattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(1)], '')
+            #Runner back to dugout
+            elif re.search('([B123])[#X][123H]', run) != None:
+                setattr(self, baselookup[re.search('([B123])[#X][123H]', run).group(1)], '')
+            #Runner scores
+            if re.search('([B123])[-\*]H', run) != None:
+                setattr(self, baselookup[re.search('([B123])[-\*]H', run).group(1)], '')
 
     def sub_in_starters(self):
         for userid in self.lineup.keys():
