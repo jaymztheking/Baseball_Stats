@@ -65,18 +65,18 @@ def get_rs_play(playseq):
 		if re.search('(^|[^B])K', playtyp) != None:
 			playname = 'Strikeout'
 
-		# one Fielding Out
-		if re.search('^[0-9]+$', playtyp) != None and 'Sacrifice' not in playname:
-			playname = 'Out'
-
 		# Force and Tag Outs/Double Play/Triple Play
-		if re.search('^[0-9]{1,4}\([B123]\)', playtyp) != None and 'Sacrifice' not in playname:
+		if re.search('^([0-9]|\([B123]\))+/', playtyp) != None and 'Sacrifice' not in playname:
 			for a in playseq.split('/'):
-				if 'DP' in a and 'NDP' not in a:
+				if 'GDP' in a:
+					playname = 'Ground Double Play'
+				elif 'DP' in a and 'NDP' not in a:
 					playname = 'Double Play'
-				if 'TP' in a:
+				elif 'GTP' in a:
+					playname = 'Ground Triple Play'
+				elif 'TP' in a:
 					playname = 'Triple Play'
-			if playname not in ('Triple Play', 'Double Play'):
+			if playname not in ('Triple Play', 'Double Play', 'Ground Double Play'):
 				playname = 'Out'
 
 		# Fielders Choice
@@ -186,7 +186,23 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 			runseq += ';3-H'
 
 	#Figure out Double Play and Fielding out mess
-
+	elif re.search('^([0-9]|\([B123]\))+/', playtyp):
+		outstr = re.findall('\([B123]\)', playtyp)
+		outcount = 0
+		for o in outstr:
+			outcount += 1
+			if o == '(1)':
+				runseq += ';1X2'
+			elif o == '(2)':
+				runseq += ';2X3'
+			elif o == '(3)':
+				runseq += ';3XH'
+			elif o == '(B)':
+				runseq += ';BX1'
+		if 'Double Play' in playname and outcount == 2 and 'B' not in runseq:
+			runseq += ';B-1'
+		elif playname == 'Out' and outcount == 1 and 'B' not in runseq:
+			runseq += ';B-1'
 
 	return runseq
 
@@ -212,5 +228,13 @@ def get_ball_type(playseq):
 			balltype = 'Bunt Line Drive'
 		if re.search('BG', x) != None:
 			balltype = 'Bunt Ground Ball'
+		if re.search('-', x) != None and balltype != '':
+			balltype = 'Weak '+balltype
+		if re.search('\+', x) != None and balltype != '':
+			balltype = 'Strong '+balltype
+	if re.search('^[SDTE]?([0-9])', playseq) != None and ballloc == '':
+		ballloc = re.search('^[SDTE]?([0-9])', playseq).group(1)
+	elif re.search('^FC([0-9])', playseq) != None and ballloc == '':
+		ballloc = re.search('^FC([0-9])', playseq).group(1)
 
 	return (ballloc, balltype)
