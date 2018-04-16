@@ -206,7 +206,7 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 
 	return runseq
 
-def get_ball_type(playseq):
+def get_rs_ball_type(playseq):
 	ballloc = ''
 	balltype = ''
 	for x in playseq.split('/')[1:]:

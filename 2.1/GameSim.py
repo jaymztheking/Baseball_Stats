@@ -27,6 +27,7 @@ class GameSim:
         self.second_base = ''
         self.third_base = ''
         self.inning = 1
+        self.outs = 0
         self.topbotinn = 0
         self.homeruns = 0
         self.awayruns = 0
@@ -92,6 +93,9 @@ class GameSim:
             currentplay.play_type = get_rs_play(currentplay.playseq)
             currentplay.ball_loc, currentplay.ball_type = get_rs_ball_type(currentplay.playseq)
             currentbase.run_seq = get_rs_run_seq(currentbase.run_seq, currentplay.play_seq, currentplay.play_type, self)
+            #move_runners(currentbase.run_seq)
+            #calculate steals, caughts, and scores for base
+            #increment lineup and roster fields
 
     def sub_in_starters(self):
         for userid in self.lineup.keys():
