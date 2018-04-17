@@ -4,7 +4,6 @@ import re
 def get_rs_play(playseq):
 	playtyp = playseq.split('/')[0]
 	playname = ''
-
 	# Stolen Base
 	if re.search('SB[23H]', playtyp) != None:
 		playname = 'Stolen Base'
@@ -128,7 +127,7 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 
 	#Caught Stealing
 	if re.search('CS[23H]', playtyp) != None:
-		base = re.search('CS([23H])').group(1)
+		base = re.search('CS([23H])', playtyp).group(1)
 		if re.search('E[0-9]', playtyp) != None and runseq == '':
 			if base == '2' and re.search('1[-X]', runseq) == None:
 				runseq += ';1-2'
@@ -146,7 +145,7 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 
 	#Pickoff
 	if re.search('PO[^C]', playtyp) != None:
-		base = re.search('PO([23H])').group(1)
+		base = re.search('PO([23H])', playtyp).group(1)
 		if re.search('E[0-9]', playtyp) != None and runseq == '':
 			if base == '1' and re.search('1[-X]', runseq) == None:
 				runseq += ';1-2'

@@ -87,17 +87,41 @@ class GameSim:
         self.topbotinn = row.topbotinn
         self.inning = row.inningnum
         self.batter = row.playerid
+        pitcher = self.activeawaypitcher if int(self.topbotinn) == 1 else self.activehomepitcher
         if row.playseq == 'NP':
             self.playcount += 1
             currentplay = Play(self, row)
             currentbase = Base(self, row)
             currentplay.play_type = get_rs_play(currentplay.playseq)
-            currentplay.ball_loc, currentplay.ball_type = get_rs_ball_type(currentplay.playseq)
+            currentplay.classify_play()
+            currentplay.ball_loc, currentplay.ball_type = get_rs_ball_type(currentplay.playseq.split('.')[0])
             currentbase.run_seq = get_rs_run_seq(currentbase.run_seq, currentplay.play_seq, currentplay.play_type, self)
             self.get_outs(currentplay.play_type, currentbase.run_seq)
             self.move_runners(currentbase.run_seq)
             currentbase.calc_end_play_stats(self)
-            #increment lineup, roster, and gamesim fields
+            currentbase.figure_out_rbi(currentplay.play_type)
+            self.lineup[row.playerid].increment_from_play(currentplay, currentbase)
+            baserunners = {currentbase.start_first: 'first',
+                           currentbase.start_second: 'second',
+                           currentbase.start_third: 'third'}
+            for br in baserunners.keys():
+                if br != '':
+                    self.lineup[br].increment_from_base(currentbase, baserunners[br])
+            self.roster[pitcher].increment_from_play(currentplay)
+            if int(self.topbotinn) == 0:
+                self.awayhits += int(currentplay.hit)
+                self.awayruns += currentbase.total_runs
+            self.plays.append(currentplay)
+            self.bases.append(currentbase)
+
+    def sub_in_starters(self):
+        for userid in self.lineup.keys():
+            if self.lineup[userid].position == 'P':
+                self.roster[userid] = PitchBoxScore(self.lineup[userid], 'Starter')
+                if self.roster[userid].team_key == self.currentgame.home_team_key:
+                    self.activehomepitcher = userid
+                else:
+                    self.activeawaypitcher = userid
 
     def get_outs(self, playtype, runseq):
         if playtype == 'Triple Play':
@@ -129,15 +153,6 @@ class GameSim:
             #Runner scores
             if re.search('([B123])[-\*]H', run) != None:
                 setattr(self, baselookup[re.search('([B123])[-\*]H', run).group(1)], '')
-
-    def sub_in_starters(self):
-        for userid in self.lineup.keys():
-            if self.lineup[userid].position == 'P':
-                self.roster[userid] = PitchBoxScore(self.lineup[userid], 'Starter')
-                if self.roster[userid].team_key == self.currentgame.home_team_key:
-                    self.activehomepitcher = userid
-                else:
-                    self.activeawaypitcher = userid
 
     def read_sub_row_data(self, row):
         pass

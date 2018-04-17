@@ -147,8 +147,38 @@ class HitBoxScore(DecBase):
         self.batting_num = row.batnum
         self.position = row.position
 
+    def increment_from_play(self, play, base):
+        self.rbi += base.rbi
+        self.plate_app += int(play.plate_app)
+        self.at_bat += int(play.at_bat)
+        self.hits += int(play.hit)
+        if 'Walk' in play.play_type:
+            self.bb += 1
+            if 'Intentional Walk' in play.play_type:
+                self.ibb += 1
+        elif 'Strikeout' in play.play_type:
+            self.k += 1
+        elif 'Hit By Pitch' in play.play_type:
+            self.hbp += 1
+        elif play.play_type == 'Single':
+            self.single += 1
+        elif play.play_type in ('Double', 'Ground Rule Double'):
+            self.double += 1
+        elif play.play_type == 'Triple':
+            self.triple += 1
+        elif play.play_type == 'Home Run':
+            self.hr += 1
+
+    def increment_from_base(self, base, curbase):
+        baseahead = {'first': 'second',
+                     'second': 'third',
+                     'third': 'home'}
+        self.runs += int(getattr(base, curbase+'_scored'))
+        self.sb += int(getattr(base, baseahead[curbase]+'_stolen'))
+        self.cs += int(getattr(base, baseahead[curbase]+'_caught'))
+
     @staticmethod
-    def AddLineups(lineups):
+    def add_lineups(lineups):
         con = Session()
         con.add_all(lineups)
         con.commit()
@@ -215,6 +245,29 @@ class PitchBoxScore(DecBase):
             self.team_key = lineup.team_key
         if role is not None:
             self.pitch_role = role
+
+    def increment_from_play(self, play):
+        self.pitch_count += play.strikes + play.balls
+        self.strikes += play.strikes
+        self.balls += play.balls
+        self.swing_strikes += play.swing_x
+        self.look_strikes += play.look_x
+        self.contact_strikes += play.contact_x
+        if 'Strikeout' in play.play_type:
+            self.k += 1
+        elif 'Walk' in play.play_type:
+            self.bb += 1
+            if 'Intentional' in play.play_type:
+                self.ibb += 1
+        elif play.hit:
+            self.hits += 1
+        ball_type = play.ball_type.replace('Strong ', '').replace('Weak ', '')
+        if play.ball_type in ('Fly Ball', 'Pop Up', 'Bunt Pop'):
+            self.flyballs += 1
+        elif play.ball_type in ('Line Drive', 'Bunt Line Drive'):
+            self.line_drives += 1
+        elif play.ball_type in ('Ground Ball', 'Bunt Ground Ball'):
+            self.groundballs += 1
 
     @staticmethod
     def AddRosters(rosters):
@@ -349,11 +402,12 @@ class Play(DecBase):
         self.top_bot_inn = sim.topbotinn
         self.inning_num = sim.inning
         self.pitch_seq = row.pitchseq
-        self.play_seq = row.playseq.strip('/MREV').strip('/UREV')
+        self.play_seq = row.playseq.replace('/MREV', '').replace('/UREV', '')
         if int(sim.topbotinn) == 0:
             self.pitcher_key = sim.activehomepitcher
         else:
             self.pitcher_key = sim.activeawaypitcher
+        self.balls = 0
         self.contact_x = 0
         self.look_x = 0
         self.swing_x = 0
@@ -370,6 +424,20 @@ class Play(DecBase):
             elif pitch in ('B', 'H', 'I', 'P', 'U', 'Y'):
                 self.balls += 1
             self.strikes = self.contact_x + self.look_x + self.swing_x
+
+    def classify_play(self):
+        if self.play_type in ('Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball', 'Wild Pitch'
+                        'Defensive Indifference', 'Error on Foul', 'Unknown Runner Activity'):
+            self.plate_app = False
+        else:
+            self.plate_app = True
+            if 'Walk' in self.play_type or 'Sacrifice' in self.play_type or self.play_type == 'Hit By Pitch':
+                self.at_bat = False
+            else:
+                self.at_bat = True
+                if self.play_type in ('Single', 'Double', 'Ground Rule Double', 'Triple', 'Home Run'):
+                    self.hit = True
+
 
     def __repr__(self):
         return "<Play (game_key=%s, play_seq_no='%s')>" % (self.game_key, self.play_seq_no)
@@ -443,7 +511,9 @@ class Base(DecBase):
 
     def calc_end_play_stats(self, sim):
         sorter = {'3': 1, '2': 2, '1': 3, 'B': 4}
-        stealslookup = {'*2': 'second_stolen', '*3': 'third_stolen', '*H': 'home_stolen'}
+        steallookup = {'*2': 'second_stolen', '*3': 'third_stolen', '*H': 'home_stolen'}
+        caughtlookup = {'#2': 'second_caught', '#3': 'third_caught', '#H': 'home_caught'}
+        scorelookup = {'B': 'batter_scored', '1': 'first_scored', '2': 'second_scored', '3': 'third_scored'}
         self.end_outs = sim.outs
         self.end_first = sim.first_base
         self.end_second = sim.second_base
@@ -451,12 +521,29 @@ class Base(DecBase):
         runners = filter(None, self.run_seq.split(';'))
         runners = sorted(runners, key=lambda base: sorter[base[0]])
         for run in runners:
-            print(run)
             if re.search('^[123](\*[23H])$', run) != None:
-                setattr(self, stealslookup[re.search('^[123](\*[23H])$', run).group(1)], True)
+                setattr(self, steallookup[re.search('^[123](\*[23H])$', run).group(1)], True)
+                if self.home_stolen:
+                    self.third_scored = True
+            if re.search('^[123](#[23H])', run) != None:
+                setattr(self, caughtlookup[re.search('^[123](#[23H])', run).group(1)], True)
+            if re.search('^([B123])[-\*]H', run) != None:
+                setattr(self, scorelookup[re.search('^([B123])[-\*]H', run).group(1)], True)
+                if '(NR)' in run:
+                    self.rbi -= 1
+        self.total_sb =  self.second_stolen + self.third_stolen + self.home_stolen
+        self.total_cs = self.second_caught + self.third_caught + self.home_caught
+        self.total_runs = self.first_scored + self.second_scored + self.third_scored + self.batter_scored
 
-
-
+    def figure_out_rbi(self, playname):
+        if playname in ('Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball', 'Wild Pitch'
+                        'Defensive Indifference', 'Error on Foul', 'Unknown Runner Activity',
+                        'Ground Double Play', 'Triple Play', 'Ground Triple Play'):
+            self.rbi = 0
+        elif 'Strikeout' in playname:
+            self.rbi = 0
+        else:
+            self.rbi += self.total_runs
 
 
     @staticmethod
