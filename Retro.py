@@ -1,3 +1,5 @@
+from GameSim import GameSim
+
 class Row:
     def __init__(self, gameid, row, rowcount):
         self.gameid = gameid
@@ -44,23 +46,39 @@ class RSLog:
 
     def scrape(self):
         rowcount = 0
+        currentgame = ''
+        currentsim = None
+        games = {}
+        gamelineups = {}
+        gamerosters = {}
+        gameplays = {}
+        gamebases = {}
         text = open(self.filename, 'r')
         for line in text:
             row = line.strip('\n').split(',')
             rowtype = row[0]
             rowcount += 1
             if rowtype == 'id':
-                currentgame = row[1]
-                currentsim = GameSim(row[1])
+                if currentgame != '':
+                    currentsim.currentgame.get_end_game_stats(currentsim)
+                    games[currentgame] = currentsim.currentgame
+                    gamelineups[currentgame] = currentsim.lineup
+                    gamerosters[currentgame] = currentsim.roster
+                    gameplays[currentgame] = currentsim.plays
+                    gamebases[currentgame] = currentsim.bases
+                if row[1] != 'dunzo':
+                    currentgame = row[1]
+                    currentsim = GameSim(row[1])
             elif rowtype == 'info':
                 currentsim.read_info_row_data(InfoRow(currentgame, row, rowcount))
             elif rowtype == 'start':
-                currentsim.read_start_row_data(StartRow(currentgame, row, rowcount))
+                currentsim.add_lineup(SubRow(currentgame, row, rowcount))
             elif rowtype == 'play':
-                rows.append(PlayRow(currentgame, row, rowcount))
+                currentsim.read_play_row_data(PlayRow(currentgame, row, rowcount))
             elif rowtype == 'sub':
-                rows.append(SubRow(currentgame, row, rowcount))
+                currentsim.read_sub_row_data(SubRow(currentgame, row, rowcount))
             elif rowtype == 'data':
-                rows.append(StartRow(currentgame, row, rowcount))
-        return rows
+                currentsim.read_data_row_data(DataRow(currentgame, row, rowcount))
+
+        return {'games': games, 'lineups': gamelineups, 'rosters': gamerosters, 'plays': gameplays, 'bases': gamebases}
 

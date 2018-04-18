@@ -75,6 +75,20 @@ class Game(DecBase):
         if row.attribute in gameinfo.keys():
             setattr(self, gameinfo[row.attribute], row.value)
 
+    def get_end_game_stats(self, sim):
+        self.total_innings = sim.inning
+        self.home_hits = sim.homehits
+        self.home_runs = sim.homeruns
+        self.away_hits = sim.awayhits
+        self.away_runs = sim.awayruns
+        if sim.homeruns > sim.awayruns:
+            self.home_team_win = True
+        elif sim.homeruns == sim.awayruns:
+            self.tie = True
+        else:
+            self.home_team_win = False
+            self.tie = False
+
     @staticmethod
     def add_games(games):
         con = Session()
@@ -157,7 +171,7 @@ class HitBoxScore(DecBase):
             if 'Intentional Walk' in play.play_type:
                 self.ibb += 1
         elif 'Strikeout' in play.play_type:
-            self.k += 1
+            self.so += 1
         elif 'Hit By Pitch' in play.play_type:
             self.hbp += 1
         elif play.play_type == 'Single':
@@ -217,7 +231,7 @@ class PitchBoxScore(DecBase):
         return "<PitchBoxScore (game_key=%s, team_key='%s', player_key='%s')>" % \
                (self.game_key, self.team_key, self.player_key)
 
-    def __init__(self, lineup=None, role=None):
+    def __init__(self, row=None, role=None):
         self.pitch_count = 0
         self.k = 0
         self.bb = 0
@@ -241,8 +255,6 @@ class PitchBoxScore(DecBase):
         self.groundballs = 0
         self.line_drives = 0
 
-        if lineup is not None:
-            self.team_key = lineup.team_key
         if role is not None:
             self.pitch_role = role
 
@@ -399,18 +411,25 @@ class Play(DecBase):
     def __init__(self, sim, row):
         self.play_seq_no = sim.playcount
         self.hitter_key = sim.batter
-        self.top_bot_inn = sim.topbotinn
-        self.inning_num = sim.inning
-        self.pitch_seq = row.pitchseq
-        self.play_seq = row.playseq.replace('/MREV', '').replace('/UREV', '')
         if int(sim.topbotinn) == 0:
             self.pitcher_key = sim.activehomepitcher
         else:
             self.pitcher_key = sim.activeawaypitcher
+        self.top_bot_inn = sim.topbotinn
+        self.inning_num = sim.inning
+        self.pitch_seq = row.pitchseq
+        self.play_seq = row.playseq.replace('/MREV', '').replace('/UREV', '')
+        self.play_type = ''
+        self.plate_app = False
+        self.at_bat = False
+        self.hit = False
+        self.strikes = 0
         self.balls = 0
         self.contact_x = 0
         self.look_x = 0
         self.swing_x = 0
+        self.ball_loc = ''
+        self.ball_type = ''
         self.calc_pitch_data()
 
     def calc_pitch_data(self):
@@ -426,12 +445,13 @@ class Play(DecBase):
             self.strikes = self.contact_x + self.look_x + self.swing_x
 
     def classify_play(self):
-        if self.play_type in ('Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball', 'Wild Pitch'
-                        'Defensive Indifference', 'Error on Foul', 'Unknown Runner Activity'):
+        if self.play_type in ('Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball', 'Wild Pitch',
+                              'Defensive Indifference', 'Error on Foul', 'Unknown Runner Activity'):
             self.plate_app = False
         else:
             self.plate_app = True
-            if 'Walk' in self.play_type or 'Sacrifice' in self.play_type or self.play_type == 'Hit By Pitch':
+            if 'Walk' in self.play_type or 'Sacrifice' in self.play_type or self.play_type in('Hit By Pitch',
+                                                                                              'Interference'):
                 self.at_bat = False
             else:
                 self.at_bat = True

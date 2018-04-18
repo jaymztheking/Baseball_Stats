@@ -45,8 +45,11 @@ def get_rs_play(playseq):
 		playname = 'Interference'
 
 	# Walks
-	if re.search('W(\+|$)', playtyp) != None:
-		playname = 'Intentional Walk' if 'IW' in playseq else 'Walk'
+	if re.search('W([\+\.]|$)', playtyp) != None:
+		if 'IW' in playtyp:
+			playname = 'Intentional Walk'
+		else:
+			playname = 'Walk'
 
 	# HBP
 	if re.search('HP', playtyp) != None:
@@ -65,7 +68,7 @@ def get_rs_play(playseq):
 		playname = 'Strikeout'
 
 	# Force and Tag Outs/Double Play/Triple Play
-	if re.search('^([0-9]|\([B123]\))+/', playtyp) != None and 'Sacrifice' not in playname:
+	if re.search('^([0-9]|\([B123]\))+', playtyp) != None and 'Sacrifice' not in playname:
 		for a in playseq.split('/'):
 			if 'GDP' in a:
 				playname = 'Ground Double Play'
@@ -108,7 +111,6 @@ def get_rs_play(playseq):
 
 	if '+' in playtyp:
 		playname = get_rs_play(playtyp.split('+')[0]) + ' + ' + get_rs_play(playtyp.split('+')[1])
-
 	return playname
 
 def get_rs_run_seq(runseq, playseq, playname, sim):
@@ -144,7 +146,7 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 				runseq += ';3#H'
 
 	#Pickoff
-	if re.search('PO[^C]', playtyp) != None:
+	if re.search('PO([23H])', playtyp) != None:
 		base = re.search('PO([23H])', playtyp).group(1)
 		if re.search('E[0-9]', playtyp) != None and runseq == '':
 			if base == '1' and re.search('1[-X]', runseq) == None:

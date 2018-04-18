@@ -1,7 +1,7 @@
 from Baseball import Game, HitBoxScore, PitchBoxScore, Play, Base
 from datetime import date, datetime
 import re
-import RetroPlayConverter
+from RetroPlayConverter import get_rs_play, get_rs_run_seq, get_rs_ball_type
 
 import json
 
@@ -13,7 +13,6 @@ with open('TeamLookup.json', 'r') as out:
 class GameSim:
     def __init__(self, gameid):
         self.currentgame = Game(gameid)
-        self.playstarted = False
         self.awayteam = ''
         self.hometeam = ''
         self.playcount = 0
@@ -66,35 +65,40 @@ class GameSim:
         else:
             self.currentgame.add_info(row)
 
-    def add_lineup(self, row):
+    def add_lineup(self, row, role='Starter'):
         row.position = PosLookup[int(row.posnum)]
         self.lineup[row.playerid] = HitBoxScore(row)
         if int(row.teamind) == 0:
             self.lineup[row.playerid].team_key = self.currentgame.away_team_key
+            if row.position == 'P':
+                self.roster[row.playerid] = PitchBoxScore(row, role)
+                self.roster[row.playerid].team_key = self.currentgame.away_team_key
+                self.activeawaypitcher = row.playerid
         else:
             self.lineup[row.playerid].team_key = self.currentgame.home_team_key
+            if row.position == 'P':
+                self.roster[row.playerid] = PitchBoxScore(row, role)
+                self.roster[row.playerid].team_key = self.currentgame.home_team_key
+                self.activehomepitcher = row.playerid
 
     def update_lineup(self, row):
         row.position = PosLookup[int(row.posnum)]
         self.lineup[row.playerid].update(row)
 
     def read_play_row_data(self, row):
-        if self.playstarted is False:
-            self.sub_in_starters()
-            self.playstarted = True
         if row.topbotinn != self.topbotinn:
             self.reset_base_out_state()
         self.topbotinn = row.topbotinn
         self.inning = row.inningnum
         self.batter = row.playerid
         pitcher = self.activeawaypitcher if int(self.topbotinn) == 1 else self.activehomepitcher
-        if row.playseq == 'NP':
+        if row.playseq != 'NP':
             self.playcount += 1
             currentplay = Play(self, row)
             currentbase = Base(self, row)
-            currentplay.play_type = get_rs_play(currentplay.playseq)
+            currentplay.play_type = get_rs_play(currentplay.play_seq)
             currentplay.classify_play()
-            currentplay.ball_loc, currentplay.ball_type = get_rs_ball_type(currentplay.playseq.split('.')[0])
+            currentplay.ball_loc, currentplay.ball_type = get_rs_ball_type(currentplay.play_seq.split('.')[0])
             currentbase.run_seq = get_rs_run_seq(currentbase.run_seq, currentplay.play_seq, currentplay.play_type, self)
             self.get_outs(currentplay.play_type, currentbase.run_seq)
             self.move_runners(currentbase.run_seq)
@@ -111,17 +115,11 @@ class GameSim:
             if int(self.topbotinn) == 0:
                 self.awayhits += int(currentplay.hit)
                 self.awayruns += currentbase.total_runs
+            else:
+                self.homehits += int(currentplay.hit)
+                self.homeruns += currentbase.total_runs
             self.plays.append(currentplay)
             self.bases.append(currentbase)
-
-    def sub_in_starters(self):
-        for userid in self.lineup.keys():
-            if self.lineup[userid].position == 'P':
-                self.roster[userid] = PitchBoxScore(self.lineup[userid], 'Starter')
-                if self.roster[userid].team_key == self.currentgame.home_team_key:
-                    self.activehomepitcher = userid
-                else:
-                    self.activeawaypitcher = userid
 
     def get_outs(self, playtype, runseq):
         if playtype == 'Triple Play':
@@ -138,7 +136,7 @@ class GameSim:
         runners = filter(None, runseq)
         runners = sorted(runners, key=lambda base: sorter[base[0]])
         #Stupid Jean Segura Play
-        if '2-1' in runners[0]:
+        if len(runners) > 0 and '2-1' in runners[0]:
             runners.insert(len(runners), runners.pop(0))
         #Successful Advance
         for run in runners:
@@ -155,9 +153,46 @@ class GameSim:
                 setattr(self, baselookup[re.search('([B123])[-\*]H', run).group(1)], '')
 
     def read_sub_row_data(self, row):
-        pass
+        if int(row.posnum) == 1:
+            if int(self.topbotinn) == 0:
+                self.sub_in_reliever(self.activeawaypitcher, row)
+            else:
+                self.sub_in_reliever(self.activehomepitcher, row)
+        elif int(row.posnum) == 12:
+            basevalues = ['first_base', 'second_base', 'third_base']
+            base = ''
+            for b in basevalues:
+                if getattr(self, b) == row.playerid:
+                    base = b
+            self.sub_in_pinch_runner(row, base)
+        else:
+            self.sub_in_hitter(row)
+
+    def sub_in_reliever(self, exitpitch, row):
+        self.calc_ip(exitpitch, row)
+        self.add_lineup(row, 'Reliever')
+
+    def calc_ip(self, pitcher, row):
+        # Figure out Innings Pitcher for Mound Exiter
+        IP = float(self.inning) - 1 + float(self.outs / 3.0)
+        for pit in self.roster.keys():
+            if int(row.teamind) == 0 and self.roster[pit].team_key == self.currentgame.away_team_key:
+                IP -= self.roster[pit].ip
+            elif self.roster[pit].team_key == self.currentgame.home_team_key:
+                IP -= self.roster[pit].ip
+        self.roster[pitcher].ip = IP
+
+    def sub_in_hitter(self, row):
+        if row.playerid not in self.lineup.keys():
+            self.add_lineup(row)
+        else:
+            self.update_lineup(row)
+
+    def sub_in_pinch_runner(self, row, base):
+        self.add_lineup(row)
+        setattr(self, base, row.playerid)
 
     def read_data_row_data(self, row):
-        pass
-
+        if row.datatype == 'er':
+            self.roster[row.playerid].earned_runs += int(row.value)
 
