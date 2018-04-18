@@ -94,6 +94,8 @@ class GameSim:
         pitcher = self.activeawaypitcher if int(self.topbotinn) == 1 else self.activehomepitcher
         if row.playseq != 'NP':
             self.playcount += 1
+            # if self.currentgame.game_id == 'ANA201704260' and self.playcount == 72:
+            #     pass
             currentplay = Play(self, row)
             currentbase = Base(self, row)
             currentplay.play_type = get_rs_play(currentplay.play_seq)
@@ -105,7 +107,8 @@ class GameSim:
             currentbase.calc_end_play_stats(self)
             currentbase.figure_out_rbi(currentplay.play_type)
             self.lineup[row.playerid].increment_from_play(currentplay, currentbase)
-            baserunners = {currentbase.start_first: 'first',
+            baserunners = {currentplay.hitter_key: 'batter',
+                           currentbase.start_first: 'first',
                            currentbase.start_second: 'second',
                            currentbase.start_third: 'third'}
             for br in baserunners.keys():
@@ -144,10 +147,17 @@ class GameSim:
             if re.search('([B123])[-\*]([123])', run) != None:
                 setattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(2)],
                         getattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(1)]))
-                setattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(1)], '')
+                if re.search('([B123])[-\*]([123])', run).group(2) != re.search('([B123])[-\*]([123])', run).group(1):
+                    setattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(1)], '')
             #Runner back to dugout
             elif re.search('([B123])[#X][123H]', run) != None:
-                setattr(self, baselookup[re.search('([B123])[#X][123H]', run).group(1)], '')
+                if re.search('\([1-9]?E[1-9](/TH)?\)', run) != None:
+                    runners.remove(run)
+                    runners.append(run.replace('X','-'))
+                    self.move_runners(';'.join(runners))
+                    break
+                else:
+                    setattr(self, baselookup[re.search('([B123])[#X][123H]', run).group(1)], '')
             #Runner scores
             if re.search('([B123])[-\*]H', run) != None:
                 setattr(self, baselookup[re.search('([B123])[-\*]H', run).group(1)], '')

@@ -8,9 +8,6 @@ Play by Play Logs/
 *.ROS
 Game HTML Saves/
 *.iml
-.idea/misc.xml
-.idea/vcs.xml
-.idea/workspace.xml
-.idea/modules.xml
 databaseconfig.py
-.idea/inspectionProfiles/profiles_settings.xml
+.idea/
+anaruns.csv

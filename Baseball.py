@@ -188,8 +188,9 @@ class HitBoxScore(DecBase):
                      'second': 'third',
                      'third': 'home'}
         self.runs += int(getattr(base, curbase+'_scored'))
-        self.sb += int(getattr(base, baseahead[curbase]+'_stolen'))
-        self.cs += int(getattr(base, baseahead[curbase]+'_caught'))
+        if curbase != 'batter':
+            self.sb += int(getattr(base, baseahead[curbase]+'_stolen'))
+            self.cs += int(getattr(base, baseahead[curbase]+'_caught'))
 
     @staticmethod
     def add_lineups(lineups):
@@ -541,6 +542,13 @@ class Base(DecBase):
         runners = filter(None, self.run_seq.split(';'))
         runners = sorted(runners, key=lambda base: sorter[base[0]])
         for run in runners:
+            if re.search('([B123])[#X][123H]', run) != None:
+                if re.search('\([1-9]?E[1-9](/TH)?\)', run) != None:
+                    runners.remove(run)
+                    runners.append(run.replace('X', '-'))
+                    self.run_seq = ';'.join(runners)
+                    self.calc_end_play_stats(sim)
+                    break
             if re.search('^[123](\*[23H])$', run) != None:
                 setattr(self, steallookup[re.search('^[123](\*[23H])$', run).group(1)], True)
                 if self.home_stolen:

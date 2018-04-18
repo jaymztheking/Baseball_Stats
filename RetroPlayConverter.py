@@ -169,7 +169,7 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 			runseq += ';BX1'
 
 	#1 Base Advancement: Walk, Interference, HBP, FC, ROE, Single
-	if playname in ('Walk', 'intentional Walk', 'Interference', 'Hit By Pitch', 'Fielders Choice', 'Reach On Error',
+	if playname in ('Walk', 'Intentional Walk', 'Interference', 'Hit By Pitch', 'Fielders Choice', 'Reach On Error',
 					  'Single'):
 		if 'B' not in runseq:
 			runseq += ';B-1'
@@ -196,11 +196,11 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 	elif playname == 'Home Run':
 		if 'B' not in runseq:
 			runseq += ';B-H'
-		if sim.first_base != '':
+		if sim.first_base != '' and '1-H' not in runseq:
 			runseq += ';1-H'
-		if sim.second_base != '':
+		if sim.second_base != '' and '2-H' not in runseq:
 			runseq += ';2-H'
-		if sim.third_base != '':
+		if sim.third_base != '' and '3-H' not in runseq:
 			runseq += ';3-H'
 
 	#Figure out Double Play and Fielding out mess

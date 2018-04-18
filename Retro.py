@@ -53,6 +53,9 @@ class RSLog:
         gamerosters = {}
         gameplays = {}
         gamebases = {}
+        text = open(self.filename, 'a')
+        text.write('\nid,dunzo')
+        text.close()
         text = open(self.filename, 'r')
         for line in text:
             row = line.strip('\n').split(',')

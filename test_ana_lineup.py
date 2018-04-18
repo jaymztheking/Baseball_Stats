@@ -24,7 +24,8 @@ for game in results['lineups'].keys():
 			x2b += x.double
 			x3b += x.triple
 			hr += x.hr
+			rbi += x.rbi
 			sb += x.sb
 			cs += x.cs
-print(player, pa, ab, r, h, x2b, x3b, hr, sb, cs)
+print(pa, ab, r, h, x2b, x3b, hr, rbi, sb, cs)
 
