@@ -8,23 +8,23 @@ teamfile = RSLog('.\\Play by Play Logs\\2017\\2017ANA.EVA')
 results = teamfile.scrape()
 
 # Run Totals By Game
-playruntotal = 0
-lineruntotal = 0
+dic = {}
+games = []
+rbis = []
 for game in results['games']:
-	playruns = 0
-	lineruns = 0
-	for play in results['plays'][game]:
-		base = results['bases'][game][play.play_seq_no-1]
-		if int(base.top_bot_inn) == 1:
-			playruns += base.total_runs
+	print(game)
+	linerbis = 0
 	for hitter in results['lineups'][game]:
 		line = results['lineups'][game][hitter]
 		if line.team_key == 13:
-			lineruns += line.runs
-	print(game, playruns, lineruns)
-	playruntotal += playruns
-	lineruntotal += lineruns
-print(playruntotal, lineruntotal)
+			linerbis += line.rbi
+	rbis.append(linerbis)
+	games.append(game)
+dic= {'game': games, 'rbi': rbis}
+df = pd.DataFrame(data=dic)
+print(games)
+df.to_csv('anarbi2017.csv')
+
 
 # #Lines for Game
 # for hitter in results['lineups']['ANA201705160']:
