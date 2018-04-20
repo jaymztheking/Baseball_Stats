@@ -3,7 +3,8 @@ from sqlalchemy.ext.declarative import declared_attr, declarative_base
 from sqlalchemy.orm import sessionmaker
 from RSParser import PlayerInfoParser
 import databaseconfig as cfg
-import urllib.request, re
+import urllib.request
+import re
 
 class MyBase(object):
     @declared_attr
@@ -283,7 +284,7 @@ class PitchBoxScore(DecBase):
             self.groundballs += 1
 
     @staticmethod
-    def AddRosters(rosters):
+    def add_rosters(rosters):
         con = Session()
         con.add_all(rosters)
         con.commit()
@@ -304,7 +305,7 @@ class Hitter(DecBase):
     def __repr__(self):
         return "<Hitter (player_key=%s, name='%s')>" % (self.player_key, self.name)
 
-    def GetInfofromRS(self):
+    def get_info_from_rs(self):
         rs = PlayerInfoParser()
         url = "http://www.retrosheet.org/boxesetc/%s/P%s.htm" % \
               (self.rs_user_id[0].upper(), self.rs_user_id)
@@ -323,7 +324,7 @@ class Hitter(DecBase):
         self.weight_lbs = float(rs.weight)
 
     @staticmethod
-    def GetHitterRSLookup():
+    def get_hitter_rs_lookup():
         con = Session()
         lookup = {}
         for x in con.query(Hitter):
@@ -331,7 +332,7 @@ class Hitter(DecBase):
         return lookup
 
     @staticmethod
-    def AddNewHitters(newhitters):
+    def add_new_hitters(newhitters):
         con = Session()
         con.add_all(newhitters)
         con.commit()
@@ -354,7 +355,7 @@ class Pitcher(DecBase):
     def __repr__(self):
         return "<Pitcher (player_key=%s, name='%s')>" % (self.player_key, self.name)
 
-    def GetInfofromRS(self):
+    def get_info_from_rs(self):
         rs = PlayerInfoParser()
         url = "http://www.retrosheet.org/boxesetc/%s/P%s.htm" % \
               (self.rs_user_id[0].upper(), self.rs_user_id)
@@ -373,7 +374,7 @@ class Pitcher(DecBase):
         self.weight_lbs = float(rs.weight)
 
     @staticmethod
-    def GetPitcherRSLookup():
+    def get_pitcher_rs_lookup():
         con = Session()
         lookup = {}
         for x in con.query(Pitcher):
@@ -381,7 +382,7 @@ class Pitcher(DecBase):
         return lookup
 
     @staticmethod
-    def AddNewPitchers(newpitchers):
+    def add_new_pitchers(newpitchers):
         con = Session()
         con.add_all(newpitchers)
         con.commit()
@@ -464,7 +465,7 @@ class Play(DecBase):
         return "<Play (game_key=%s, play_seq_no='%s')>" % (self.game_key, self.play_seq_no)
 
     @staticmethod
-    def AddPlays(plays):
+    def add_plays(plays):
         con = Session()
         con.add_all(plays)
         con.commit()
@@ -504,6 +505,7 @@ class Base(DecBase):
         return "<Base (game_key=%s, play_seq_no='%s')>" % (self.game_key, self.play_seq_no)
 
     def __init__(self, sim, row):
+        self.play_seq_no = sim.playcount
         self.run_seq = row.playseq.split('.')[1] if len(row.playseq.split('.')) > 1 else ''
         self.top_bot_inn = row.topbotinn
         self.inning_num = row.inningnum
@@ -532,7 +534,7 @@ class Base(DecBase):
 
     def calc_end_play_stats(self, sim):
         sorter = {'3': 1, '2': 2, '1': 3, 'B': 4}
-        steallookup = {'*2': 'second_stolen', '*3': 'third_stolen', '*H': 'home_stolen'}
+        steallookup = {'1*': 'second_stolen', '2*': 'third_stolen', '3*': 'home_stolen'}
         caughtlookup = {'#2': 'second_caught', '#3': 'third_caught', '#H': 'home_caught'}
         scorelookup = {'B': 'batter_scored', '1': 'first_scored', '2': 'second_scored', '3': 'third_scored'}
         self.end_outs = sim.outs
@@ -549,33 +551,35 @@ class Base(DecBase):
                     self.run_seq = ';'.join(runners)
                     self.calc_end_play_stats(sim)
                     break
-            if re.search('^[123](\*[23H])$', run) != None:
-                setattr(self, steallookup[re.search('^[123](\*[23H])$', run).group(1)], True)
+            if re.search('^([123]\*)[23H]', run) != None:
+                setattr(self, steallookup[re.search('^([123]\*)[23H]', run).group(1)], True)
                 if self.home_stolen:
                     self.third_scored = True
             if re.search('^[123](#[23H])', run) != None:
                 setattr(self, caughtlookup[re.search('^[123](#[23H])', run).group(1)], True)
             if re.search('^([B123])[-\*]H', run) != None:
                 setattr(self, scorelookup[re.search('^([B123])[-\*]H', run).group(1)], True)
-                if '(NR)' in run:
+                if '(NR)' in run or re.search('[B123]-H.+E', run) != None:
                     self.rbi -= 1
         self.total_sb =  self.second_stolen + self.third_stolen + self.home_stolen
         self.total_cs = self.second_caught + self.third_caught + self.home_caught
         self.total_runs = self.first_scored + self.second_scored + self.third_scored + self.batter_scored
 
-    def figure_out_rbi(self, playname):
+    def figure_out_rbi(self, playname, outs):
         if playname in ('Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball', 'Wild Pitch'
                         'Defensive Indifference', 'Error on Foul', 'Unknown Runner Activity',
                         'Ground Double Play', 'Triple Play', 'Ground Triple Play'):
             self.rbi = 0
         elif 'Strikeout' in playname:
             self.rbi = 0
+        elif playname == 'Reach On Error' and outs < 2:
+            self.rbi += int(self.third_scored)
         else:
             self.rbi += self.total_runs
 
 
     @staticmethod
-    def AddBases(bases):
+    def add_bases(bases):
         con = Session()
         con.add_all(bases)
         con.commit()

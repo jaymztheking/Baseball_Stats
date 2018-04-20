@@ -1,4 +1,5 @@
 from GameSim import GameSim
+from Baseball import Hitter, Pitcher, Game, Play, Base, HitBoxScore, PitchBoxScore
 
 class Row:
     def __init__(self, gameid, row, rowcount):
@@ -76,6 +77,8 @@ class RSLog:
                 currentsim.read_info_row_data(InfoRow(currentgame, row, rowcount))
             elif rowtype == 'start':
                 currentsim.add_lineup(SubRow(currentgame, row, rowcount))
+                if int(row[5]) == 1:
+                    currentsim.add_roster(SubRow(currentgame, row, rowcount), 'Starter')
             elif rowtype == 'play':
                 currentsim.read_play_row_data(PlayRow(currentgame, row, rowcount))
             elif rowtype == 'sub':
@@ -85,3 +88,78 @@ class RSLog:
 
         return {'games': games, 'lineups': gamelineups, 'rosters': gamerosters, 'plays': gameplays, 'bases': gamebases}
 
+    def add_to_db(self, games=None, lineups=None, rosters=None, plays=None, bases=None):
+        addplays = []
+        addbases = []
+        addlineups = []
+        addrosters = []
+        newhitters = []
+        newpitchers = []
+        if lineups != None:
+            print('Getting New Hitters')
+            hitterlookup = Hitter().get_hitter_rs_lookup()
+            for game in games:
+                for h in lineups[game].keys():
+                    if h not in hitterlookup:
+                        newhitter = Hitter()
+                        newhitter.rs_user_id = h
+                        newhitter.get_info_from_rs()
+                        newhitters.append(newhitter)
+                        hitterlookup[h] = Hitter()
+            Hitter().add_new_hitters(newhitters)
+            hitterlookup = Hitter().get_hitter_rs_lookup()
+        else:
+            hitterlookup = Hitter().get_hitter_rs_lookup()
+        if rosters != None:
+            print('Getting New Pitchers')
+            pitcherlookup = Pitcher().get_pitcher_rs_lookup()
+            for game in games:
+                for h in rosters[game].keys():
+                    if h not in pitcherlookup:
+                        newpitcher = Pitcher()
+                        newpitcher.rs_user_id = h
+                        newpitcher.get_info_from_rs()
+                        newpitchers.append(newpitcher)
+                        pitcherlookup[h] = Pitcher()
+            Pitcher().add_new_pitchers(newpitchers)
+            pitcherlookup = Pitcher().get_pitcher_rs_lookup()
+        else:
+            pitcherlookup = Pitcher().get_pitcher_rs_lookup()
+        if games != None:
+            print('Adding Games')
+            Game.add_games(games.values())
+            gamelookup = Game.get_game_lookup()
+
+            for gameid in games.keys():
+                thisgame = gamelookup[gameid]
+                games[gameid].game_key = thisgame
+                if plays != None:
+                    for play in plays[gameid]:
+                        play.game_key = thisgame
+                        play.hitter_key = hitterlookup[play.hitter_key]
+                        play.pitcher_key = pitcherlookup[play.pitcher_key]
+                        addplays.append(play)
+                if bases != None:
+                    for base in bases[gameid]:
+                        base.game_key = thisgame
+                        addbases.append(base)
+                if lineups != None:
+                    for lineup in lineups[gameid].keys():
+                        val = lineups[gameid][lineup]
+                        val.game_key = thisgame
+                        val.player_key = hitterlookup[lineup]
+                        addlineups.append(val)
+                if rosters != None:
+                    for roster in rosters[gameid].keys():
+                        val = rosters[gameid][roster]
+                        val.game_key = thisgame
+                        val.player_key = pitcherlookup[roster]
+                        addrosters.append(val)
+            print('Adding Plays')
+            Play.add_plays(addplays)
+            print('Adding Bases')
+            Base.add_bases(addbases)
+            print('Adding Lineups')
+            HitBoxScore.add_lineups(addlineups)
+            print('Adding Rosters')
+            PitchBoxScore.add_rosters(addrosters)

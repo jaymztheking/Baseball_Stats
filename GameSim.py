@@ -65,25 +65,27 @@ class GameSim:
         else:
             self.currentgame.add_info(row)
 
-    def add_lineup(self, row, role='Starter'):
+    def add_lineup(self, row):
         row.position = PosLookup[int(row.posnum)]
         self.lineup[row.playerid] = HitBoxScore(row)
         if int(row.teamind) == 0:
             self.lineup[row.playerid].team_key = self.currentgame.away_team_key
-            if row.position == 'P':
-                self.roster[row.playerid] = PitchBoxScore(row, role)
-                self.roster[row.playerid].team_key = self.currentgame.away_team_key
-                self.activeawaypitcher = row.playerid
         else:
             self.lineup[row.playerid].team_key = self.currentgame.home_team_key
-            if row.position == 'P':
-                self.roster[row.playerid] = PitchBoxScore(row, role)
-                self.roster[row.playerid].team_key = self.currentgame.home_team_key
-                self.activehomepitcher = row.playerid
 
     def update_lineup(self, row):
         row.position = PosLookup[int(row.posnum)]
         self.lineup[row.playerid].update(row)
+
+    def add_roster(self, row, role):
+        if int(row.teamind) == 0:
+            self.roster[row.playerid] = PitchBoxScore(row, role)
+            self.roster[row.playerid].team_key = self.currentgame.away_team_key
+            self.activeawaypitcher = row.playerid
+        else:
+            self.roster[row.playerid] = PitchBoxScore(row, role)
+            self.roster[row.playerid].team_key = self.currentgame.home_team_key
+            self.activehomepitcher = row.playerid
 
     def read_play_row_data(self, row):
         if row.topbotinn != self.topbotinn:
@@ -94,8 +96,8 @@ class GameSim:
         pitcher = self.activeawaypitcher if int(self.topbotinn) == 1 else self.activehomepitcher
         if row.playseq != 'NP':
             self.playcount += 1
-            # if self.currentgame.game_id == 'ANA201704260' and self.playcount == 72:
-            #     pass
+            # if self.currentgame.game_id == 'ANA201705070' and self.playcount == 14:
+            #     print('Yo')
             currentplay = Play(self, row)
             currentbase = Base(self, row)
             currentplay.play_type = get_rs_play(currentplay.play_seq)
@@ -105,7 +107,7 @@ class GameSim:
             self.get_outs(currentplay.play_type, currentbase.run_seq)
             self.move_runners(currentbase.run_seq)
             currentbase.calc_end_play_stats(self)
-            currentbase.figure_out_rbi(currentplay.play_type)
+            currentbase.figure_out_rbi(currentplay.play_type, self.outs)
             self.lineup[row.playerid].increment_from_play(currentplay, currentbase)
             baserunners = {currentplay.hitter_key: 'batter',
                            currentbase.start_first: 'first',
@@ -180,7 +182,12 @@ class GameSim:
 
     def sub_in_reliever(self, exitpitch, row):
         self.calc_ip(exitpitch, row)
-        self.add_lineup(row, 'Reliever')
+        if row.playerid not in self.lineup.keys():
+            self.add_lineup(row)
+        else:
+            self.update_lineup(row)
+        if row.playerid not in self.roster.keys():
+            self.add_roster(row, 'Reliever')
 
     def calc_ip(self, pitcher, row):
         # Figure out Innings Pitcher for Mound Exiter
