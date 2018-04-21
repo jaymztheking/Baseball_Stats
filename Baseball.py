@@ -600,6 +600,22 @@ class Team(DecBase):
     def __repr__(self):
         return "<Team (team_key=%s, team_abbrev='%s')>" % (self.team_key, self.team_abbrev_br)
 
+    @staticmethod
+    def get_rs_to_br_team_lookup():
+        con = Session()
+        lookup = {}
+        for x in con.query(Team):
+            lookup[x.team_abbrev_rs] = x.team_abbrev_br
+        return lookup
+
+    @staticmethod
+    def get_team_key_to_br_team_lookup():
+        con = Session()
+        lookup = {}
+        for x in con.query(Team):
+            lookup[x.team_key] = x.team_abbrev_br
+        return lookup
+
 
 class Park(DecBase):
     park_key = Column(SmallInteger, primary_key=True)
