@@ -10,4 +10,4 @@ for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
 	teamfile = RSLog('.\\Play by Play Logs\\'+str(year)+'\\%s' % file[1])
 	results = teamfile.scrape()
 	teamfile.add_to_db(results['games'], results['lineups'], results['rosters'], results['plays'], results['bases'])
-	print(time.strftime('%I:%M:%S %p', time.localtime(time.time())))
+	print(time.strftime('%I:%M:%S %p', time.localtime(time.timey())))

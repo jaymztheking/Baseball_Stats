@@ -545,7 +545,7 @@ class Base(DecBase):
         runners = sorted(runners, key=lambda base: sorter[base[0]])
         for run in runners:
             if re.search('([B123])[#X][123H]', run) != None:
-                if re.search('\([1-9]?E[1-9](/TH)?\)', run) != None:
+                if re.search('\([1-9]*E[1-9][^(/TH)]\)', run) != None:
                     runners.remove(run)
                     runners.append(run.replace('X', '-'))
                     self.run_seq = ';'.join(runners)

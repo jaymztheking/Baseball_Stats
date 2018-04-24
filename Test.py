@@ -5,9 +5,9 @@ import pandas as pd
 import os
 from Baseball import Team
 
-#
-# teamfile = RSLog('.\\Play by Play Logs\\2017\\2017CHN.EVN')
-# results = teamfile.scrape()
+
+teamfile = RSLog('.\\Play by Play Logs\\2017\\2017TBA.EVA')
+results = teamfile.scrape()
 
 # # Run Totals By Game
 # dic = {}
@@ -41,6 +41,10 @@ from Baseball import Team
 # 		print(vars(base))
 # 		print('')
 
+
+################################################################################################
+#                                  Gets Stats by Team                                          #
+################################################################################################
 year = 2017
 teamlookup = Team().get_team_key_to_br_team_lookup()
 mydict = {}
@@ -48,10 +52,6 @@ results = {}
 for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
 	print(file[1])
 	if file[1][-3:-1] == 'EV':
-		run = 0
-		rbi = 0
-		sb = 0
-		cs = 0
 		home = file[1][4:7]
 		teamfile = RSLog('.\\Play by Play Logs\\'+str(year)+'\\%s' % file[1])
 		results = teamfile.scrape()
@@ -70,17 +70,71 @@ for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
 				mydict[team]['sb'] += x.sb
 				mydict[team]['cs'] += x.cs
 
-team = []
-run = []
-rbi = []
-sb = []
-cs = []
+teams = []
+runs = []
+rbis = []
+sbs = []
+css = []
 for key in mydict.keys():
-	team.append(key)
-	run.append(mydict[key]['run'])
-	rbi.append(mydict[key]['rbi'])
-	sb.append(mydict[key]['sb'])
-	cs.append(mydict[key]['cs'])
-otherdict = {'team': team, 'runs': run, 'rbi': rbi, 'sb': sb, 'cs': cs}
-df = pd.DataFrame(data=otherdict, columns=['team','runs','rbi','sb','cs'])
-df.to_csv('result.csv')
+	teams.append(key)
+	runs.append(mydict[key]['run'])
+	rbis.append(mydict[key]['rbi'])
+	sbs.append(mydict[key]['sb'])
+	css.append(mydict[key]['cs'])
+csvdict = {'team': teams, 'runs': runs, 'rbi': rbis, 'sb': sbs, 'cs': css}
+df = pd.DataFrame(data=csvdict)
+df.to_csv('2017byTeam.csv', columns=['team','runs','rbi','sb','cs'])
+
+# ################################################################################################
+# #                                  Gets Stats by Game                                          #
+# ################################################################################################
+#
+# year = 2017
+# teamlookup = Team().get_team_key_to_br_team_lookup()
+# mydict = {}
+# results = {}
+# for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
+# 	print(file[1])
+# 	if file[1][-3:-1] == 'EV':
+# 		home = file[1][4:7]
+# 		teamfile = RSLog('.\\Play by Play Logs\\'+str(year)+'\\%s' % file[1])
+# 		results = teamfile.scrape()
+# 		for l in results['lineups']:
+# 			for m in results['lineups'][l]:
+# 				if results['lineups'][l][m].team_key == 6:
+# 					x = results['lineups'][l][m]
+# 					if l not in mydict.keys():
+# 						mydict[l] = {}
+# 						mydict[l]['date'] = str(results['games'][l].game_date)
+# 						mydict[l]['run'] = 0
+# 						mydict[l]['rbi'] = 0
+# 						mydict[l]['sb'] = 0
+# 						mydict[l]['cs'] = 0
+# 					mydict[l]['run'] += x.runs
+# 					mydict[l]['rbi'] += x.rbi
+# 					mydict[l]['sb'] += x.sb
+# 					mydict[l]['cs'] += x.cs
+#
+# dates = []
+# runs = []
+# rbis = []
+# sbs = []
+# css = []
+# for key in mydict.keys():
+# 	dates.append(mydict[key]['date'])
+# 	runs.append(mydict[key]['run'])
+# 	rbis.append(mydict[key]['rbi'])
+# 	sbs.append(mydict[key]['sb'])
+# 	css.append(mydict[key]['cs'])
+# csvdict = {'date': dates, 'runs': runs, 'rbi': rbis, 'sb': sbs, 'cs': css}
+# df = pd.DataFrame(data=csvdict)
+# df.to_csv('2017CHWgames.csv', columns=['date','runs','rbi','sb','cs'])
+
+
+#Runner safe on error
+runseq= 'BXH(672)(E8/TH)'
+if re.search('[B123]X[123H]\([1-9]*E[1-9]\)', runseq):
+	print('MATCH')
+	match = re.search('([B123])X([123H])(\([1-9]*E[1-9]\))', runseq)
+	runseq = re.sub('[B123]X[123H]\([1-9]*E[1-9]\)', match.group(1) + '-' + match.group(2) + match.group(3), runseq)
+print(runseq)

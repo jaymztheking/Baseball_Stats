@@ -96,7 +96,7 @@ class GameSim:
         pitcher = self.activeawaypitcher if int(self.topbotinn) == 1 else self.activehomepitcher
         if row.playseq != 'NP':
             self.playcount += 1
-            # if self.currentgame.game_id == 'ANA201705070' and self.playcount == 14:
+            # if self.currentgame.game_id == 'TBA201706080' and self.playcount == 18:
             #     print('Yo')
             currentplay = Play(self, row)
             currentbase = Base(self, row)

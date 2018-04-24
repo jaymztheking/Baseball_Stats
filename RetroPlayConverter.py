@@ -82,11 +82,11 @@ def get_rs_play(playseq):
 			playname = 'Out'
 
 	# Fielders Choice
-	if re.search('FC[0-9]', playtyp) != None  and 'Sacrifice' not in playname:
+	if re.search('FC[0-9]', playtyp) != None:
 		playname = 'Fielders Choice'
 
 	# Reach On Error
-	if re.search('^[0-9]?E[0-9]', playtyp) != None and 'Sacrifice' not in playname:
+	if re.search('^[0-9]?E[0-9]', playtyp) != None:
 		playname = 'Reach On Error'
 
 	# Single
@@ -117,13 +117,12 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 	#Stolen Base
 	playtyp = playseq.split('/')[0]
 	if re.search('SB[23H]', playtyp) != None:
-		if runseq == '':
-			if 'SB2' in playtyp and re.search('1[-X]', runseq) == None:
-				runseq += ';1*2'
-			if 'SB3' in playtyp and re.search('2[-X]', runseq) == None:
-				runseq += ';2*3'
-			if 'SBH' in playtyp and re.search('3[-X]', runseq) == None:
-				runseq += ';3*H'
+		if 'SB2' in playtyp and re.search('1[-X]', runseq) == None:
+			runseq += ';1*2'
+		if 'SB3' in playtyp and re.search('2[-X]', runseq) == None:
+			runseq += ';2*3'
+		if 'SBH' in playtyp and re.search('3[-X]', runseq) == None:
+			runseq += ';3*H'
 		else:
 			runseq = runseq.replace('-', '*')
 
@@ -204,7 +203,7 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 			runseq += ';3-H'
 
 	#Figure out Double Play and Fielding out mess
-	elif re.search('^([0-9]|\([B123]\))+/', playtyp):
+	elif re.search('^([0-9]|\([B123]\))+', playtyp):
 		outstr = re.findall('\([B123]\)', playtyp)
 		outcount = 0
 		for o in outstr:
@@ -225,6 +224,12 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 			runseq += ';B-1'
 		elif 'B' not in runseq:
 			runseq += ';BX1'
+
+	#Runner safe on error
+	if re.search('[B123]X[123H]\([1-9]*E[1-9]\)', runseq):
+		match = re.search('([B123])X([123H])(\([1-9]*E[1-9]\))', runseq)
+		runseq = re.sub('[B123]X[123H]\([1-9]*E[1-9]\)', match.group(1) + '-' + match.group(2) + match.group(3), runseq)
+
 
 	return runseq
 
