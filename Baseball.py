@@ -572,10 +572,19 @@ class Base(DecBase):
             self.rbi = 0
         elif 'Strikeout' in playname:
             self.rbi = 0
+        elif 'Wild Pitch' in playname:
+            self.rbi = 0
+        elif 'Passed Ball' in playname:
+            self.rbi = 0
         elif playname == 'Reach On Error' and outs < 2:
             self.rbi += int(self.third_scored)
+        elif playname == 'Reach On Error' and outs == 2:
+            self.rbi = 0
         else:
             self.rbi += self.total_runs
+
+        if self.rbi < 0:
+            self.rbi = 0
 
 
     @staticmethod

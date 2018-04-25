@@ -83,6 +83,7 @@ for key in mydict.keys():
 	css.append(mydict[key]['cs'])
 csvdict = {'team': teams, 'runs': runs, 'rbi': rbis, 'sb': sbs, 'cs': css}
 df = pd.DataFrame(data=csvdict)
+df = df.sort_values(by=['team'])
 df.to_csv('2017byTeam.csv', columns=['team','runs','rbi','sb','cs'])
 
 # ################################################################################################
@@ -101,7 +102,7 @@ df.to_csv('2017byTeam.csv', columns=['team','runs','rbi','sb','cs'])
 # 		results = teamfile.scrape()
 # 		for l in results['lineups']:
 # 			for m in results['lineups'][l]:
-# 				if results['lineups'][l][m].team_key == 6:
+# 				if results['lineups'][l][m].team_key == 7:
 # 					x = results['lineups'][l][m]
 # 					if l not in mydict.keys():
 # 						mydict[l] = {}
@@ -128,13 +129,7 @@ df.to_csv('2017byTeam.csv', columns=['team','runs','rbi','sb','cs'])
 # 	css.append(mydict[key]['cs'])
 # csvdict = {'date': dates, 'runs': runs, 'rbi': rbis, 'sb': sbs, 'cs': css}
 # df = pd.DataFrame(data=csvdict)
-# df.to_csv('2017CHWgames.csv', columns=['date','runs','rbi','sb','cs'])
+# df = df.sort_values(by=['date'])
+# df.to_csv('2017CINgames.csv', columns=['date','runs','rbi','sb','cs'])
 
 
-#Runner safe on error
-runseq= 'BXH(672)(E8/TH)'
-if re.search('[B123]X[123H]\([1-9]*E[1-9]\)', runseq):
-	print('MATCH')
-	match = re.search('([B123])X([123H])(\([1-9]*E[1-9]\))', runseq)
-	runseq = re.sub('[B123]X[123H]\([1-9]*E[1-9]\)', match.group(1) + '-' + match.group(2) + match.group(3), runseq)
-print(runseq)
