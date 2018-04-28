@@ -462,7 +462,7 @@ class Play(DecBase):
 
 
     def __repr__(self):
-        return "<Play (game_key=%s, play_seq_no='%s')>" % (self.game_key, self.play_seq_no)
+        return "<Play (game_key=%s, inning='%s', topbot='%s', play_seq_no='%s')>" % (self.game_key, self.inning_num, self.top_bot_inn, self.play_seq_no)
 
     @staticmethod
     def add_plays(plays):
@@ -566,6 +566,7 @@ class Base(DecBase):
         self.total_runs = self.first_scored + self.second_scored + self.third_scored + self.batter_scored
 
     def figure_out_rbi(self, playname, outs):
+        sorter = {'3': 1, '2': 2, '1': 3, 'B': 4}
         if playname in ('Stolen Base', 'Caught Stealing', 'Pick Off', 'Balk', 'Passed Ball', 'Wild Pitch'
                         'Defensive Indifference', 'Error on Foul', 'Unknown Runner Activity',
                         'Ground Double Play', 'Triple Play', 'Ground Triple Play'):
@@ -578,6 +579,11 @@ class Base(DecBase):
             self.rbi = 0
         elif playname == 'Reach On Error' and outs < 2:
             self.rbi += int(self.third_scored)
+            runners = filter(None, self.run_seq.split(';'))
+            runners = sorted(runners, key=lambda base: sorter[base[0]])
+            for run in runners:
+                if re.search('[B12][-\*]H', run) != None and '(NR)' in run:
+                    self.rbi += 1
         elif playname == 'Reach On Error' and outs == 2:
             self.rbi = 0
         else:
