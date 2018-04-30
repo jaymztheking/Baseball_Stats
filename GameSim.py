@@ -96,8 +96,8 @@ class GameSim:
         pitcher = self.activeawaypitcher if int(self.topbotinn) == 1 else self.activehomepitcher
         if row.playseq != 'NP':
             self.playcount += 1
-            # if self.currentgame.game_id == 'CHA201709080':
-            #     print('Yo')
+            if self.currentgame.game_id == 'CIN201709240' and self.playcount == 55:
+                print('Yo')
             currentplay = Play(self, row)
             currentbase = Base(self, row)
             currentplay.play_type = get_rs_play(currentplay.play_seq)
@@ -146,20 +146,20 @@ class GameSim:
         #Successful Advance
         for run in runners:
             # Successful Advance
-            if re.search('([B123])[-\*]([123])', run) != None:
-                setattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(2)],
-                        getattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(1)]))
-                if re.search('([B123])[-\*]([123])', run).group(2) != re.search('([B123])[-\*]([123])', run).group(1):
-                    setattr(self, baselookup[re.search('([B123])[-\*]([123])', run).group(1)], '')
+            if re.search('([B123])[-\*@]([123])', run) != None:
+                setattr(self, baselookup[re.search('([B123])[-\*@]([123])', run).group(2)],
+                        getattr(self, baselookup[re.search('([B123])[-\*@]([123])', run).group(1)]))
+                if re.search('([B123])[-\*@]([123])', run).group(2) != re.search('([B123])[-\*@]([123])', run).group(1):
+                    setattr(self, baselookup[re.search('([B123])[-\*@]([123])', run).group(1)], '')
             #Runner back to dugout
-            elif re.search('([B123])[#X][123H]', run) != None:
+            elif re.search('([B123])[#X~][123H]', run) != None:
                 if re.search('\([1-9]?E[1-9](/TH)?\)', run) != None:
                     runners.remove(run)
                     runners.append(run.replace('X','-'))
                     self.move_runners(';'.join(runners))
                     break
                 else:
-                    setattr(self, baselookup[re.search('([B123])[#X][123H]', run).group(1)], '')
+                    setattr(self, baselookup[re.search('([B123])[#X~][123H]', run).group(1)], '')
             #Runner scores
             if re.search('([B123])[-\*]H', run) != None:
                 setattr(self, baselookup[re.search('([B123])[-\*]H', run).group(1)], '')

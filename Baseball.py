@@ -133,6 +133,9 @@ class HitBoxScore(DecBase):
     hr = Column(SmallInteger)
     sb = Column(SmallInteger)
     cs = Column(SmallInteger)
+    sh = Column(SmallInteger)
+    sf = Column(SmallInteger)
+    gdp = Column(SmallInteger)
 
     def __repr__(self):
         return "<HitBoxScore (game_key=%s, team_key='%s', player_key='%s')>" % \
@@ -154,6 +157,10 @@ class HitBoxScore(DecBase):
         self.hr = 0
         self.sb = 0
         self.cs = 0
+        self.sf = 0
+        self.sh = 0
+        self.gdp = 0
+
         if row is not None:
             self.batting_num = row.batnum
             self.position = row.position
@@ -167,6 +174,9 @@ class HitBoxScore(DecBase):
         self.plate_app += int(play.plate_app)
         self.at_bat += int(play.at_bat)
         self.hits += int(play.hit)
+        self.sf += int(play.sac_fly)
+        self.sh += int(play.sac_hit)
+        self.gdp += int(play.gdp)
         if 'Walk' in play.play_type:
             self.bb += 1
             if 'Intentional Walk' in play.play_type:
@@ -402,6 +412,9 @@ class Play(DecBase):
     plate_app = Column(Boolean)
     at_bat = Column(Boolean)
     hit = Column(Boolean)
+    sac_fly = Column(Boolean)
+    sac_hit = Column(Boolean)
+    gdp = Column(Boolean)
     strikes = Column(SmallInteger)
     balls = Column(SmallInteger)
     contact_x = Column(SmallInteger)
@@ -425,6 +438,9 @@ class Play(DecBase):
         self.plate_app = False
         self.at_bat = False
         self.hit = False
+        self.sac_fly = False
+        self.sac_hit = False
+        self.gdp = False
         self.strikes = 0
         self.balls = 0
         self.contact_x = 0
@@ -452,13 +468,20 @@ class Play(DecBase):
             self.plate_app = False
         else:
             self.plate_app = True
-            if 'Walk' in self.play_type or 'Sacrifice' in self.play_type or self.play_type in('Hit By Pitch',
-                                                                                              'Interference'):
+            if 'Walk' in self.play_type or self.play_type in('Hit By Pitch', 'Interference'):
                 self.at_bat = False
             else:
                 self.at_bat = True
                 if self.play_type in ('Single', 'Double', 'Ground Rule Double', 'Triple', 'Home Run'):
                     self.hit = True
+            if 'SF' in self.play_seq:
+                self.at_bat = False
+                self.sac_fly = True
+            if 'SH' in self.play_seq and 'CSH' not in self.play_seq:
+                self.at_bat = False
+                self.sac_hit = True
+            if 'GDP' in self.play_seq:
+                self.gdp = True
 
 
     def __repr__(self):
@@ -535,7 +558,7 @@ class Base(DecBase):
     def calc_end_play_stats(self, sim):
         sorter = {'3': 1, '2': 2, '1': 3, 'B': 4}
         steallookup = {'1*': 'second_stolen', '2*': 'third_stolen', '3*': 'home_stolen'}
-        caughtlookup = {'#2': 'second_caught', '#3': 'third_caught', '#H': 'home_caught'}
+        caughtlookup = {'1#': 'second_caught', '2#': 'third_caught', '3#': 'home_caught'}
         scorelookup = {'B': 'batter_scored', '1': 'first_scored', '2': 'second_scored', '3': 'third_scored'}
         self.end_outs = sim.outs
         self.end_first = sim.first_base
@@ -551,17 +574,17 @@ class Base(DecBase):
                     self.run_seq = ';'.join(runners)
                     self.calc_end_play_stats(sim)
                     break
-            if re.search('^([123]\*)[23H]', run) != None:
-                setattr(self, steallookup[re.search('^([123]\*)[23H]', run).group(1)], True)
+            if re.search('^([123][~\*])[23H]', run) != None:
+                setattr(self, steallookup[re.search('^([123])[~\*][23H]', run).group(1)+'*'], True)
                 if self.home_stolen:
                     self.third_scored = True
-            if re.search('^[123](#[23H])', run) != None:
-                setattr(self, caughtlookup[re.search('^[123](#[23H])', run).group(1)], True)
-            if re.search('^([B123])[-\*]H', run) != None:
-                setattr(self, scorelookup[re.search('^([B123])[-\*]H', run).group(1)], True)
+            if re.search('^[123]([#@][23H])', run) != None:
+                setattr(self, caughtlookup[re.search('^([123])[@#][23H]', run).group(1)+'#'], True)
+            if re.search('^([B123])[-\*@]H', run) != None:
+                setattr(self, scorelookup[re.search('^([B123])[-\*@]H', run).group(1)], True)
                 if '(NR)' in run or re.search('[B123]-H.+E', run) != None:
                     self.rbi -= 1
-        self.total_sb =  self.second_stolen + self.third_stolen + self.home_stolen
+        self.total_sb = self.second_stolen + self.third_stolen + self.home_stolen
         self.total_cs = self.second_caught + self.third_caught + self.home_caught
         self.total_runs = self.first_scored + self.second_scored + self.third_scored + self.batter_scored
 

@@ -61,30 +61,84 @@ for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
 				team = teamlookup[x.team_key]
 				if team not in mydict.keys():
 					mydict[team]= {}
+					mydict[team]['pa'] = 0
+					mydict[team]['ab'] = 0
 					mydict[team]['run'] = 0
+					mydict[team]['h'] = 0
+					mydict[team]['x2b'] = 0
+					mydict[team]['x3b'] = 0
+					mydict[team]['hr'] = 0
 					mydict[team]['rbi'] = 0
 					mydict[team]['sb'] = 0
 					mydict[team]['cs'] = 0
+					mydict[team]['bb'] = 0
+					mydict[team]['so'] = 0
+					mydict[team]['gdp'] = 0
+					mydict[team]['hbp'] = 0
+					mydict[team]['sh'] = 0
+					mydict[team]['sf'] = 0
+					mydict[team]['ibb'] = 0
+				mydict[team]['pa'] += x.plate_app
+				mydict[team]['ab'] += x.at_bat
 				mydict[team]['run'] += x.runs
+				mydict[team]['h'] += x.hits
+				mydict[team]['x2b'] += x.double
+				mydict[team]['x3b'] += x.triple
+				mydict[team]['hr'] += x.hr
 				mydict[team]['rbi'] += x.rbi
 				mydict[team]['sb'] += x.sb
 				mydict[team]['cs'] += x.cs
+				mydict[team]['bb'] += x.bb
+				mydict[team]['so'] += x.so
+				mydict[team]['gdp'] += x.gdp
+				mydict[team]['hbp'] += x.hbp
+				mydict[team]['sh'] += x.sh
+				mydict[team]['sf'] += x.sf
+				mydict[team]['ibb'] += x.ibb
 
 teams = []
+pas = []
+abs = []
 runs = []
+hs = []
+x2bs = []
+x3bs = []
+hrs = []
 rbis = []
 sbs = []
 css = []
+bbs = []
+sos = []
+gdps = []
+hbps = []
+shs = []
+sfs = []
+ibbs = []
 for key in mydict.keys():
 	teams.append(key)
+	pas.append(mydict[key]['pa'])
+	abs.append(mydict[key]['ab'])
 	runs.append(mydict[key]['run'])
+	hs.append(mydict[key]['h'])
+	x2bs.append(mydict[key]['x2b'])
+	x3bs.append(mydict[key]['x3b'])
+	hrs.append(mydict[key]['hr'])
 	rbis.append(mydict[key]['rbi'])
 	sbs.append(mydict[key]['sb'])
 	css.append(mydict[key]['cs'])
-csvdict = {'team': teams, 'runs': runs, 'rbi': rbis, 'sb': sbs, 'cs': css}
+	bbs.append(mydict[key]['bb'])
+	sos.append(mydict[key]['so'])
+	gdps.append(mydict[key]['gdp'])
+	hbps.append(mydict[key]['hbp'])
+	shs.append(mydict[key]['sh'])
+	sfs.append(mydict[key]['sf'])
+	ibbs.append(mydict[key]['ibb'])
+csvdict = {'team': teams, 'pa': pas, 'ab': abs, 'runs': runs, 'h': hs, '2b': x2bs, '3b': x3bs, 'hr': hrs, 'rbi': rbis,
+		   'sb': sbs, 'cs': css, 'bb': bbs, 'so': sos, 'gdp': gdps, 'hbp': hbps, 'sh': shs, 'sf': sfs, 'ibb': ibbs}
 df = pd.DataFrame(data=csvdict)
 df = df.sort_values(by=['team'])
-df.to_csv('2017byTeam.csv', columns=['team','runs','rbi','sb','cs'])
+df.to_csv('2017byTeam.csv', columns=['team', 'pa', 'ab', 'runs', 'h', '2b', '3b', 'hr', 'rbi', 'sb', 'cs', 'bb', 'so',
+									 'gdp', 'hbp', 'sh', 'sf', 'ibb'])
 
 # ################################################################################################
 # #                                  Gets Stats by Game                                          #
@@ -102,7 +156,7 @@ df.to_csv('2017byTeam.csv', columns=['team','runs','rbi','sb','cs'])
 # 		results = teamfile.scrape()
 # 		for l in results['lineups']:
 # 			for m in results['lineups'][l]:
-# 				if results['lineups'][l][m].team_key == 24:
+# 				if results['lineups'][l][m].team_key == 7:
 # 					x = results['lineups'][l][m]
 # 					if l not in mydict.keys():
 # 						mydict[l] = {}
@@ -130,6 +184,6 @@ df.to_csv('2017byTeam.csv', columns=['team','runs','rbi','sb','cs'])
 # csvdict = {'date': dates, 'runs': runs, 'rbi': rbis, 'sb': sbs, 'cs': css}
 # df = pd.DataFrame(data=csvdict)
 # df = df.sort_values(by=['date'])
-# df.to_csv('2017SFGgames.csv', columns=['date','runs','rbi','sb','cs'])
+# df.to_csv('2017CINgames.csv', columns=['date','runs','rbi','sb','cs'])
 
 

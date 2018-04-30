@@ -117,25 +117,45 @@ def get_rs_run_seq(runseq, playseq, playname, sim):
 	#Stolen Base
 	playtyp = playseq.split('/')[0]
 	if re.search('SB[23H]', playtyp) != None:
-		if 'SB2' in playtyp and re.search('1[-X]', runseq) == None:
-			runseq += ';1*2'
-		if 'SB3' in playtyp and re.search('2[-X]', runseq) == None:
-			runseq += ';2*3'
-		if 'SBH' in playtyp and re.search('3[-X]', runseq) == None:
-			runseq += ';3*H'
-		else:
-			runseq = runseq.replace('-', '*')
+		if 'SB2' in playtyp:
+			if re.search('1[-X]', runseq) == None:
+				runseq += ';1*2'
+			elif '1X3' in runseq:
+				runseq = runseq.replace('1X3','1~3')
+			else:
+				runseq = runseq.replace('1-', '1*')
+		if 'SB3' in playtyp:
+			if re.search('2[-X]', runseq) == None:
+				runseq += ';2*3'
+			elif '2xH' in runseq:
+				runseq = runseq.replace('2XH','2~H')
+			else:
+				runseq = runseq.replace('2-', '2*')
+		if 'SBH' in playtyp:
+			if re.search('3[-X]', runseq) == None:
+				runseq += ';3*H'
+			else:
+				runseq = runseq.replace('3-', '3*')
 
 	#Caught Stealing
 	if re.search('CS[23H]', playtyp) != None:
 		base = re.search('CS([23H])', playtyp).group(1)
-		if re.search('E[0-9]', playtyp) != None and runseq == '':
-			if base == '2' and re.search('1[-X]', runseq) == None:
-				runseq += ';1-2'
-			elif base == '3' and re.search('2[-X]', runseq) == None:
-				runseq += ';2-3'
-			elif base == 'H' and re.search('3[-X]', runseq) == None:
-				runseq += ';3-H'
+		if re.search('E[0-9]', playtyp) != None:
+			if base == '2':
+				if re.search('1[-X]', runseq) == None:
+					runseq += ';1@2'
+				else:
+					runseq = runseq.replace('1-','1@')
+			elif base == '3':
+				if re.search('2[-X]', runseq) == None:
+					runseq += ';2@3'
+				else:
+					runseq = runseq.replace('2-', '2@')
+			elif base == 'H':
+				if re.search('3[-X]', runseq) == None:
+					runseq += ';3@H'
+				else:
+					runseq = runseq.replace('3-', '3@')
 		else:
 			if base == '2' and re.search('1[-X]', runseq) == None:
 				runseq += ';1#2'
