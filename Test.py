@@ -6,7 +6,7 @@ import os
 from Baseball import Team
 
 
-teamfile = RSLog('.\\Play by Play Logs\\2017\\2017TBA.EVA')
+teamfile = RSLog('.\\Play by Play Logs\\2017\\2017KCA.EVA')
 results = teamfile.scrape()
 
 # # Run Totals By Game
@@ -102,7 +102,7 @@ df.to_csv('2017byTeam.csv', columns=['team','runs','rbi','sb','cs'])
 # 		results = teamfile.scrape()
 # 		for l in results['lineups']:
 # 			for m in results['lineups'][l]:
-# 				if results['lineups'][l][m].team_key == 9:
+# 				if results['lineups'][l][m].team_key == 24:
 # 					x = results['lineups'][l][m]
 # 					if l not in mydict.keys():
 # 						mydict[l] = {}
@@ -130,6 +130,6 @@ df.to_csv('2017byTeam.csv', columns=['team','runs','rbi','sb','cs'])
 # csvdict = {'date': dates, 'runs': runs, 'rbi': rbis, 'sb': sbs, 'cs': css}
 # df = pd.DataFrame(data=csvdict)
 # df = df.sort_values(by=['date'])
-# df.to_csv('2017COLgames.csv', columns=['date','runs','rbi','sb','cs'])
+# df.to_csv('2017SFGgames.csv', columns=['date','runs','rbi','sb','cs'])
 
 

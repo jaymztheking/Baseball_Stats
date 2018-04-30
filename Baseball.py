@@ -577,6 +577,8 @@ class Base(DecBase):
             self.rbi = 0
         elif 'Passed Ball' in playname:
             self.rbi = 0
+        elif 'Stolen Base' in playname:
+            self.rbi = 0
         elif playname == 'Reach On Error' and outs < 2:
             self.rbi += int(self.third_scored)
             runners = filter(None, self.run_seq.split(';'))

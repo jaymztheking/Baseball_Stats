@@ -96,8 +96,8 @@ class GameSim:
         pitcher = self.activeawaypitcher if int(self.topbotinn) == 1 else self.activehomepitcher
         if row.playseq != 'NP':
             self.playcount += 1
-            if self.currentgame.game_id == 'WAS201707301':
-                print('Yo')
+            # if self.currentgame.game_id == 'CHA201709080':
+            #     print('Yo')
             currentplay = Play(self, row)
             currentbase = Base(self, row)
             currentplay.play_type = get_rs_play(currentplay.play_seq)
@@ -107,7 +107,7 @@ class GameSim:
             self.get_outs(currentplay.play_type, currentbase.run_seq)
             self.move_runners(currentbase.run_seq)
             currentbase.calc_end_play_stats(self)
-            currentbase.figure_out_rbi(currentplay.play_type, self.outs)
+            currentbase.figure_out_rbi(currentplay.play_type, currentbase.start_outs)
             self.lineup[row.playerid].increment_from_play(currentplay, currentbase)
             baserunners = {currentplay.hitter_key: 'batter',
                            currentbase.start_first: 'first',
