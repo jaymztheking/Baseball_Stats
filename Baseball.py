@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, Time, ForeignKey, Float, Boolean, SmallInteger
+from sqlalchemy import create_engine, Column, Integer, String, Date, Time, ForeignKey, Float, Boolean, SmallInteger, UniqueConstraint
 from sqlalchemy.ext.declarative import declared_attr, declarative_base
 from sqlalchemy.orm import sessionmaker
 from RSParser import PlayerInfoParser
@@ -29,13 +29,13 @@ class Game(DecBase):
     game_time = Column(Time, nullable=False)
     home_team_key = Column(SmallInteger, ForeignKey("team.team_key"), nullable=False)
     away_team_key = Column(SmallInteger, ForeignKey("team.team_key"), nullable=False)
-    park_key = Column(SmallInteger, ForeignKey("park.park_key"), nullable=False)
+    park_key = Column(SmallInteger, ForeignKey("park.park_key"), nullable=True)
     game_temp_f = Column(Float)
-    wind_dir = Column(String(20))
+    wind_dir = Column(String)
     wind_speed_mph = Column(Float)
-    field_condition = Column(String(20))
-    precipitation = Column(String(20))
-    sky_cond = Column(String(20))
+    field_condition = Column(String)
+    precipitation = Column(String)
+    sky_cond = Column(String)
     total_innings = Column(SmallInteger)
     home_hits = Column(SmallInteger)
     away_hits = Column(SmallInteger)
@@ -44,7 +44,7 @@ class Game(DecBase):
     home_team_win = Column(Boolean)
     tie = Column(Boolean)
     game_time_minutes = Column(SmallInteger)
-    home_ump_id = Column(String(20))
+    home_ump_id = Column(String)
     attendance = Column(Integer)
 
     def __repr__(self):
@@ -215,7 +215,7 @@ class PitchBoxScore(DecBase):
     game_key = Column(Integer, ForeignKey("game.game_key"), primary_key=True)
     team_key = Column(SmallInteger, ForeignKey("team.team_key"), primary_key=True)
     player_key = Column(Integer, ForeignKey("pitcher.player_key"), primary_key=True)
-    pitch_role = Column(String(10), nullable=False)
+    pitch_role = Column(String, nullable=False)
     pitch_count = Column(SmallInteger)
     k = Column(SmallInteger)
     bb = Column(SmallInteger)
@@ -400,15 +400,16 @@ class Pitcher(DecBase):
 
 
 class Play(DecBase):
-    game_key = Column(Integer, ForeignKey("game.game_key"), primary_key=True)
-    play_seq_no = Column(SmallInteger, primary_key=True)
+    playid = Column(Integer, primary_key=True)
+    game_key = Column(Integer, ForeignKey("game.game_key"))
+    play_seq_no = Column(SmallInteger)
     hitter_key = Column(Integer, ForeignKey("hitter.player_key"))
     pitcher_key = Column(Integer, ForeignKey("pitcher.player_key"))
     top_bot_inn = Column(SmallInteger)
     inning_num = Column(SmallInteger)
-    pitch_seq = Column(String(30))
-    play_seq = Column(String(100))
-    play_type = Column(String(30))
+    pitch_seq = Column(String)
+    play_seq = Column(String)
+    play_type = Column(String)
     plate_app = Column(Boolean)
     at_bat = Column(Boolean)
     hit = Column(Boolean)
@@ -420,8 +421,8 @@ class Play(DecBase):
     contact_x = Column(SmallInteger)
     swing_x = Column(SmallInteger)
     look_x = Column(SmallInteger)
-    ball_loc = Column(String(10))
-    ball_type = Column(String(20))
+    ball_loc = Column(String)
+    ball_type = Column(String)
 
     def __init__(self, sim, row):
         self.play_seq_no = sim.playcount
@@ -496,19 +497,20 @@ class Play(DecBase):
 
 
 class Base(DecBase):
-    game_key = Column(Integer, ForeignKey("game.game_key"), primary_key=True)
-    play_seq_no = Column(SmallInteger, ForeignKey("play.play_seq_no"), primary_key=True)
-    run_seq = Column(String(20))
+    baseid = Column(Integer, primary_key=True)
+    game_key = Column(Integer, ForeignKey('game.game_key'))
+    play_seq_no = Column(SmallInteger)
+    run_seq = Column(String)
     top_bot_inn = Column(SmallInteger)
     inning_num = Column(SmallInteger)
     start_outs = Column(SmallInteger)
     end_outs = Column(SmallInteger)
-    start_first = Column(String(10))
-    start_second = Column(String(10))
-    start_third = Column(String(10))
-    end_first = Column(String(10))
-    end_second = Column(String(10))
-    end_third = Column(String(10))
+    start_first = Column(String)
+    start_second = Column(String)
+    start_third = Column(String)
+    end_first = Column(String)
+    end_second = Column(String)
+    end_third = Column(String)
     second_stolen = Column(Boolean)
     third_stolen = Column(Boolean)
     home_stolen = Column(Boolean)
