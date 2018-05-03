@@ -221,9 +221,14 @@ class PitchBoxScore(DecBase):
     bb = Column(SmallInteger)
     ibb = Column(SmallInteger)
     hbp = Column(SmallInteger)
+    blk = Column(SmallInteger)
+    wp = Column(SmallInteger)
     hits = Column(SmallInteger)
+    hr = Column(SmallInteger)
+    runs = Column(SmallInteger)
     earned_runs = Column(SmallInteger)
     ip = Column(Float)
+    bf = Column(SmallInteger)
     strikes = Column(SmallInteger)
     balls = Column(SmallInteger)
     complete_game = Column(Boolean)
@@ -249,9 +254,14 @@ class PitchBoxScore(DecBase):
         self.bb = 0
         self.ibb = 0
         self.hbp = 0
+        self.blk = 0
+        self.wp = 0
         self.hits = 0
+        self.hr = 0
+        self.runs = 0
         self.earned_runs = 0
         self.ip = 0.0
+        self.bf = 0
         self.strikes = 0
         self.balls = 0
         self.complete_game = False
@@ -270,22 +280,38 @@ class PitchBoxScore(DecBase):
         if role is not None:
             self.pitch_role = role
 
-    def increment_from_play(self, play):
+    def increment_from_play(self, play, base):
         self.pitch_count += play.strikes + play.balls
         self.strikes += play.strikes
         self.balls += play.balls
         self.swing_strikes += play.swing_x
         self.look_strikes += play.look_x
         self.contact_strikes += play.contact_x
-        if 'Strikeout' in play.play_type:
+        self.runs += int(base.total_runs)
+        if play.play_type in ('Reach On Error', 'Double Play', 'Out', 'Fielders Choice', 'Ground Double Play',
+                              'Sacrifice Fly', 'Sacrifice Hit', 'Interference'):
+            self.bf += 1
+        elif 'Strikeout' in play.play_type:
             self.k += 1
+            self.bf += 1
         elif 'Walk' in play.play_type:
             self.bb += 1
+            self.bf += 1
             if 'Intentional' in play.play_type:
                 self.ibb += 1
+        elif 'Hit By Pitch' in play.play_type:
+            self.hbp += 1
+            self.bf +=1
+        elif 'Balk' in play.play_type:
+            self.blk += 1
+        elif 'WP' in play.play_seq:
+            self.wp += 1
         elif play.hit:
             self.hits += 1
-        ball_type = play.ball_type.replace('Strong ', '').replace('Weak ', '')
+            self.bf += 1
+            if play.play_type == 'Home Run':
+                self.hr += 1
+        play.ball_type = play.ball_type.replace('Strong ', '').replace('Weak ', '')
         if play.ball_type in ('Fly Ball', 'Pop Up', 'Bunt Pop'):
             self.flyballs += 1
         elif play.ball_type in ('Line Drive', 'Bunt Line Drive'):

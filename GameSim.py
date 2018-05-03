@@ -116,7 +116,7 @@ class GameSim:
             for br in baserunners.keys():
                 if br != '':
                     self.lineup[br].increment_from_base(currentbase, baserunners[br])
-            self.roster[pitcher].increment_from_play(currentplay)
+            self.roster[pitcher].increment_from_play(currentplay, currentbase)
             if int(self.topbotinn) == 0:
                 self.awayhits += int(currentplay.hit)
                 self.awayruns += currentbase.total_runs

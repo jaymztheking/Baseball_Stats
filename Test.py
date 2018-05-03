@@ -28,16 +28,16 @@ for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
 					pitchdict[team]['saves'] = 0
 					pitchdict[team]['ip'] = 0
 					pitchdict[team]['hits'] = 0
-					# pitchdict[team]['runs'] = 0
+					pitchdict[team]['runs'] = 0
 					pitchdict[team]['earned_runs'] = 0
-					# pitchdict[team]['hr'] = 0
+					pitchdict[team]['hr'] = 0
 					pitchdict[team]['bb'] = 0
 					pitchdict[team]['ibb'] = 0
 					pitchdict[team]['so'] = 0
 					pitchdict[team]['hbp'] = 0
-					# pitchdict[team]['balks'] = 0
-					# pitchdict[team]['wp'] = 0
-					# pitchdict[team]['bf'] = 0
+					pitchdict[team]['balks'] = 0
+					pitchdict[team]['wp'] = 0
+					pitchdict[team]['bf'] = 0
 				pitchdict[team]['wins'] += int(x.win)
 				pitchdict[team]['losses'] += int(x.loss)
 				pitchdict[team]['cg'] += int(x.complete_game)
@@ -45,15 +45,21 @@ for file in enumerate(os.listdir('.\\Play by Play Logs\\'+str(year))):
 				pitchdict[team]['saves'] += int(x.save)
 				pitchdict[team]['ip'] += x.ip
 				pitchdict[team]['hits'] += x.hits
-				#pitchdict[team]['runs'] += x.runs
+				pitchdict[team]['runs'] += x.runs
 				pitchdict[team]['earned_runs'] += x.earned_runs
-				#pitchdict[team]['hr'] += x.hr
+				pitchdict[team]['hr'] += x.hr
 				pitchdict[team]['bb'] += x.bb
 				pitchdict[team]['ibb'] += x.ibb
 				pitchdict[team]['so'] += x.k
 				pitchdict[team]['hbp'] += x.hbp
-				#pitchdict[team]['balks'] += x.blk
-				#pitchdict[team]['wp'] += x.wp
-				#pitchdict[team]['bf'] += x.bf
+				pitchdict[team]['balks'] += x.blk
+				pitchdict[team]['wp'] += x.wp
+				pitchdict[team]['bf'] += x.bf
 
-print(pitchdict['ARI'])
+csvdict = {}
+csvdict['team'] = []
+for x in pitchdict.keys():
+	csvdict['team'].append(x)
+	for y in pitchdict[x].values():
+		print(y)
+print(csvdict)
