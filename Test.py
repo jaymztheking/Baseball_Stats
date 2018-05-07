@@ -60,6 +60,9 @@ csvdict = {}
 csvdict['team'] = []
 for x in pitchdict.keys():
 	csvdict['team'].append(x)
-	for y in pitchdict[x].values():
-		print(y)
-print(csvdict)
+	for y in pitchdict[x].keys():
+		if y not in csvdict.keys():
+			csvdict[y] = []
+		csvdict[y].append(pitchdict[x][y])
+df = pd.DataFrame(data=csvdict)
+df.to_csv('teampitch2017.csv', columns=['team','wins','losses','cg','cgso','saves','ip','hits','runs','earned_runs','hr','bb','ibb','so','hbp','balks','wp','bf'])
