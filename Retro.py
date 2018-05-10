@@ -70,7 +70,7 @@ class RSLog:
                     if currentsim.savingpit != '':
                         currentsim.roster[currentsim.savingpit].save = True
                     for pitcher in currentsim.roster.keys():
-                        if currentsim.roster[pitcher].ip == 9.0:
+                        if currentsim.roster[pitcher].ip >= 9.0:
                             currentsim.roster[pitcher].complete_game = True
                             if currentsim.roster[pitcher].runs == 0:
                                 currentsim.roster[pitcher].shut_out = True
