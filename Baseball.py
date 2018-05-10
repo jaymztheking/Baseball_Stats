@@ -424,6 +424,14 @@ class Pitcher(DecBase):
         con.commit()
         return True
 
+    @staticmethod
+    def get_pitcher_name_lookup():
+        con = Session()
+        lookup = {}
+        for x in con.query(Pitcher):
+            lookup[x.rs_user_id] = x.name
+        return lookup
+
 
 class Play(DecBase):
     playid = Column(Integer, primary_key=True)

@@ -64,18 +64,7 @@ class RSLog:
             rowcount += 1
             if rowtype == 'id':
                 if currentgame != '':
-                    currentsim.currentgame.get_end_game_stats(currentsim)
-                    currentsim.roster[currentsim.winningpit].win = True
-                    currentsim.roster[currentsim.losingpit].loss = True
-                    if currentsim.savingpit != '':
-                        currentsim.roster[currentsim.savingpit].save = True
-                    for pitcher in currentsim.roster.keys():
-                        if currentsim.roster[pitcher].ip >= 9.0:
-                            currentsim.roster[pitcher].complete_game = True
-                            if currentsim.roster[pitcher].runs == 0:
-                                currentsim.roster[pitcher].shut_out = True
-                                if currentsim.roster[pitcher].hits == 0:
-                                    currentsim.roster[pitcher].no_hitter = True
+                    currentsim.finish_game()
                     games[currentgame] = currentsim.currentgame
                     gamelineups[currentgame] = currentsim.lineup
                     gamerosters[currentgame] = currentsim.roster

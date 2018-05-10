@@ -96,7 +96,7 @@ class GameSim:
         pitcher = self.activeawaypitcher if int(self.topbotinn) == 1 else self.activehomepitcher
         if row.playseq != 'NP':
             self.playcount += 1
-            if self.currentgame.game_id == 'CIN201709240' and self.playcount == 55:
+            if self.currentgame.game_id == 'PIT201705300':
                 print('Yo')
             currentplay = Play(self, row)
             currentbase = Base(self, row)
@@ -166,7 +166,7 @@ class GameSim:
 
     def read_sub_row_data(self, row):
         if int(row.posnum) == 1:
-            if int(self.topbotinn) == 0:
+            if int(row.teamind) == 0:
                 self.sub_in_reliever(self.activeawaypitcher, row)
             else:
                 self.sub_in_reliever(self.activehomepitcher, row)
@@ -181,7 +181,7 @@ class GameSim:
             self.sub_in_hitter(row)
 
     def sub_in_reliever(self, exitpitch, row):
-        self.calc_ip(exitpitch, row)
+        self.calc_ip(exitpitch, row.teamind)
         if row.playerid not in self.lineup.keys():
             self.add_lineup(row)
         else:
@@ -189,11 +189,11 @@ class GameSim:
         if row.playerid not in self.roster.keys():
             self.add_roster(row, 'Reliever')
 
-    def calc_ip(self, pitcher, row):
+    def calc_ip(self, pitcher, teamind):
         # Figure out Innings Pitcher for Mound Exiter
         IP = float(self.inning) - 1 + float(self.outs / 3.0)
         for pit in self.roster.keys():
-            if int(row.teamind) == 0 and self.roster[pit].team_key == self.currentgame.away_team_key:
+            if int(teamind) == 0 and self.roster[pit].team_key == self.currentgame.away_team_key:
                 IP -= self.roster[pit].ip
             elif self.roster[pit].team_key == self.currentgame.home_team_key:
                 IP -= self.roster[pit].ip
@@ -213,3 +213,18 @@ class GameSim:
         if row.datatype == 'er':
             self.roster[row.playerid].earned_runs += int(row.value)
 
+    def finish_game(self):
+        self.calc_ip(self.activeawaypitcher, 0)
+        self.calc_ip(self.activehomepitcher, 1)
+        self.currentgame.get_end_game_stats(self)
+        self.roster[self.winningpit].win = True
+        self.roster[self.losingpit].loss = True
+        if self.savingpit != '':
+            self.roster[self.savingpit].save = True
+        for pitcher in self.roster.keys():
+            if self.roster[pitcher].ip == 9.0:
+                self.roster[pitcher].complete_game = True
+                if self.roster[pitcher].runs == 0:
+                    self.roster[pitcher].shut_out = True
+                    if self.roster[pitcher].hits == 0:
+                        self.roster[pitcher].no_hitter = True
