@@ -116,6 +116,7 @@ def make_player_csv(year):
 
 def make_game_log_csv(year):
 	gamedict = {}
+	teamlookup = Team().get_team_key_to_br_team_lookup()
 	pitchstats = {
 		'ip'			: 	'ip',
 		'hits'			:	'hits',
@@ -137,18 +138,20 @@ def make_game_log_csv(year):
 			for game in results['rosters'].keys():
 				for pitcher in results['rosters'][game]:
 					x = results['rosters'][game][pitcher]
-					if game not in gamedict.keys():
-						gamedict[game] = {}
+					gameteam = game+teamlookup[x.team_key]
+					if gameteam not in gamedict.keys():
+						gamedict[gameteam] = {}
 						for a in pitchstats.keys():
-							gamedict[game][a] = 0
+							gamedict[gameteam][a] = 0
 					for a in pitchstats.keys():
-						gamedict[game][a] += int(getattr(x, pitchstats[a]))
+						gamedict[gameteam][a] += int(getattr(x, pitchstats[a]))
 
 	csvdict = {}
-	csvdict['game'] = []
+	csvdict['gamedate'] = []
+	csvdict['team'] = []
 	for x in gamedict.keys():
-		print(x)
-		csvdict['game'].append(str(x))
+		csvdict['gamedate'].append(str(x[3:12]))
+		csvdict['team'].append(str(x[12:15]))
 		for y in gamedict[x].keys():
 			if y not in csvdict.keys():
 				csvdict[y] = []
@@ -156,9 +159,11 @@ def make_game_log_csv(year):
 	print(csvdict)
 	df = pd.DataFrame(data=csvdict)
 	cols = []
-	cols.append('game')
+	cols.append('gamedate')
+	cols.append('team')
 	for a in pitchstats.keys():
 		cols.append(a)
+	df = df.sort_values(by=['team', 'gamedate'])
 	df.to_csv('gamepitches%s.csv' % year, columns=cols)
 
 make_game_log_csv(2017)
