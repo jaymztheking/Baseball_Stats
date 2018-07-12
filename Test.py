@@ -166,4 +166,23 @@ def make_game_log_csv(year):
 	df = df.sort_values(by=['team', 'gamedate'])
 	df.to_csv('gamepitches%s.csv' % year, columns=cols)
 
+
+def make_game_pitcher_log_csv(gameid):
+	gamedict = {}
+	teamlookup = Team().get_team_key_to_br_team_lookup()
+	pitchstats = {
+		'ip'			: 	'ip',
+		'hits'			:	'hits',
+		'runs'			:	'runs',
+		'earned_runs'	: 'earned_runs',
+		'bb'	 		:	'bb',
+		'so'			:	'k',
+		'hr'			:	'hr',
+		'hbp'			:	'hbp',
+		'bf'			:	'bf',
+		'pit'			:	'pitch_count',
+		'str'			:	'strikes'
+	}
+
+
 make_game_log_csv(2017)
