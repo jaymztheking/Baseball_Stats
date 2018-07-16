@@ -192,10 +192,14 @@ class GameSim:
     def calc_ip(self, pitcher, teamind):
         # Figure out Innings Pitcher for Mound Exiter
         IP = float(self.inning) - 1 + float(self.outs / 3.0)
-        for pit in self.roster.keys():
+        pitchers = list(self.roster.keys())
+        pitchers.remove(pitcher)
+        for pit in pitchers:
+            print(self.roster[pit].team_key, self.currentgame.away_team_key, self.currentgame.home_team_key)
+            testteamind = int(teamind)
             if int(teamind) == 0 and self.roster[pit].team_key == self.currentgame.away_team_key:
                 IP -= self.roster[pit].ip
-            elif self.roster[pit].team_key == self.currentgame.home_team_key:
+            elif int(teamind) == 1 and self.roster[pit].team_key == self.currentgame.home_team_key:
                 IP -= self.roster[pit].ip
         self.roster[pitcher].ip = IP
 
@@ -214,6 +218,7 @@ class GameSim:
             self.roster[row.playerid].earned_runs += int(row.value)
 
     def finish_game(self):
+        self.outs = 3
         self.calc_ip(self.activeawaypitcher, 0)
         self.calc_ip(self.activehomepitcher, 1)
         self.currentgame.get_end_game_stats(self)

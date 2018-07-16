@@ -45,7 +45,7 @@ class RSLog:
     def __init__(self, filename):
         self.filename = filename
 
-    def scrape(self):
+    def scrape(self, gameid=None):
         rowcount = 0
         currentgame = ''
         currentsim = None
@@ -65,14 +65,19 @@ class RSLog:
             if rowtype == 'id':
                 if currentgame != '':
                     currentsim.finish_game()
+                    if currentgame == gameid:
+                            return { 'lineups': currentsim.lineup, 'rosters': currentsim.roster,
+                                     'plays': currentsim.plays, 'bases': currentsim.bases}
                     games[currentgame] = currentsim.currentgame
                     gamelineups[currentgame] = currentsim.lineup
                     gamerosters[currentgame] = currentsim.roster
                     gameplays[currentgame] = currentsim.plays
                     gamebases[currentgame] = currentsim.bases
-                if row[1] != 'dunzo':
+                if (row[1] != 'dunzo' and gameid is None) or (row[1] == gameid):
                     currentgame = row[1]
                     currentsim = GameSim(row[1])
+            elif gameid is not None and currentgame != gameid:
+                continue
             elif rowtype == 'info':
                 currentsim.read_info_row_data(InfoRow(currentgame, row, rowcount))
             elif rowtype == 'start':

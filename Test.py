@@ -132,6 +132,7 @@ def make_game_log_csv(year):
 	}
 
 	for file in enumerate(os.listdir(os.path.join('.', 'Play by Play Logs', str(year)))):
+		print(file[1])
 		if file[1][-3:-1] == 'EV':
 			teamfile = RSLog(os.path.join('.', 'Play by Play Logs', str(year), file[1]))
 			results = teamfile.scrape()
@@ -167,7 +168,7 @@ def make_game_log_csv(year):
 	df.to_csv('gamepitches%s.csv' % year, columns=cols)
 
 
-def make_game_pitcher_log_csv(gameid):
+def make_game_pitcher_log_csv(year, gameid):
 	gamedict = {}
 	teamlookup = Team().get_team_key_to_br_team_lookup()
 	pitchstats = {
@@ -184,5 +185,35 @@ def make_game_pitcher_log_csv(gameid):
 		'str'			:	'strikes'
 	}
 
+	for file in enumerate(os.listdir(os.path.join('.', 'Play by Play Logs', str(year)))):
+		print(file[1])
+		if file[1][-3:-1] == 'EV':
+			teamfile = RSLog(os.path.join('.', 'Play by Play Logs', str(year), file[1]))
+			if gameid[0:3] == file[1][4:7]:
+				results = teamfile.scrape(gameid)
+				for pitcher in results['rosters']:
+					x = results['rosters'][pitcher]
+					if pitcher not in gamedict.keys():
+						gamedict[pitcher] = {}
+						for a in pitchstats.keys():
+							gamedict[pitcher][a] = 0.0
+					for a in pitchstats.keys():
+						gamedict[pitcher][a] += getattr(x, pitchstats[a])
 
-make_game_log_csv(2017)
+	csvdict = {}
+	csvdict['pitcher'] = []
+	for x in gamedict.keys():
+		csvdict['pitcher'].append(str(x))
+		for y in gamedict[x].keys():
+			if y not in csvdict.keys():
+				csvdict[y] = []
+			csvdict[y].append(gamedict[x][y])
+	print(csvdict)
+	df = pd.DataFrame(data=csvdict)
+	cols = []
+	cols.append('pitcher')
+	for a in pitchstats.keys():
+		cols.append(a)
+	df.to_csv('gamepitcher%s.csv' % gameid, columns=cols)
+
+make_game_pitcher_log_csv(2017, 'ARI201704020')

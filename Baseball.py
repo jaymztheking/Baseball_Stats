@@ -281,12 +281,13 @@ class PitchBoxScore(DecBase):
             self.pitch_role = role
 
     def increment_from_play(self, play, base):
-        self.pitch_count += play.strikes + play.balls
-        self.strikes += play.strikes
-        self.balls += play.balls
-        self.swing_strikes += play.swing_x
-        self.look_strikes += play.look_x
-        self.contact_strikes += play.contact_x
+        if play.plate_app == True:
+            self.pitch_count += play.strikes + play.balls
+            self.strikes += play.strikes
+            self.balls += play.balls
+            self.swing_strikes += play.swing_x
+            self.look_strikes += play.look_x
+            self.contact_strikes += play.contact_x
         self.runs += int(base.total_runs)
         if play.play_type in ('Reach On Error', 'Double Play', 'Out', 'Fielders Choice', 'Ground Double Play',
                               'Sacrifice Fly', 'Sacrifice Hit', 'Interference'):
