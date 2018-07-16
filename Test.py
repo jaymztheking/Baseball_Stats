@@ -145,7 +145,7 @@ def make_game_log_csv(year):
 						for a in pitchstats.keys():
 							gamedict[gameteam][a] = 0
 					for a in pitchstats.keys():
-						gamedict[gameteam][a] += int(getattr(x, pitchstats[a]))
+						gamedict[gameteam][a] += getattr(x, pitchstats[a])
 
 	csvdict = {}
 	csvdict['gamedate'] = []
@@ -166,6 +166,7 @@ def make_game_log_csv(year):
 		cols.append(a)
 	df = df.sort_values(by=['team', 'gamedate'])
 	df.to_csv('gamepitches%s.csv' % year, columns=cols)
+make_game_log_csv(2017)
 
 
 def make_game_pitcher_log_csv(year, gameid):
@@ -195,6 +196,7 @@ def make_game_pitcher_log_csv(year, gameid):
 					x = results['rosters'][pitcher]
 					if pitcher not in gamedict.keys():
 						gamedict[pitcher] = {}
+						gamedict[pitcher]['team'] = teamlookup[results['rosters'][pitcher].team_key]
 						for a in pitchstats.keys():
 							gamedict[pitcher][a] = 0.0
 					for a in pitchstats.keys():
@@ -202,6 +204,7 @@ def make_game_pitcher_log_csv(year, gameid):
 
 	csvdict = {}
 	csvdict['pitcher'] = []
+	csvdict['team'] = []
 	for x in gamedict.keys():
 		csvdict['pitcher'].append(str(x))
 		for y in gamedict[x].keys():
@@ -212,6 +215,7 @@ def make_game_pitcher_log_csv(year, gameid):
 	df = pd.DataFrame(data=csvdict)
 	cols = []
 	cols.append('pitcher')
+	cols.append('team')
 	for a in pitchstats.keys():
 		cols.append(a)
 	df.to_csv('gamepitcher%s.csv' % gameid, columns=cols)

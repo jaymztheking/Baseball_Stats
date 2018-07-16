@@ -96,8 +96,8 @@ class GameSim:
         pitcher = self.activeawaypitcher if int(self.topbotinn) == 1 else self.activehomepitcher
         if row.playseq != 'NP':
             self.playcount += 1
-            if self.currentgame.game_id == 'PIT201705300':
-                print('Yo')
+            # if self.currentgame.game_id == 'PIT201705300':
+            #     print('Yo')
             currentplay = Play(self, row)
             currentbase = Base(self, row)
             currentplay.play_type = get_rs_play(currentplay.play_seq)
@@ -195,8 +195,6 @@ class GameSim:
         pitchers = list(self.roster.keys())
         pitchers.remove(pitcher)
         for pit in pitchers:
-            print(self.roster[pit].team_key, self.currentgame.away_team_key, self.currentgame.home_team_key)
-            testteamind = int(teamind)
             if int(teamind) == 0 and self.roster[pit].team_key == self.currentgame.away_team_key:
                 IP -= self.roster[pit].ip
             elif int(teamind) == 1 and self.roster[pit].team_key == self.currentgame.home_team_key:
